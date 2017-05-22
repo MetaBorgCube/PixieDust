@@ -1,0 +1,26 @@
+module generating/pixiedust/generate
+
+imports
+
+  generating/js/generate
+  
+  generating/pixiedust/reducer
+
+rules
+  generate-pixiedust-program : moduleName -> js-program |[
+    stmts_jsBackend
+    stmts_imports
+    stmts_reducer
+  ]|
+    with
+      debug ;
+      Program(stmts_jsBackend) := <generate-javascript-program> moduleName
+    ; debug
+    ; stmts_imports := <generate-pixiedust-imports>
+    ; stmts_reducer := <generate-reducer> moduleName
+    
+  
+  generate-pixiedust-imports : _ -> js-stmt* |[
+    var _pixiedustRuntime = require('./lib/pixiedust-runtime');
+    var makeReducer = _pixiedustRuntime.makeReducer;
+  ]|

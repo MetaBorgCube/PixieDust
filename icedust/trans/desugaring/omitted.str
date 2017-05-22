@@ -235,14 +235,14 @@ rules // config
     try(config-section-add-eventual);
     bottomup(try(javabackend-generate-phase));
     bottomup(try(javascriptbackend-generate-phase))
-    
-    
+  
   config-section-generate-backend: c -> c'
     where
       configsection-has-no-backend
     with
-      backend := <custom-origin(|c)>JavaBackend(None());
+      backend := <custom-origin(|c)>PixieDustBackend();
       c'      := <configsection-add(!backend)>c
+  
   
   config-section-generate-features: c -> c'
     where

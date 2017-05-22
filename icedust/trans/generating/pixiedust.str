@@ -1,0 +1,20 @@
+module generating/pixiedust
+
+imports
+
+  signatures/Config-sig
+  
+  generating/pixiedust/generate
+  generating/javascript
+
+
+rules
+
+  build(error-handler|backend, moduleName, relativePath): _ -> result
+    where
+      PixieDustBackend() := backend
+    with
+      program := <generate-pixiedust-program> moduleName
+    ; program-pp := <pp-js-program> program 
+    ; filename := <javascript-generated-path(|relativePath)>
+    ; result := (filename, program-pp)

@@ -1,0 +1,106 @@
+module generating/pixiedust/reducer
+
+imports
+  generating/js/getter
+  generating/js/model
+  
+  js/js-util
+  
+rules
+
+  generate-reducer: moduleName -> js-stmt* |[
+    stmts_action
+    stmts_actionCreator
+  ]|
+    with
+      attributes := <modulename-get-attributes> moduleName
+    ; stmts_action := <generate-actions> attributes
+    ; stmts_actionCreator := <generate-action-creators> attributes
+  
+  generate-actions: attributes -> js-stmt* |[
+    var actions = {
+      prop_setter*,
+      prop_calculate*
+    };
+    module.exports.actions = actions;
+  ]|
+    with
+      prop_setter* := <mapconcat(attribute-to-setter-action-props(setter-action-expression))> attributes
+    ; prop_calculate* := <mapconcat(attribute-to-calculate-action-props(calculate-action-expression))> attributes
+  
+  generate-action-creators: attributes -> js-stmt* |[
+    var actionCreators = {
+      prop_setter*,
+      prop_calculate*
+    };
+    module.exports.actionCreators = actionCreators;
+  ]|
+    with
+      prop_setter* := <mapconcat(attribute-to-setter-action-props(setter-action-creator-expression))> attributes
+    ; prop_calculate* := <mapconcat(attribute-to-calculate-action-props(calculate-action-creator-expression))> attributes
+  
+  action-property(to-name, to-exp): x_name -> js-prop |[exp_name : exp_value]|
+    with
+      exp_name := <to-name ; js-string> x_name
+    ; exp_value := <to-exp> x_name 
+  
+  attribute-to-setter-action-props(to-exp): x_attribute -> result
+    with
+      setterNames := <attribute-to-setter-function-names> x_attribute
+    ; result := <map(action-property(id, to-exp))> setterNames
+  
+  attribute-to-calculate-action-props(to-exp) : x_attribute -> result
+    where
+      debug ; attribute-has-calculate
+    with
+     result  := <
+        cart(id)
+      ; debug
+      ; map(!(<calculate-function-name>, <Snd>))
+      ; debug
+      ; map(action-property(Fst, to-exp))
+     > ([x_attribute], [One(), ZeroOrMore()])
+      
+  attribute-to-calculate-action-props(to-exp) = ![]
+  
+  setter-action-expression : x_setterFunctionName -> js-exp |[
+    function(state, action){
+      return x_setterFunctionName(state, action.id, action.value);
+    }
+  ]|
+  
+  calculate-action-expression: (x_calculateFunctionName, m) -> js-exp |[
+    function(state, action){
+      return x_calculateFunctionName(state, action.x_id);
+    }
+  ]|
+    with
+      x_id := <id-var> m
+  
+  setter-action-creator-expression: x_setterFunctionName -> js-exp |[
+    function(id, value) {
+      return {
+        type: exp_setterFunctionName,
+        id: id,
+        value: value
+      };
+    }
+  ]|
+    with
+      exp_setterFunctionName := <js-string> x_setterFunctionName
+  
+  calculate-action-creator-expression: (x_calculateFunctionName, m) -> js-exp |[
+    function(x_id) {
+      return {
+        type: exp_calculateFunctionName,
+        id: x_id
+      };
+    }
+  ]|
+    with
+      exp_calculateFunctionName := <js-string> x_calculateFunctionName
+    ; x_id := <id-var> m
+  
+  
+  
+  
