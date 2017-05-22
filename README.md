@@ -1,6 +1,11 @@
-[![Build status](http://buildfarm.metaborg.org/job/metaborgcube/job/IceDust/job/develop/badge/icon)](http://buildfarm.metaborg.org/job/metaborgcube/job/IceDust/job/develop/)
+[![Build status](http://buildfarm.metaborg.org/job/metaborgcube/job/PixieDust/job/develop/badge/icon)](http://buildfarm.metaborg.org/job/metaborgcube/job/PixieDust/job/develop/)
 
-# IceDust
+# PixieDust
+
+PixieDust is a language extension on top of [IceDust](http://github.com/MetaBorgCube/IceDust)
+
+
+#IceDust
 
 IceDust is an information system modeling language; a declarative specification language with first class relations and derived values.
 
@@ -13,26 +18,26 @@ model
 
   entity Student {
     name       : String
-    
+
     passedCourses : Int = sum(enrollments.pass2)
   }
-  
+
   entity Course {
     name       : String
-    
+
     avgGrade   : Float?  = avg(enrollments.grade)
     passPerc   : Float?  = sum(enrollments.pass2) / count(enrollments) * 100.0
     numStudents: Int     = count(enrollments)
   }
-  
+
   entity Enrollment {
     name       : String  = course.name + " " +student.name
-    
+
     grade      : Float?
     pass       : Boolean = grade >= 5.5 <+ false
     pass2      : Int     = pass ? 1 : 0
   }
-  
+
   relation Course.enrollments *  <-> 1 Enrollment.course
   relation Student.enrollments * <-> 1 Enrollment.student
 
@@ -49,7 +54,7 @@ data
   }
   math : Course {
     name = "Math"
-    enrollments = 
+    enrollments =
       enA {
         student = alice
         grade = 8.0
@@ -63,7 +68,7 @@ data
         grade = 5.0
       }
   }
-  
+
 execute
 
   math.name
