@@ -6,6 +6,9 @@ imports
   generating/js/generate
   
   generating/pixiedust/names
+  generating/js/model
+  generating/js/setter
+  generating/js/calculate
   
   js/js-util
   
