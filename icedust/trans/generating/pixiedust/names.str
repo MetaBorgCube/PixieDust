@@ -1,0 +1,10 @@
+module generating/pixiedust/names
+
+imports
+  lib/string
+
+rules
+  
+  entityname-to-create-action-name : x_entityname -> $[create[x_Entityname]]
+    with
+      x_Entityname := <ucfirst> x_entityname
