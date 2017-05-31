@@ -1,0 +1,65 @@
+module pixiedust/View
+
+imports
+  Common
+  Expressions
+  Types
+  pixiedust/Action
+  
+context-free syntax
+  
+  View = Component
+  
+  Component.Component = <
+    component <ID><ComponentParameters>{
+      <{ViewMember "\n"}*>
+    }
+  >
+  
+  Component.NativeComponent = <
+    native component <ID><ComponentParameters>
+  >
+  
+  ComponentParameters.ComponentParameters = <(<{ComponentParameter ", "}*>)> 
+  ComponentParameters.NoComponentParameters = <>
+  
+  ComponentParameter = TypeParameter 
+  ComponentParameter.RefParameter = <ref <TypeParameter>>
+
+  ViewMember = Render
+  ViewMember = RenderLoop
+  ViewMember = Action
+  
+  Render.RenderExp = Exp
+  Render.RenderComponent = <@<ID>(<{Exp ", "}*>)<ElementChildren>>
+  Render.RenderDomElement = <<ID><DomElementProperties><ElementChildren>>
+  
+  
+  RenderLoop.RenderLoop = <
+    for(<ID> in <Exp>){
+      <{ViewMember "\n"}*>  
+    }
+  >
+  
+  DomElementProperties.DomElementProperties = <[<{DomElementProperty ", "}*>]>
+  DomElementProperties.NoProperties = <>
+  
+  ElementChildren.ElementChidren = <
+    { 
+      <{ViewMember "\n"}*> 
+    }
+  >
+  ElementChildren.NoChildren = <>
+  
+  DomElementProperty.DomElementProperty = <<ID> = <DomElementValue>>
+  
+  DomElementValue.ExpressionValue = Exp
+  DomElementValue.Map = <{
+    <{DomElementProperty ", "}*>
+  }>
+  DomElementValue.ActionCall = <<Exp>(<{Exp ", "}*>)>
+  
+  context-free priorities
+    
+    Render.RenderExp > Render.RenderComponent
+  

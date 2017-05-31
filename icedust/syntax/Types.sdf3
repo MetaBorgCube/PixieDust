@@ -32,3 +32,4 @@ context-free syntax
   Strategy.Eventual            = <(eventual)>
   Strategy.OnDemandEventual    = <(on-demand eventual)>
   
+  TypeParameter.TypeParameter = <<ID> : <AnyType><Multiplicity?>>

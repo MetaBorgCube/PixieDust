@@ -1,0 +1,19 @@
+module pixiedust/Action
+
+imports
+  Common
+  Types
+  Expressions
+  Data
+  
+
+context-free syntax
+
+  Action.Action = <
+    action <ID>(<{TypeParameter ", "}*>){
+      <{ActionStatement "\n"}*>
+    }
+  >
+  
+  ActionStatement = EntityInstance
+  ActionStatement.Assignment = <<Exp> = <Exp>>
