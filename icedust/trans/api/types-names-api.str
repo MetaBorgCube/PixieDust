@@ -23,6 +23,7 @@ rules
   normalize-type = ?TTuple(<id>,_,_);?TString()  ;!String()
   normalize-type = ?TTuple(<id>,_,_);?TNoValue() ;!NoValue()
   normalize-type = ?TTuple(<id>,_,_);?TEntity(Occurrence(_,<id>,_))
+  normalize-type = ?TComponent(Occurrence(_,<id>,_))
   normalize-type = debug(!"normalize-type: ");fail
   
   normalize-multiplicity = ?TTuple(_,<id>,_);?TOne()              ;!One()

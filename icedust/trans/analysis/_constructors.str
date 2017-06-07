@@ -12,6 +12,8 @@ signature constructors
   Role           : NameSpace
   Shortcut       : NameSpace
   Variable       : NameSpace
+  Component      : NameSpace
+  Action         : NameSpace
 
   Normal       : DerivationType
   Derivation   : DerivationType

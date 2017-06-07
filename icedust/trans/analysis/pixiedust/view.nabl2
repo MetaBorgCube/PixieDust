@@ -1,0 +1,65 @@
+module pixiedust/view
+
+rules
+
+  [[ Component(name, params, body) ^ (module_scope, module_view_scope) ]] := 
+    [[params ^ (body_scope) : tpes]],
+    Component{name} <- module_view_scope,
+    Component{name} : TComponent(tpes),
+    new body_scope,
+    body_scope -P-> module_scope,
+    Map2 [[body ^ (body_scope, module_view_scope) ]].
+  
+  
+  [[ NativeComponent(name, params) ^ (module_scope, module_view_scope) ]] := 
+    Component{name} <- module_view_scope.
+    
+  
+  [[ RenderComponent(name, parameters, children) ^ (module_scope, module_view_scope) ]] :=
+    Component{name} -> module_view_scope,
+    Component{name} |-> name_def,
+    Map1T [[ parameters ^ (module_scope) : tpes ]],
+    [[ children ^ (module_scope, module_view_scope) ]].
+    
+  
+  [[ RenderDomElement(name, properties, children) ^ (module_scope, module_view_scope) ]] :=
+    [[ children ^ (module_scope, module_view_scope) ]].
+  
+  
+  [[ ComponentParameters(params) ^ (module_scope) : tpes ]] :=
+    Map1T [[ params ^ (module_scope) : tpes ]].
+    
+  [[ TypeParameter(name, tpe, m) ^ (s) : tpe ]] :=
+    [[ tpe ^ (s) : ttpe ]],
+    MMul [[ m ^ () : mm ]],
+    Member{name} <- s,
+    Member{name} : TTuple(ttpe, mm, TOnDemand()).
+    
+    
+  
+  MMul [[ None() ^ () : One() ]] := true.
+  MMul [[ Some(m) ^ () : m ]] := true. 
+  
+  
+  [[ RenderLoop(var, exp, body) ^ (module_scope, module_view_scope) ]] :=
+    [[ exp ^ (module_scope) : TTuple(exp_type, exp_mult, exp_strat) ]],
+    new body_scope,
+    body_scope -P-> module_scope,
+    Member{var} <- body_scope,
+    Member{var} : TTuple(exp_type, One(), exp_strat),
+    Map2 [[ body ^ (body_scope, module_view_scope) ]].
+    
+  
+  [[ RenderExp(exp) ^ (module_scope, module_view_scope) ]] :=
+//    [[ exp ^ (module_scope) : ty ]].
+    true.
+    
+  [[ Action(name, params, stmts) ^ (module_scope, module_view_scope) ]] :=
+    Action{name} <- module_view_scope.
+    
+  //component children
+    
+  [[ ElementChildren(children) ^ (module_scope, module_view_scope) ]] :=
+    Map2 [[children ^ (module_scope, module_view_scope) ]].
+  
+  [[ NoChildren() ^ (_, _) ]] := true.

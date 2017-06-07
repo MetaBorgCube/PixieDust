@@ -44,7 +44,7 @@ context-free syntax
   DomElementProperties.DomElementProperties = <[<{DomElementProperty ", "}*>]>
   DomElementProperties.NoProperties = <>
   
-  ElementChildren.ElementChidren = <
+  ElementChildren.ElementChildren = <
     { 
       <{ViewMember "\n"}*> 
     }

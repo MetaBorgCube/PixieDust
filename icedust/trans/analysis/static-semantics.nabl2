@@ -15,6 +15,7 @@ imports
   model
   module
   types
+  pixiedust/view
 
 signature
 
@@ -27,6 +28,7 @@ signature
     TString   : Type
     TNoValue  : Type
     TEntity   : occurrence -> Type
+    TComponent : list(Type) -> Type
     
     TOne               : Mult
     TZeroOrOne         : Mult
