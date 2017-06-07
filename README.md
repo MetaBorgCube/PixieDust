@@ -5,7 +5,7 @@
 PixieDust is a language extension on top of [IceDust](http://github.com/MetaBorgCube/IceDust)
 
 
-#IceDust
+# IceDust ![](icedust/icons/icedust-32x32.png "IceDust logo")
 
 IceDust is an information system modeling language; a declarative specification language with first class relations and derived values.
 

@@ -8,6 +8,7 @@ imports
   api/expressions-api
 
   signatures/Expressions-sig
+  signatures/Types-sig
   js/js-util
   
   generating/js/names
@@ -18,7 +19,9 @@ rules
 
   generate-expression-statements: e -> js-stmt* |[]|
   
-  int-to-varname : i -> $[_[i]]   
+  int-to-varname : i -> $[_[i]]
+  
+  int-to-varname-inc = !(<int-to-varname>, <inc>)   
   
   //binary expressions
   
@@ -37,17 +40,46 @@ rules
   
   exp-to-js-stmts = exp-to-js-stmts(|1)
   exp-to-js-stmts(|i) = ?Addition(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-add|i) 
-  exp-to-js-stmts(|i) = ?Subtraction(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-subtract|i)
+  exp-to-js-stmts(|i) = ?Subtraction(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), \(exp_lhs, exp_rhs) -> <merge-subtract> (e1, e2, exp_lhs, exp_rhs)\|i)
+  
+  
+  merge-subtract: (e1, e2, exp_lhs, exp_rhs) -> js-exp |[
+    exp_lhs.diff(exp_rhs, 's')
+  ]|
+    where
+      (Datetime(), Datetime()) := <(get-type2, get-type2)> (e1, e2)
+    
+  merge-subtract: (e1, e2, exp_lhs, exp_rhs) -> <js-subtract> (exp_lhs, exp_rhs)
+  
   exp-to-js-stmts(|i) = ?Multiplication(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-mul|i)
   exp-to-js-stmts(|i) = ?Division(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-div|i) 
   exp-to-js-stmts(|i) = ?FloorDivision(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), \(exp_lhs, exp_rhs) -> js-exp|[
     parseInt(exp_lhs / exp_rhs)
   ]|\|i)
   
-  exp-to-js-stmts(|i) = ?LessThan(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-lt|i)
-  exp-to-js-stmts(|i) = ?LessThanEqual(e1, e2) ; binexp-to-js-stmts-with-nullcheck( !(e1,e2), js-lte|i)
-  exp-to-js-stmts(|i) = ?GreaterThan(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-gt|i)
-  exp-to-js-stmts(|i) = ?GreaterThanEqual(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-gte|i)
+  exp-to-js-stmts(|i) = ?LessThan(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), merge-compare(js-lt, date-lt|e1, e2)|i)
+  exp-to-js-stmts(|i) = ?LessThanEqual(e1, e2) ; binexp-to-js-stmts-with-nullcheck( !(e1,e2), merge-compare(js-lte, date-lte|e1,e2)|i)
+  exp-to-js-stmts(|i) = ?GreaterThan(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), merge-compare(js-gt, date-gt|e1,e2)|i)
+  exp-to-js-stmts(|i) = ?GreaterThanEqual(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), merge-compare(js-gte, date-gte|e1,e2)|i)
+  
+  date-gt = date-compare(|"isAfter")
+  date-gte = date-compare(|"isSameOrAfter")
+  date-lt = date-compare(|"isBefore")
+  date-lte = date-compare(|"isSameOrBefore")
+  
+  date-compare(|x_compareFunction) : (exp_lhs, exp_rhs) -> js-exp |[
+    exp_lhs.x_compareFunction(exp_rhs)
+  ]|
+  
+  
+  merge-compare(if-numeric, if-date|e1, e2): (exp_lhs, exp_rhs) -> <if-date> (exp_lhs, exp_rhs)
+    where
+      (Datetime(), Datetime()) := <(get-type2, get-type2)> (e1, e2)
+  
+  merge-compare(if-numeric, if-date|e1, e2) = if-numeric
+    
+  
+  
   exp-to-js-stmts(|i) = ?Equal(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-eqq|i)
   exp-to-js-stmts(|i) = ?Inequal(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-neqq|i)
   exp-to-js-stmts(|i) = ?And(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-and|i)
@@ -113,7 +145,7 @@ rules
   exp-to-js-stmts(|i) = ?Not(e) ; unexp-to-js-stmts(!e, js-not|i)
   exp-to-js-stmts(|i): e_cast@Cast(e, t2) -> result
     with
-      t1 := <get-type2 ; debug> e
+      t1 := <get-type2> e
     ; result := <unexp-to-js-stmts(!e, !(<id>, t1, t2) ; do-cast|i)> e_cast 
   
   do-cast: (exp_e, Float(), Int()) -> js-exp |[parseInt(exp_e)]|
@@ -171,33 +203,191 @@ rules
     ; exp_result := <js-var> x_var
     ; result := (exp_result, stmts, <inc> i''')
     
-/*    
   // filter
-  
   exp-to-js-stmts(|i): Filter(e_source, x_var, e_body) -> result
     with
       (exp_source, stmts_source, i') := <exp-to-js-stmts(|i)> e_source
     ; x_result := <int-to-varname> i'
     ; exp_res := <js-var> x_result
     ; i'' := <inc> i'
-    ; x_scope := <int-to-varname> i''
+    ; x_loop := <int-to-varname> i''
     ; i''' := <inc> i''
     ; (exp_body, stmts_body, i'''') := <exp-to-js-stmts(|i''')> e_body
-    ; stmts := js-stmt* |[
-        stmts_source
-        let x_result = EMPTY_ARRAY;
-        for(var i = 0 ; i < exp_source.length ; i++){
-          var x_var = exp_source[i];
-          let x_scope = {x_var: x_var};
-          stmts_body
-          if(exp_body){
-            x_result = x_result.concat(x_var);
-          }
-        }
-      ]|
-    ; result := (exp_res, stmts, <inc> i'''')
-*/
+    ; x_scope := <scope-var>
+    with
+      switch <get-multiplicity> e_source
+        case upper-one:
+          stmts := js-stmt* |[
+            stmts_source
+            var oldScope = x_scope;
+            var x_result = null;
+            (function(){
+              var x_scope = _.assign({}, oldScope, {x_var: exp_source});
+              stmts_body
+              if(exp_body){
+                x_result = x_scope.x_var;
+              }
+            })();
+          ]|
+        case upper-many:
+          stmts := js-stmt* |[
+            stmts_source
+            var x_result = EMPTY_ARRAY;
+            for(var x_loop = 0 ; x_loop < exp_source.length ; x_loop++){
+              var oldScope = x_scope;
+              (function(){
+                var x_scope = _.assign({}, oldScope, {x_var: exp_source[x_loop]});
+                stmts_body
+                if(exp_body){
+                  x_result = x_result.concat([x_scope.x_var]);
+                }
+              })();
+            }
+          ]|
+      end
+    with
+      result := (exp_res, stmts, <inc> i'''')
   
+  //find
+  
+  exp-to-js-stmts(|i): Find(e_source, x_var, e_body) -> result
+    with
+      (exp_source, stmts_source, i') := <exp-to-js-stmts(|i)> e_source
+    ; x_result := <int-to-varname> i'
+    ; exp_res := <js-var> x_result
+    ; i'' := <inc> i'
+    ; x_loop := <int-to-varname> i''
+    ; i''' := <inc> i''
+    ; (exp_body, stmts_body, i'''') := <exp-to-js-stmts(|i''')> e_body
+    ; x_scope := <scope-var>
+    with
+      switch <get-multiplicity> e_source
+        case upper-one:
+          stmts := js-stmt* |[
+            stmts_source
+            var x_result = null;
+            var oldScope = x_scope;
+            (function(){
+              var x_scope = _.assign({}, oldScope, {x_var: exp_source});
+              stmts_body
+              if(exp_body){
+                x_result = x_scope.x_var;
+              }
+            })();
+          ]|  
+        case upper-many:
+          stmts := js-stmt* |[
+            stmts_source
+            var x_result = null;
+            for(var x_loop = 0 ; x_loop < exp_source.length && x_result === null ; x_loop++){
+              var oldScope = x_scope;
+              (function(){
+                var x_scope = _.assign({}, oldScope, {x_var: exp_source[x_loop]});
+                stmts_body
+                if(exp_body){
+                  x_result = x_scope.x_var;
+                }
+              })();
+            }
+          ]|
+      end
+    with
+      result := (exp_res, stmts, <inc> i'''')
+  
+  
+  
+  // order by
+  exp-to-js-stmts(|i): OrderBy(e_source, x_var, e_body) -> result
+    with
+      (exp_source, stmts_source, i1) := <exp-to-js-stmts(|i)> e_source    
+    ; (x_result, i2) := <int-to-varname-inc> i1
+    ; exp_result := <js-var> x_result
+    ; (x_element, i3) := <int-to-varname-inc> i2
+    ; (x_element2, i4) := <int-to-varname-inc> i3
+    ; (x_res1, i5) := <int-to-varname-inc> i4
+    ; (exp_body, stmts_body, i6) := <exp-to-js-stmts(|i5)> e_body
+    ; (x_res2, i7) := <int-to-varname-inc> i6
+    ; (exp_body2, stmts_body2, i8) := <exp-to-js-stmts(|i7)> e_body
+    ; x_scope := <scope-var>
+    ; stmts := js-stmt*|[
+      stmts_source
+      var oldScope = x_scope;
+      var x_result = exp_source.slice().sort(function(x_element, x_element2){
+        var x_res1;
+        (function(){
+          var scope = _.assign({}, oldScope, {x_var: x_element});
+          stmts_body
+          x_res1 = exp_body;
+        })();
+        var x_res2;
+        (function(){
+          var scope = _.assign({}, oldScope, {x_var: x_element2});
+          stmts_body2
+          x_res2 = exp_body2;
+        })();
+          return x_res1 > x_res2 ? 1 : x_res1 == x_res2 ? 0 : -1;
+      });
+    ]|
+    ; result := (exp_result, stmts, <inc> i8)
+  
+  //first
+  
+  exp-to-js-stmts(|i): First(e) -> result
+    with
+      (exp_source, stmts_source, i') := <exp-to-js-stmts(|i)> e
+    ; (x_result, i'') := <int-to-varname-inc> i'
+    with
+      switch <get-multiplicity> e
+        case upper-one:
+          stmts := js-stmt* |[
+            var x_result = exp_source;
+          ]|
+        case upper-many:
+          stmts := js-stmt* |[
+            var x_result = exp_source.length === 0 ? null : exp_source[0];
+          ]|
+      end
+    with
+      result := (<js-var> x_result, <conc> (stmts_source, stmts), i'')
+      
+  exp-to-js-stmts(|i): First(e, n) -> result
+    with
+      (exp_source, stmts_source, i') := <exp-to-js-stmts(|i)> e
+    ; (x_result, i'') := <int-to-varname-inc> i'
+    ; (exp_n, stmts_n, i''') := <exp-to-js-stmts(|i)> n
+    with
+      switch <get-multiplicity> e
+        case upper-one:
+          stmts := js-stmt* |[
+            var x_result = exp_source;
+          ]|
+        case upper-many:
+          stmts := js-stmt* |[
+            stmts_n
+            var x_result = [];
+            for(var i = 0 ; i < exp_n && i < exp_source.length ; i++){
+              x_result.push(exp_source[i]);
+            }
+          ]|
+      end
+    with
+      result := (<js-var> x_result, <conc> (stmts_source, stmts), i''')
+    
+    //indexOf  
+    exp-to-js-stmts(|i) = ?IndexOf(e_source, e) ; binexp-to-js-stmts-with-nullcheck(!(e_source, e), merge-indexOf(|e_source, e)|i)
+    
+    merge-indexOf(|e_source, e): (exp_source, exp_e) -> <js-null> 
+      where <get-multiplicity ; upper-one> e_source
+      
+    merge-indexOf(|e_source, e): (exp_source, exp_e) -> js-exp |[ 
+      exp_source.indexOf(exp_e) 
+    ]|
+    
+    //elementAt
+    exp-to-js-stmts(|i) = ?ElemAt(e_source, e_index) ; binexp-to-js-stmts-with-nullcheck(!(e_source, e_index), merge-elementAt|i)
+    
+    merge-elementAt: (exp_source, exp_e) -> js-exp |[exp_source[exp_e] !== undefined ? exp_source[exp_e] : null]|
+    
   //dereferencing
   
   exp-to-js-stmts(|i) : m@MemberAccess(e, x_attribute) -> result
@@ -216,7 +406,7 @@ rules
   
   access-to-js-stmts(|i) : (x_attribute, m_previous, m_current, exp_source) -> result
     where
-      <name-is-derived <+ name-is-default> x_attribute
+      <name-is-derived ; not(relationname-is-right) <+ name-is-default> x_attribute
     with
       x_calc := <calculate-function-name> (x_attribute, m_previous)
       ; exp_calc := js-exp |[x_calc(state, exp_source)]|
@@ -227,22 +417,19 @@ rules
       ; exp_empty := <exp-empty> m_lub
       ; stmts := js-stmt* |[
           var x_var;
-          {
-            if(exp_source !== exp_emptyPrevious){
-              var calc = exp_calc;
-              state = calc.state;
-              x_var = calc.result;
-            } else {
-              x_var = exp_empty;
-            }
+          if(exp_source != exp_emptyPrevious){
+            var calc = exp_calc;
+            state = calc.state;
+            x_var = calc.result;
+          } else {
+            x_var = exp_empty;
           }
         ]|
       ; result := (exp_var, stmts, <inc> i)
-        
   
   access-to-js-stmts(|i) : (x_attribute, m_previous, m_current, exp_source) -> result
     where
-      <name-is-normal> x_attribute
+      <is-attributename <+ is-relationname> x_attribute
     with
       x_getter := <getter-function-name> (x_attribute, m_previous)
     ; exp_get := js-exp |[x_getter(state, exp_source)]|
@@ -253,12 +440,13 @@ rules
       ]|
     ; result := (exp_var, stmts, <inc> i)
     
-  
-  //no attribute access. default to access field of source
+  //ref is a variable. access variable in current scope
   access-to-js-stmts(|i) : (x_attribute, m_previous, m_current, exp_source) -> result
     with
-      exp_access := js-exp |[exp_source.x_attribute]|
+      x_scope := <scope-var>
+    ; exp_access := js-exp |[x_scope.x_attribute]|
     ; result := (exp_access, [], i)
+  
   
   // literal expressions
   
