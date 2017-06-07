@@ -3,22 +3,30 @@ module pixiedust/view
 rules
 
   [[ Component(name, params, body) ^ (module_scope, module_view_scope) ]] := 
-    [[params ^ (body_scope) : tpes]],
-    Component{name} <- module_view_scope,
-    Component{name} : TComponent(tpes),
     new body_scope,
     body_scope -P-> module_scope,
+    Member{"children"} <- body_scope,
+    Member{"children"} : TTuple(TComponent(), TZeroOrMore(), TOnDemand()),
+    Member{"children"}.side := None(),
+    [[params ^ (body_scope) : tpes]],
+    Component{name} <- module_view_scope,
+    Component{name} : TTypedComponent(tpes),
     Map2 [[body ^ (body_scope, module_view_scope) ]].
   
   
   [[ NativeComponent(name, params) ^ (module_scope, module_view_scope) ]] := 
-    Component{name} <- module_view_scope.
+    new dummy_scope,
+    dummy_scope -P-> module_scope,
+    [[ params ^ (dummy_scope) : tpes ]],
+    Component{name} <- module_view_scope,
+    Component{name} : TTypedComponent(tpes).
     
   
   [[ RenderComponent(name, parameters, children) ^ (module_scope, module_view_scope) ]] :=
     Component{name} -> module_view_scope,
     Component{name} |-> name_def,
-    Map1T [[ parameters ^ (module_scope) : tpes ]],
+    Component{name} : TTypedComponent(params),
+    Map1T [[ parameters ^ (module_scope) : tparams ]],
     [[ children ^ (module_scope, module_view_scope) ]].
     
   
@@ -29,16 +37,29 @@ rules
   [[ ComponentParameters(params) ^ (module_scope) : tpes ]] :=
     Map1T [[ params ^ (module_scope) : tpes ]].
     
-  [[ TypeParameter(name, tpe, m) ^ (s) : tpe ]] :=
-    [[ tpe ^ (s) : ttpe ]],
-    MMul [[ m ^ () : mm ]],
+  [[ TypeParameter(name, type, m) ^ (s) : member_type ]] :=
+    [[ type ^ (s) : ttype ]],
+    MMul [[ m ^ (s) : mm ]],
+    member_type == TTuple(ttype, mm, TOnDemand()),
     Member{name} <- s,
-    Member{name} : TTuple(ttpe, mm, TOnDemand()).
-    
-    
+    Member{name} : member_type,
+    Member{name}.variableType := NormalVariableType(),
+    Member{name}.side := None().
+     
+   
+  [[ RefParameter(TypeParameter(name, type, m)) ^ (s) : member_tpe ]] :=
+    [[ type ^ (s) : ttype ]],
+    MMul [[ m ^ (s) : mm ]],
+    member_type == TTuple(ttype, mm, TOnDemand()),
+    Member{name} <- s,
+    Member{name} : member_type,
+    Member{name}.variableType := BoxedVariableType(),
+    Member{name}.side := None().
   
-  MMul [[ None() ^ () : One() ]] := true.
-  MMul [[ Some(m) ^ () : m ]] := true. 
+    
+  MMul [[ None() ^ (s) : TOne() ]] := true.
+  MMul [[ m ^ (s) : tm ]] := 
+    [[ m ^ (s) : tm ]]. 
   
   
   [[ RenderLoop(var, exp, body) ^ (module_scope, module_view_scope) ]] :=
@@ -47,12 +68,13 @@ rules
     body_scope -P-> module_scope,
     Member{var} <- body_scope,
     Member{var} : TTuple(exp_type, One(), exp_strat),
+    Member{var}.side := None(),
+    Member{var}.variableType := NormalVariableType(),
     Map2 [[ body ^ (body_scope, module_view_scope) ]].
     
   
   [[ RenderExp(exp) ^ (module_scope, module_view_scope) ]] :=
-//    [[ exp ^ (module_scope) : ty ]].
-    true.
+    [[ exp ^ (module_scope) : ty ]].    
     
   [[ Action(name, params, stmts) ^ (module_scope, module_view_scope) ]] :=
     Action{name} <- module_view_scope.

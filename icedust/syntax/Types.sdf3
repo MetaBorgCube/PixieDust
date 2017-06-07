@@ -8,6 +8,7 @@ context-free syntax
 
   AnyType = EntityType
   AnyType = PrimitiveType
+  AnyType = ComponentType
 
   EntityType.EntityType = ID
 
@@ -21,6 +22,8 @@ context-free syntax
   Multiplicity.ZeroOrOne  = <?>
   Multiplicity.OneOrMore  = <+>
   Multiplicity.ZeroOrMore = <*>
+  
+  ComponentType.ComponentType = <Component>
   
   MultiplicityOrdering                   = Multiplicity
   MultiplicityOrdering.ZeroOrMoreOrdered = <* (ordered)>

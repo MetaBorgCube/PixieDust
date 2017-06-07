@@ -28,7 +28,8 @@ signature
     TString   : Type
     TNoValue  : Type
     TEntity   : occurrence -> Type
-    TComponent : list(Type) -> Type
+    TComponent : Type
+    TTypedComponent : list(Type) -> Type
     
     TOne               : Mult
     TZeroOrOne         : Mult

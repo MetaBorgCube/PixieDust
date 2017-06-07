@@ -49,6 +49,7 @@ lexical syntax // Keywords
   Keyword = "this"
   Keyword = "true"
   Keyword = "unordered"
+  Keyword = "Component"
 
 lexical restrictions
 

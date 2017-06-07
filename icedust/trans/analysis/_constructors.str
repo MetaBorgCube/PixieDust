@@ -12,8 +12,6 @@ signature constructors
   Role           : NameSpace
   Shortcut       : NameSpace
   Variable       : NameSpace
-  Component      : NameSpace
-  Action         : NameSpace
 
   Normal       : DerivationType
   Derivation   : DerivationType
@@ -27,3 +25,6 @@ signature constructors
   Relation : Term
   Trait    : Term
   
+  
+  NormalVariableType : VariableType
+  BoxedVariableType : VariableType

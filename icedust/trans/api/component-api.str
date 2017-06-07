@@ -1,0 +1,15 @@
+module api/component-api
+
+imports
+  lib/nabl2
+  
+  analysis/_constructors
+
+rules
+
+  name-get-variable-type = get-property(|"Member","variableType")
+  
+  variable-is-normal = where(name-get-variable-type ; ?NormalVariableType())
+  variable-is-boxed = where(name-get-variable-type ; ?BoxedVariableType())
+  
+  component-get-type = get-type

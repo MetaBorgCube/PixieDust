@@ -11,6 +11,7 @@ rules
   [[ Float()             ^ (s) : ty ]] := ty == TFloat().
   [[ Int()               ^ (s) : ty ]] := ty == TInt().
   [[ String()            ^ (s) : ty ]] := ty == TString().
+  [[ ComponentType()     ^ (s) : ty ]] := ty == TComponent().
 
   [[ One()               ^ (s) : mu ]] := mu == TOne().
   [[ ZeroOrOne()         ^ (s) : mu ]] := mu == TZeroOrOne().
