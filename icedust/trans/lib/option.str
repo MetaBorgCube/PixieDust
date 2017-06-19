@@ -4,4 +4,6 @@ rules
 
   try-option(s) = s < !Some(<id>) + !None()
 
+  try-or-none(s) = s <+ !None()
+
   flatten-option-list = filter(\Some(x) -> x\)

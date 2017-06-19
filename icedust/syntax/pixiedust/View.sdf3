@@ -32,8 +32,7 @@ context-free syntax
   
   Render.RenderExp = Exp
   Render.RenderComponent = <@<ID>(<{Exp ", "}*>)<ElementChildren>>
-  Render.RenderDomElement = <<ID><DomElementProperties><ElementChildren>>
-  
+  Render.RenderDomElement = <<DomID><DomElementProperties><ElementChildren>>
   
   RenderLoop.RenderLoop = <
     for(<ID> in <Exp>){
@@ -62,4 +61,10 @@ context-free syntax
   context-free priorities
     
     Render.RenderExp > Render.RenderComponent
+
+lexical syntax
+  DomID = ID
+  DomID = Keyword { reject }
+  DomID = ViewKeyword { reject }
   
+  ViewKeyword = "children"  

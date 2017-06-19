@@ -2,6 +2,7 @@ module api/types-names-api
 
 imports // signatures
 
+  analysis/_constructors
   analysis2/constructors
   static-semantics
   signatures/Types-sig
@@ -23,8 +24,11 @@ rules
   normalize-type = ?TTuple(<id>,_,_);?TString()  ;!String()
   normalize-type = ?TTuple(<id>,_,_);?TNoValue() ;!NoValue()
   normalize-type = ?TTuple(<id>,_,_);?TEntity(Occurrence(_,<id>,_))
-  normalize-type = ?TTuple(<id>,_,_);?TComponent() ; !ComponentType()
-  normalize-type = ?TTypedComponent(types)
+  normalize-type = ?TTuple(<id>,_,_);?TUntypedComponent();!UntypedComponent()
+  normalize-type: TTypedComponent(types) -> result 
+    with
+      types' := <map(normalize-type)> types
+    ; result := Component(types')
    
   normalize-type = debug(!"normalize-type: ");fail
   

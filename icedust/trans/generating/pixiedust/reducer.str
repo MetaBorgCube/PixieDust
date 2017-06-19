@@ -75,13 +75,11 @@ rules
   
   attribute-to-calculate-action-props(to-exp) : x_attribute -> result
     where
-      debug ; attribute-has-calculate
+      attribute-has-calculate
     with
      result  := <
         cart(id)
-      ; debug
       ; map(!(<calculate-function-name>, <Snd>))
-      ; debug
       ; map(action-property(Fst, to-exp))
      > ([x_attribute], [One(), ZeroOrMore()])
       

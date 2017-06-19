@@ -25,6 +25,11 @@ signature constructors
   Relation : Term
   Trait    : Term
   
+  UntypedComponent : Type
+  Component : List(Type) -> Type
+  
+  NormalComponentKind : ComponentKind
+  NativeComponentKind : ComponentKind 
   
   NormalVariableType : VariableType
   BoxedVariableType : VariableType

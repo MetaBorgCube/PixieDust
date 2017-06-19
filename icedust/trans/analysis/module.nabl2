@@ -33,6 +33,4 @@ rules
     Map1T [[ es ^ (module_data_scope) : es_types ]].
   
   [[ ViewSection(es) ^ (module_scope, module_data_scope) ]] := 
-    new module_view_scope,
-    module_view_scope -P-> module_scope,
-    Map2 [[ es ^ (module_scope, module_view_scope) ]].
+    Map1 [[ es ^ (module_scope) ]].

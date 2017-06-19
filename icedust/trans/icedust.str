@@ -3,7 +3,7 @@ module icedust
 imports
   
   editor/analysis
-//  editor/build
+  editor/build
   editor/builders
   editor/completion
   editor/pp

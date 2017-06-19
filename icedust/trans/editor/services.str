@@ -17,6 +17,7 @@ imports // functions
 //  lib/index
   lib/nabl2
   lib/string
+  lib/option
   prettyprinting/pp
 //  names/naming/names
 //  completion/IceDust-cp
@@ -51,8 +52,9 @@ rules // Editor services
   get-editor-properties(language-pp) = get-all-editor-properties(language-pp);filter(not(?(_,None())<+?(_,[])))
   
   get-all-editor-properties(language-pp):
-    t ->
-        [
+    t -> <conc> (props, pixiedust-props)
+      with
+        props := [
           ("Target",               <language-pp                                       <+ !None()>t),
           ("Target Constructor",   <pp-cons                                           <+ !None()>t),
           ("Type",                 <get-type2        <+ name-get-type                 <+ !None()>t),
@@ -60,10 +62,20 @@ rules // Editor services
           ("Calculation Strategy", <get-strategy     <+ name-get-calculation-strategy <+ !None()>t),
           ("Depends On",           <name-get-dependson-paths                          <+ !None()>t),
           ("Flows To",             <name-get-flowsto-paths-all                        <+ !None()>t),
-          ("Topological Sort",     <name-get-toposort                                 <+ !None()>t),
-          ("Variable Type",        <name-get-variable-type                            <+ !None()>t)
+          ("Topological Sort",     <name-get-toposort                                 <+ !None()>t)
         ]
-  
+      ; pixiedust-props := <get-pixiedust-editor-properties> t
+        
+  get-pixiedust-editor-properties:
+    t ->
+        [
+          ("Variable-type",         <try-or-none(componentparameter-get-variable-type)> t),
+          ("Component Kind",        <try-or-none(componentname-get-component-kind)> t),
+          ("Component Type",        <try-or-none(componentname-get-type)> t),
+          ("Component Signature",   <try-or-none(componentname-get-signature-pp)> t)
+        ]
+        
+        
   pp-cons: t -> $[[<get-constructor> t]/[<get-arguments;length> t]] where not(is-string)
   
   pp-property: a -> a

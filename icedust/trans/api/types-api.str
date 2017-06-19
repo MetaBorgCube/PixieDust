@@ -3,6 +3,9 @@ module api/types-api
 imports // signatures
 
   signatures/Types-sig
+  analysis/_constructors
+  
+  lib/string
 
 rules
 
@@ -33,6 +36,11 @@ rules
   pp2-type = ?Int();!"Int"
   pp2-type = ?String();!"String"
   pp2-type = ?Datetime();!"Datetime"
+  pp2-type = ?UntypedComponent() ; !"Component(_)"
+  pp2-type: Component(params) -> result
+    with
+      params' := <map(pp2-type) ; concat-strings(|", ")> params
+    ; result := $[Component([params'])]
   pp2-type = where(is-string)
   
   pp2-multiplicity = ?One();!""

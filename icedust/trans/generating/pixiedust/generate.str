@@ -5,6 +5,8 @@ imports
   generating/js/generate
   
   generating/pixiedust/reducer
+  
+  api/component-api
 
 rules
   generate-pixiedust-program : moduleName -> js-program |[
@@ -13,12 +15,31 @@ rules
     stmts_reducer
   ]|
     with
-      debug ;
       Program(stmts_jsBackend) := <generate-javascript-program> moduleName
-    ; debug
     ; stmts_imports := <generate-pixiedust-imports>
     ; stmts_reducer := <generate-reducer> moduleName
-    
+//    ; <debug-components> moduleName
+//  
+//  
+//  debug-components: moduleName -> ()
+//    with
+//      components := <modulename-get-componentnames> moduleName
+//    ; <map(debug-component)> components
+//      
+//  debug-component : componentName -> ()
+//    with
+//      <debug> componentName
+//    ; <componentname-get-type ; debug> componentName
+//    ; <componentname-get-parameter-names ; map(!(<id>, <name-get-variable-type ; write-to-string>)) ; debug> componentName
+//    with
+//      switch <componentname-get-component-kind ; debug> componentName
+//        case ?NormalComponentKind():
+//          <componentname-get-body ; debug> componentName
+//        case ?NativeComponentKind():
+//          id
+//      end
+  
+  
   
   generate-pixiedust-imports : _ -> js-stmt* |[
     var _pixiedustRuntime = require('./lib/pixiedust-runtime');

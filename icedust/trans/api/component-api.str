@@ -2,14 +2,60 @@ module api/component-api
 
 imports
   lib/nabl2
+
   
   analysis/_constructors
 
+  api/types-names-api
+  api/types-api
+  
+  signatures/pixiedust/View-sig
+  signatures/Types-sig
+
 rules
 
-  name-get-variable-type = get-property(|"Member","variableType")
+  componentname-get-component-kind = get-property(|"Component","componentKind")
+  componentname-is-normal-kind = where(componentname-get-component-kind ; ?NormalComponentKind())
+  componentname-is-native-kind = where(componentname-get-component-kind ; ?NativeComponentKind())
   
-  variable-is-normal = where(name-get-variable-type ; ?NormalVariableType())
-  variable-is-boxed = where(name-get-variable-type ; ?BoxedVariableType())
+  componentname-get-type = get-type-property(|"Component") ; normalize-type
   
-  component-get-type = get-type
+  componentname-get-parameters = get-property(|"Component","parameters")
+  componentname-get-body = get-property(|"Component","body")
+  
+  
+  componentname-get-parameter-names = 
+    switch componentname-get-parameters
+      case ?NoComponentParameters(): []
+      case ?ComponentParameters(params): <map(componentparameter-extract-name)> params
+    end
+    
+  componentname-get-signature = componentname-get-parameter-names ; map(componentparameter-get-properties)
+  componentname-get-signature-pp = componentname-get-signature ; map(componentparameter-properties-pp)
+  
+  componentparameter-extract-name : TypeParameter(name, _, _) -> name
+  componentparameter-extract-name : RefParameter(tp) -> <componentparameter-extract-name> tp
+  
+  componentparameter-get-type = get-type-property(|"Member") ; normalize-type
+  componentparameter-get-multiplicity = get-type-property(|"Member") ; normalize-multiplicity
+  
+  componentparameter-get-variable-type = get-property(|"Member","variableType")
+  
+  componentparameter-is-normal = where(componentparameter-get-variable-type ; ?NormalVariableType())
+  componentparameter-is-boxed = where(componentparameter-get-variable-type ; ?BoxedVariableType())
+  
+  componentparameter-get-properties = !(
+    <id>,
+    <componentparameter-get-type>,
+    <componentparameter-get-multiplicity>,
+    <componentparameter-get-variable-type>
+  )
+  componentparameter-properties-pp: (name, type, m, vtype) -> pp
+    with
+      ppType := <pp2-type-multiplicity> (type, m)
+    ; ppVType := <?BoxedVariableType() < !"ref " + !""> vtype
+    ; pp := $[[ppVType][name] : [ppType]]
+  
+  
+  
+  modulename-get-componentnames = get-decl-assoc(|"Module") ; get-scope-decl-names(|"Component")
