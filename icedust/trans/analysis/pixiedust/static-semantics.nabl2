@@ -1,0 +1,13 @@
+module pixiedust/static-semantics
+
+imports 
+  pixiedust/view
+  pixiedust/types
+  pixiedust/module
+
+
+signature
+  constructors
+    TView      : Type
+    TComponent : list(Type) -> Type
+    

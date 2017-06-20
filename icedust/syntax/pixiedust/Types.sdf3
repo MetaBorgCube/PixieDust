@@ -1,0 +1,14 @@
+module pixiedust/Types
+
+imports
+  Common
+  Types
+
+context-free syntax
+  PrimitiveType.View = <View>
+
+  TypeParameter.TypeParameter = <<ID> : <AnyType><Multiplicity>>
+  TypeParameter.TypeParameter2 = <<ID> : <AnyType>>
+  
+  TypeParameter.RefTypeParameter = <ref <ID> : <AnyType><Multiplicity>>
+  TypeParameter.RefTypeParameter2 = <ref <ID> : <AnyType>>

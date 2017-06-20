@@ -1,0 +1,11 @@
+module pixiedust/Modules
+
+imports
+  pixiedust/View
+
+context-free syntax
+  ModuleSection.ViewSection = <
+    view
+    
+      <{View "\n"}*>
+  >

@@ -8,7 +8,6 @@ imports
   Data
   Execute
   Types
-  pixiedust/View
 
 context-free syntax // modules
 
@@ -41,10 +40,4 @@ context-free syntax // modules
     execute
     
       <{Execute "\n"}*>
-  >
-  
-  ModuleSection.ViewSection = <
-    view
-    
-      <{View "\n"}*>
   >

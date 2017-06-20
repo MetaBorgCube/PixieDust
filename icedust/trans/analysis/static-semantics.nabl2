@@ -15,7 +15,8 @@ imports
   model
   module
   types
-  pixiedust/view
+  pixiedust/static-semantics
+//  pixiedust/module
 
 signature
 
@@ -28,8 +29,6 @@ signature
     TString   : Type
     TNoValue  : Type
     TEntity   : occurrence -> Type
-    TUntypedComponent : Type
-    TTypedComponent : list(Type) -> Type
     
     TOne               : Mult
     TZeroOrOne         : Mult

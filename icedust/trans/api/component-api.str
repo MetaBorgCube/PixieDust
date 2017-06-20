@@ -6,13 +6,15 @@ imports
   
   analysis/_constructors
 
+  api/expressions-api
   api/types-names-api
   api/types-api
   
   signatures/pixiedust/View-sig
-  signatures/Types-sig
+  signatures/pixiedust/Types-sig
 
 rules
+  modulename-get-componentnames = get-decl-assoc(|"Module") ; get-scope-decl-names(|"Component")
 
   componentname-get-component-kind = get-property(|"Component","componentKind")
   componentname-is-normal-kind = where(componentname-get-component-kind ; ?NormalComponentKind())
@@ -23,18 +25,13 @@ rules
   componentname-get-parameters = get-property(|"Component","parameters")
   componentname-get-body = get-property(|"Component","body")
   
-  
-  componentname-get-parameter-names = 
-    switch componentname-get-parameters
-      case ?NoComponentParameters(): []
-      case ?ComponentParameters(params): <map(componentparameter-extract-name)> params
-    end
+  componentname-get-parameter-names = map(componentparameter-get-name)
     
   componentname-get-signature = componentname-get-parameter-names ; map(componentparameter-get-properties)
   componentname-get-signature-pp = componentname-get-signature ; map(componentparameter-properties-pp)
   
-  componentparameter-extract-name : TypeParameter(name, _, _) -> name
-  componentparameter-extract-name : RefParameter(tp) -> <componentparameter-extract-name> tp
+  componentparameter-get-name = ?TypeParameter(<id>, _, _)
+  componentparameter-get-name = ?RefTypeParameter(<id>, _, _)
   
   componentparameter-get-type = get-type-property(|"Member") ; normalize-type
   componentparameter-get-multiplicity = get-type-property(|"Member") ; normalize-multiplicity
@@ -43,6 +40,10 @@ rules
   
   componentparameter-is-normal = where(componentparameter-get-variable-type ; ?NormalVariableType())
   componentparameter-is-boxed = where(componentparameter-get-variable-type ; ?BoxedVariableType())
+  
+  componentname-collect-refs = 
+    where(componentname-is-normal-kind) ; componentname-get-body ; collect(is-ref)
+    
   
   componentparameter-get-properties = !(
     <id>,
@@ -58,4 +59,3 @@ rules
   
   
   
-  modulename-get-componentnames = get-decl-assoc(|"Module") ; get-scope-decl-names(|"Component")

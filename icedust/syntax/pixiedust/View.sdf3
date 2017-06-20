@@ -5,62 +5,74 @@ imports
   Expressions
   Types
   pixiedust/Action
+  pixiedust/Types
   
 context-free syntax
   
   View = Component
   
   Component.Component = <
-    component <ID><ComponentParameters>{
+    component <ID>(<{TypeParameter ", "}*>){
       <{ViewMember "\n"}*>
     }
   >
   
   Component.NativeComponent = <
-    native component <ID><ComponentParameters>
+    native component <ID>(<{TypeParameter ", "}*>)
   >
   
-  ComponentParameters.ComponentParameters = <(<{ComponentParameter ", "}*>)> 
-  ComponentParameters.NoComponentParameters = <>
   
-  ComponentParameter = TypeParameter 
-  ComponentParameter.RefParameter = <ref <TypeParameter>>
-
-  ViewMember = Render
-  ViewMember = RenderLoop
+  ViewMember = Exp
   ViewMember = Action
   
-  Render.RenderExp = Exp
-  Render.RenderComponent = <@<ID>(<{Exp ", "}*>)<ElementChildren>>
-  Render.RenderDomElement = <<DomID><DomElementProperties><ElementChildren>>
+  Render = RenderLoop
+  Render = RenderComponent
+  Render = RenderDomElement 
+  
+  RenderDomElement.RenderDomElement  = <
+    <DomID>[<{DomElementProperty ", "}*>] {
+      <{Exp "\n"}*>
+    }> 
+  RenderDomElement.RenderDomElement2 = <
+    <DomID> {
+      <{Exp "\n"}*>
+    }>
+  RenderDomElement.RenderDomElement3 = <<DomID>[<{DomElementProperty ", "}*>]>
+  
+  RenderComponent.RenderComponent  = <
+    @<ID>(<{Exp ", "}*>) { 
+      <{Exp "\n"}*> 
+    }>
+  RenderComponent.RenderComponent2 =  <
+    @<ID> { 
+      <{Exp "\n"}*> 
+    }>
+  RenderComponent.RenderComponent3 = <@<ID>(<{Exp ", "}*>)> { prefer } //above Rendercomponent4 ( Exp )
+  
+  
+  RenderComponent = RenderComponent4
+  RenderComponent4.RenderComponent4 = <@<ID>> //{ avoid }
+  
   
   RenderLoop.RenderLoop = <
     for(<ID> in <Exp>){
-      <{ViewMember "\n"}*>  
+      <{Exp "\n"}*>  
     }
   >
-  
-  DomElementProperties.DomElementProperties = <[<{DomElementProperty ", "}*>]>
-  DomElementProperties.NoProperties = <>
-  
-  ElementChildren.ElementChildren = <
-    { 
-      <{ViewMember "\n"}*> 
-    }
-  >
-  ElementChildren.NoChildren = <>
   
   DomElementProperty.DomElementProperty = <<ID> = <DomElementValue>>
   
-  DomElementValue.ExpressionValue = Exp
+  DomElementValue = Exp
   DomElementValue.Map = <{
     <{DomElementProperty ", "}*>
   }>
-  DomElementValue.ActionCall = <<Exp>(<{Exp ", "}*>)>
+  DomElementValue.ActionCall = <<ID>(<{Exp ", "}*>)>
   
-  context-free priorities
+  context-free restrictions
+  
+  RenderComponent4 -/- [\(]
     
-    Render.RenderExp > Render.RenderComponent
+//    Render.RenderExp > Render.RenderComponent
 
 lexical syntax
   DomID = ID

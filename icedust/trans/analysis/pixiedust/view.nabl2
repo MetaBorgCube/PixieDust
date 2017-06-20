@@ -6,71 +6,44 @@ rules
     new body_scope,
     body_scope -P-> module_scope,
     Member{"children"} <- body_scope,
-    Member{"children"} : TTuple(TTypedComponent([]), TZeroOrMore(), TOnDemand()),
+    Member{"children"} : TTuple(TView(), TZeroOrMore(), TOnDemand()),
     Member{"children"}.side := None(),
-    [[params ^ (body_scope) : tpes]],
+    Map1T [[params ^ (body_scope) : tpes]],
     Component{name} <- module_scope,
-    Component{name} : TTypedComponent(tpes),
+    Component{name} : TComponent(tpes),
     Component{name}.parameters := params,
     Component{name}.componentKind := NormalComponentKind(),
     Component{name}.body := body,
-    Map1 [[body ^ (body_scope) ]].
+    Map1T [[body ^ (body_scope): (_) ]].
   
   [[ NativeComponent(name, params) ^ (module_scope) ]] := 
     new dummy_scope,
     dummy_scope -P-> module_scope,
-    [[ params ^ (dummy_scope) : tpes ]],
+    Map1T [[ params ^ (dummy_scope) : tpes ]],
     Component{name} <- module_scope,
-    Component{name} : TTypedComponent(tpes),
+    Component{name} : TComponent(tpes),
     Component{name}.parameters := params,
     Component{name}.componentKind := NativeComponentKind().
     
   
-  [[ RenderComponent(name, parameters, children) ^ (module_scope) ]] :=
+  [[ RenderComponent(name, parameters, children) ^ (module_scope) : ty ]] :=
+    ty == TTuple(TView(), TOne(), TIncremental()),
     Component{name} -> module_scope,
     Component{name} |-> name_def,
-    Component{name} : TTypedComponent(params),
+    Component{name} : TComponent(params),
     Map1T [[ parameters ^ (module_scope) : tparams ]],
     tparams == params,
-    [[ children ^ (module_scope) ]].
+    Map1T [[ children ^ (module_scope) : (_) ]].
     
   
-  [[ RenderDomElement(name, properties, children) ^ (module_scope) ]] :=
-    [[ children ^ (module_scope) ]].
+  [[ RenderDomElement(name, properties, children) ^ (module_scope) : ty ]] :=
+    ty == TTuple(TView(), TOne(), TIncremental()),
+    Map1T [[ children ^ (module_scope) : (_) ]].
   
   
-  [[ ComponentParameters(params) ^ (module_scope) : tpes ]] :=
-    Map1T [[ params ^ (module_scope) : tpes ]].
   
-  [[ NoComponentParameters() ^ (module_scope) : tpes ]] :=
-    tpes == [].
-    
-  [[ TypeParameter(name, type, m) ^ (s) : member_type ]] :=
-    [[ type ^ (s) : ttype ]],
-    MMul [[ m ^ (s) : mm ]],
-    member_type == TTuple(ttype, mm, TOnDemand()),
-    Member{name} <- s,
-    Member{name} : member_type,
-    Member{name}.variableType := NormalVariableType(),
-    Member{name}.side := None().
-     
-   
-  [[ RefParameter(TypeParameter(name, type, m)) ^ (s) : member_type ]] :=
-    [[ type ^ (s) : ttype ]],
-    MMul [[ m ^ (s) : mm ]],
-    member_type == TTuple(ttype, mm, TOnDemand()),
-    Member{name} <- s,
-    Member{name} : member_type,
-    Member{name}.variableType := BoxedVariableType(),
-    Member{name}.side := None().
-  
-    
-  MMul [[ None() ^ (s) : tm ]] := tm == TOne().
-  MMul [[ m ^ (s) : tm ]] := 
-    [[ m ^ (s) : tm ]]. 
-  
-  
-  [[ RenderLoop(var, exp, body) ^ (module_scope) ]] :=
+  [[ RenderLoop(var, exp, body) ^ (module_scope) : ty ]] :=
+    ty == TTuple(TView(), TOne(), TIncremental()),
     [[ exp ^ (module_scope) : TTuple(exp_type, exp_mult, exp_strat) ]],
     new body_scope,
     body_scope -P-> module_scope,
@@ -78,20 +51,10 @@ rules
     Member{var} : TTuple(exp_type, One(), exp_strat),
     Member{var}.side := None(),
     Member{var}.variableType := NormalVariableType(),
-    Map1 [[ body ^ (body_scope) ]].
+    Map1T [[ body ^ (body_scope) : (_) ]].
     
-  
-  [[ RenderExp(exp) ^ (module_scope) ]] :=
-    [[ exp ^ (module_scope) : ty ]].    
     
-  [[ Action(name, params, stmts) ^ (module_scope) ]] :=
+  [[ Action(name, params, stmts) ^ (module_scope) : NoValue() ]] :=
     Action{name} <- module_scope.
-    
-  //component children
-    
-  [[ ElementChildren(children) ^ (module_scope) ]] :=
-    Map1 [[children ^ (module_scope) ]].
-  
-  [[ NoChildren() ^ (_) ]] := true.
   
   

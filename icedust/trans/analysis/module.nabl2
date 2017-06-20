@@ -31,6 +31,3 @@ rules
 
   [[ ExecuteSection(es) ^ (module_scope, module_data_scope) ]] :=
     Map1T [[ es ^ (module_data_scope) : es_types ]].
-  
-  [[ ViewSection(es) ^ (module_scope, module_data_scope) ]] := 
-    Map1 [[ es ^ (module_scope) ]].

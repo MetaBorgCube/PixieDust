@@ -1,0 +1,27 @@
+module pixiedust/types
+
+rules
+  [[ View() ^ (s) : ty ]] := ty == TView().
+  
+//  [[ Component(params) ^ (s) : ty ]] :=
+//    Map1T [[ params ^ (s) : pty ]],
+//    ty == TComponent(pty).
+  
+  [[ TypeParameter(name, type, m) ^ (s) : member_type ]] :=
+    [[ type ^ (s) : ttype ]],
+    [[ m ^ (s) : mm ]],
+    member_type == TTuple(ttype, mm, TOnDemand()),
+    Member{name} <- s,
+    Member{name} : member_type,
+    Member{name}.variableType := NormalVariableType(),
+    Member{name}.side := None().
+     
+   
+  [[ RefTypeParameter(name, type, m) ^ (s) : member_type ]] :=
+    [[ type ^ (s) : ttype ]],
+    [[ m ^ (s) : mm ]],
+    member_type == TTuple(ttype, mm, TOnDemand()),
+    Member{name} <- s,
+    Member{name} : member_type,
+    Member{name}.variableType := BoxedVariableType(),
+    Member{name}.side := None().

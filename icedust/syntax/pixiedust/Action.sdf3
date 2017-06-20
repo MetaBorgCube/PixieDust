@@ -2,9 +2,9 @@ module pixiedust/Action
 
 imports
   Common
-  Types
   Expressions
   Data
+  pixiedust/Types
   
 
 context-free syntax

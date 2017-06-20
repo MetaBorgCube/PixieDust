@@ -72,7 +72,8 @@ rules // Editor services
           ("Variable-type",         <try-or-none(componentparameter-get-variable-type)> t),
           ("Component Kind",        <try-or-none(componentname-get-component-kind)> t),
           ("Component Type",        <try-or-none(componentname-get-type)> t),
-          ("Component Signature",   <try-or-none(componentname-get-signature-pp)> t)
+          ("Component Signature",   <try-or-none(componentname-get-signature-pp)> t),
+          ("References",            <try-or-none(componentname-collect-refs)> t)
         ]
         
         

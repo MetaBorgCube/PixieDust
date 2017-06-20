@@ -1,0 +1,5 @@
+module pixiedust/module
+
+rules
+  [[ ViewSection(es) ^ (module_scope, module_data_scope) ]] := 
+    Map1 [[ es ^ (module_scope) ]].

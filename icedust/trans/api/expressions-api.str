@@ -10,6 +10,10 @@ imports // functions
 
 rules
 
+
+  is-ref = ?Ref(_)
+  is-ref = ?MemberAccess(_, _)
+
   is-expr = not(is-string);not(is-type) // identifiers inside expressions are not expressions, neither are type constructors
   
   is-literal = ?Int(_)
