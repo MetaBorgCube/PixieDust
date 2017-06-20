@@ -16,7 +16,6 @@ imports
   module
   types
   pixiedust/static-semantics
-//  pixiedust/module
 
 signature
 
@@ -283,6 +282,7 @@ rules
     TNoValue() <sub! TBoolean(),
     TNoValue() <sub! TDatetime(),
     TNoValue() <sub! TString(),
+    TNoValue() <sub! TView(), //TODO extract
 
     // casting relation
     
@@ -295,6 +295,10 @@ rules
     TString() <cast! TBoolean(),
     TString() <cast! TDatetime(),
     TString() <cast! TNoValue(),
+    
+    
+    dummy == 0,
+    PixieDust [[ dummy ^ (init_scope) ]],
 
     new init_scope.
  

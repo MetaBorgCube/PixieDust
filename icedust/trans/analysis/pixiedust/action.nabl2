@@ -1,0 +1,10 @@
+module pixiedust/action
+
+rules
+
+  [[ ActionCall(name, args) ^ (s) ]] := true.
+  
+  [[ CreateAction(entity, bindings) ^ (s) ]] :=
+    Entity{entity} -> s,
+    Entity{entity} |-> s.
+    

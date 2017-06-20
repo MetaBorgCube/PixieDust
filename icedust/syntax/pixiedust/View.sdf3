@@ -55,9 +55,7 @@ context-free syntax
   
   
   RenderLoop.RenderLoop = <
-    for(<ID> in <Exp>){
-      <{Exp "\n"}*>  
-    }
+    for(<ID> in <Exp>) <Exp>
   >
   
   DomElementProperty.DomElementProperty = <<ID> = <DomElementValue>>
@@ -66,7 +64,7 @@ context-free syntax
   DomElementValue.Map = <{
     <{DomElementProperty ", "}*>
   }>
-  DomElementValue.ActionCall = <<ID>(<{Exp ", "}*>)>
+  DomElementValue = Action
   
   context-free restrictions
   

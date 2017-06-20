@@ -43,18 +43,18 @@ rules
   
   
   [[ RenderLoop(var, exp, body) ^ (module_scope) : ty ]] :=
-    ty == TTuple(TView(), TOne(), TIncremental()),
+    ty == TTuple(TView(), exp_mult, TIncremental()),
     [[ exp ^ (module_scope) : TTuple(exp_type, exp_mult, exp_strat) ]],
     new body_scope,
     body_scope -P-> module_scope,
     Member{var} <- body_scope,
-    Member{var} : TTuple(exp_type, One(), exp_strat),
+    Member{var} : TTuple(exp_type, TOne(), exp_strat),
     Member{var}.side := None(),
     Member{var}.variableType := NormalVariableType(),
-    Map1T [[ body ^ (body_scope) : (_) ]].
+    [[ body ^ (body_scope) : (_) ]].
     
     
-  [[ Action(name, params, stmts) ^ (module_scope) : NoValue() ]] :=
+  [[ ActionDeclaration(name, params, stmts) ^ (module_scope) : NoValue() ]] :=
     Action{name} <- module_scope.
   
   

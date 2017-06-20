@@ -9,7 +9,7 @@ imports
 
 context-free syntax
 
-  Action.Action = <
+  ActionDeclaration.ActionDeclaration = <
     action <ID>(<{TypeParameter ", "}*>){
       <{ActionStatement "\n"}*>
     }
@@ -17,3 +17,12 @@ context-free syntax
   
   ActionStatement = EntityInstance
   ActionStatement.Assignment = <<Exp> = <Exp>>
+  
+  Action.ActionCall = <<ID>(<{Exp ", "}*>)>
+  Action.CreateAction = <<ID>::create{
+    <Binding*>  
+  }>
+  
+  Binding.Binding = <<ID> = <Exp>>
+  
+  

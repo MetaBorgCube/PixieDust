@@ -4,6 +4,7 @@ imports
   pixiedust/view
   pixiedust/types
   pixiedust/module
+  pixiedust/action
 
 
 signature
@@ -11,3 +12,10 @@ signature
     TView      : Type
     TComponent : list(Type) -> Type
     
+    
+    
+rules
+
+  PixieDust [[ _ ^ (init_scope) ]] :=
+    TNoValue() <sub! TView().
+  
