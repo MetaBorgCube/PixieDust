@@ -1,0 +1,10 @@
+module pixiedust/expressions
+
+rules
+
+  [[ Length(e) ^ (s) : TTuple(TInt(), e_mult, e_strat) ]] :=
+    [[ e ^ (s) : TTuple(e_type, e_mult, e_strat) ]],
+    e_type == TString() | error $[Expected type: String, got: $[e_type]],
+    e_mult_u is multUpper of e_mult,
+    e_mult_u == TUOne() | error $[Multiplicity mismatch: expected One or ZeroOrOne got [e_mult]] @ e.
+    

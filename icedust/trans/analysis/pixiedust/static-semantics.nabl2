@@ -1,10 +1,11 @@
 module pixiedust/static-semantics
 
 imports 
-  pixiedust/view
-  pixiedust/types
-  pixiedust/module
   pixiedust/action
+  pixiedust/expressions
+  pixiedust/module
+  pixiedust/types
+  pixiedust/view
 
 
 signature
@@ -15,7 +16,4 @@ signature
     
     
 rules
-
-  PixieDust [[ _ ^ (init_scope) ]] :=
-    TNoValue() <sub! TView().
   

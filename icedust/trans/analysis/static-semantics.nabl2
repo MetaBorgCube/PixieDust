@@ -295,10 +295,6 @@ rules
     TString() <cast! TBoolean(),
     TString() <cast! TDatetime(),
     TString() <cast! TNoValue(),
-    
-    
-    dummy == 0,
-    PixieDust [[ dummy ^ (init_scope) ]],
 
     new init_scope.
  

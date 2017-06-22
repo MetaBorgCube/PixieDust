@@ -5,6 +5,7 @@ imports
   generating/js/generate
   
   generating/pixiedust/reducer
+  generating/pixiedust/expression
   
   api/component-api
 

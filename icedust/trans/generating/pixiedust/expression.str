@@ -1,0 +1,8 @@
+module generating/pixiedust/expression
+
+imports
+  generating/js/expression
+  
+rules
+  exp-to-js-stmts(|i) = ?Length(e) ; unexp-to-js-stmts(!e, js-length|i)
+  js-length: exp_e -> js-exp |[exp_e !== null ? exp_e.length : null]|

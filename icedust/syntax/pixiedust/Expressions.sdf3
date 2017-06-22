@@ -5,3 +5,4 @@ imports
   
 context-free syntax
   Exp = Render
+  Exp.Length = <<Exp>.length()>
