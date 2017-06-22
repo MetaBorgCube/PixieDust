@@ -54,5 +54,6 @@ context-free syntax
   
   Config.PixieDustBackend = <
     backend: PixieDust
+    <JavascriptPhase?>
   >
   

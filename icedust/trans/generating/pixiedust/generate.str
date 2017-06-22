@@ -11,8 +11,8 @@ imports
 
 rules
   generate-pixiedust-program : moduleName -> js-program |[
-    stmts_jsBackend
     stmts_imports
+    stmts_jsBackend
     stmts_reducer
   ]|
     with
@@ -43,6 +43,7 @@ rules
   
   
   generate-pixiedust-imports : _ -> js-stmt* |[
+    var React = require('react');
     var _pixiedustRuntime = require('./lib/pixiedust-runtime');
     var makeReducer = _pixiedustRuntime.makeReducer;
   ]|

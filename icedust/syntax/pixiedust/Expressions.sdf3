@@ -2,7 +2,16 @@ module pixiedust/Expressions
 
 imports
   pixiedust/View
+  Expressions
   
 context-free syntax
   Exp = Render
   Exp.Length = <<Exp>.length()>
+  
+context-free priorities
+  {
+    Exp.MemberAccess
+  } >
+  {
+    RenderLoop.RenderLoop
+  }

@@ -28,7 +28,7 @@ rules
   is-backend = ?JavaBackend(_)
   is-backend = ?WebDSLBackend(_)
   is-backend = ?JavascriptBackend(_)
-  is-backend = ?PixieDustBackend()
+  is-backend = ?PixieDustBackend(_)
   
   is-javascript-backend = ?JavascriptBackend(_)
   

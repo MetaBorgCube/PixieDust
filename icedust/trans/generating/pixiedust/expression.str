@@ -3,6 +3,83 @@ module generating/pixiedust/expression
 imports
   generating/js/expression
   
+  signatures/pixiedust/View-sig
+  
 rules
   exp-to-js-stmts(|i) = ?Length(e) ; unexp-to-js-stmts(!e, js-length|i)
   js-length: exp_e -> js-exp |[exp_e !== null ? exp_e.length : null]|
+  
+  
+  
+  //render
+  
+  exp-to-js-stmts(|i) : RenderDomElement(name, attributes, children) -> result
+    with
+      exp_name := <js-string> name
+    ; (exp_children*, stmts_stmts_children, i') := <exp-fold(|i)> children
+    ; (x_result, i'') := <int-to-varname-inc> i' 
+    ; stmts_children := <concat> stmts_stmts_children
+    ; stmts := js-stmt* |[
+        stmts_children
+        var x_result = React.createElement(exp_name, {}, exp_children*);
+      ]|
+    ; result := (<js-var> x_result, stmts, i'')
+  
+  
+  exp-fold(|i) : exp* -> <foldl(do-exp-fold) ; (reverse, reverse, id) > (exp*, ([], [], i)) 
+  
+  do-exp-fold : (e, (exps, stmts, i)) -> result
+    where
+      (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
+    ; result := ([exp_e | exps], [stmts_e | stmts], i')
+  
+  exp-to-js-stmts(|i) : RenderComponent(name, parameters, children) -> []
+  
+  exp-to-js-stmts(|i) : RenderLoop(x_var, e, body) -> result 
+    with
+      (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
+    ; (exp_body, stmts_body, i'') := <exp-to-js-stmts(|i')> body
+    ; (x_result, i''') := <int-to-varname-inc> i''
+    with
+      switch <get-multiplicity> e
+        case upper-one:
+          stmts_scoped := js-stmt* |[
+            var oldScope = scope;
+            var x_result;
+            (function(){
+              var scope = _.assign({}, oldScope, {
+                x_var : exp_e 
+              });
+              stmts_body
+              x_result = exp_body;
+            })();
+          ]|
+        ; i_result := i'''
+        case upper-many:
+          (x_loop, i'''') := <int-to-varname-inc> i'''
+        ; stmts_scoped := js-stmt* |[
+            var oldScope = scope;
+            var x_result = [];
+            for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++){
+              (function(){
+                var scope = _.assign({}, oldScope, {
+                  x_var : exp_e[x_loop]
+                });
+                stmts_body
+                x_result.push(exp_body);
+              })();
+            } 
+          ]|
+        ; i_result := i''''
+      end
+    with
+      stmts := js-stmt* |[
+        stmts_e
+        stmts_scoped
+      ]|
+    ; result := (<js-var> x_result, stmts, i_result)
+    
+    
+    
+     
+  
