@@ -282,6 +282,8 @@ rules
     TNoValue() <sub! TBoolean(),
     TNoValue() <sub! TDatetime(),
     TNoValue() <sub! TString(),
+    
+    //PixieDust subtype relation
     TNoValue() <sub! TView(), //TODO extract
 
     // casting relation
@@ -295,6 +297,9 @@ rules
     TString() <cast! TBoolean(),
     TString() <cast! TDatetime(),
     TString() <cast! TNoValue(),
+
+    //PixieDust casting relation
+    TString() <cast! TView(),
 
     new init_scope.
  

@@ -241,7 +241,7 @@ rules // config
     where
       configsection-has-no-backend
     with
-      backend := <custom-origin(|c)>PixieDustBackend(Execute());
+      backend := <custom-origin(|c)>PixieDustBackend(None());
       c'      := <configsection-add(!backend)>c
   
   

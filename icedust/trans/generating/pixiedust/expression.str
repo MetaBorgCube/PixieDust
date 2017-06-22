@@ -5,29 +5,72 @@ imports
   
   signatures/pixiedust/View-sig
   
+  signatures/pixiedust/Expressions-sig
+  
+  js/js-util
+  
+  api/types-api
+  api/types-names-api
+  
 rules
   exp-to-js-stmts(|i) = ?Length(e) ; unexp-to-js-stmts(!e, js-length|i)
   js-length: exp_e -> js-exp |[exp_e !== null ? exp_e.length : null]|
   
+  //cast
   
+  do-cast: (exp_e, View(), String()) -> js-exp |[ReactDOM.renderToStaticMarkup(exp_e)]|
   
   //render
   
   exp-to-js-stmts(|i) : RenderDomElement(name, attributes, children) -> result
     with
       exp_name := <js-string> name
-    ; (exp_children*, stmts_stmts_children, i') := <exp-fold(|i)> children
-    ; (x_result, i'') := <int-to-varname-inc> i' 
+    ; (x_result, i') := <int-to-varname-inc> i
+    ; (x_attributes, i'') := <int-to-varname-inc> i'
+    ; (prop_attributes*, stmts_stmts_attributes, i''') := <attribute-fold(|i'', x_attributes)> attributes
+    ; stmts_attributes := <concat> stmts_stmts_attributes
+    ; (exp_children*, stmts_stmts_children, i'''') := <exp-fold(|i''')> children
     ; stmts_children := <concat> stmts_stmts_children
     ; stmts := js-stmt* |[
+        stmts_attributes
         stmts_children
-        var x_result = React.createElement(exp_name, {}, exp_children*);
+        var x_result = React.createElement(exp_name, {prop_attributes*}, exp_children*);
       ]|
-    ; result := (<js-var> x_result, stmts, i'')
+    ; result := (<js-var> x_result, stmts, i'''')
   
+  attribute-to-js-prop-stmts(|i): DomElementProperty(x_key, Map(pairs)) -> result
+    with
+      (x_map, i') := <int-to-varname-inc> i
+    ; (prop_pairs*, stmts_stmts_pairs, i'') := <attribute-fold(|i', x_map)> pairs
+    ; stmts_pairs := <concat> stmts_stmts_pairs
+    ; prop := js-prop |[
+      x_key: {
+        prop_pairs*
+      }
+    ]| 
+    ; stmts := js-stmt* |[
+        stmts_pairs
+      ]|
+    ; result := (prop, stmts, i'')
   
-  exp-fold(|i) : exp* -> <foldl(do-exp-fold) ; (reverse, reverse, id) > (exp*, ([], [], i)) 
+  attribute-to-js-prop-stmts(|i): DomElementProperty(x_key, e) -> result
+    with
+      (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
+    ; exp_key := <js-var> x_key
+    ; prop_e := js-prop |[x_key : exp_e]| 
+    ; result := (prop_e, stmts_e, i')
+    
+  attribute-fold(|i, x_obj) = ctx-fold(do-attribute-fold(|x_obj)|i)
   
+  do-attribute-fold(|x_obj) : (attribute, (props, stmts, i)) -> result
+    where
+      (prop_attribute, stmts_attribute, i') := <attribute-to-js-prop-stmts(|i)> attribute
+    ; result := ([prop_attribute | props], [stmts_attribute | stmts], i')
+    
+  
+  ctx-fold(do-fold|i) = !(<id>, ([], [], i)) ; foldl(do-fold) ; (reverse, reverse, id) 
+  
+  exp-fold(|i) = ctx-fold(do-exp-fold|i) 
   do-exp-fold : (e, (exps, stmts, i)) -> result
     where
       (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
@@ -46,13 +89,17 @@ rules
           stmts_scoped := js-stmt* |[
             var oldScope = scope;
             var x_result;
-            (function(){
-              var scope = _.assign({}, oldScope, {
-                x_var : exp_e 
-              });
-              stmts_body
-              x_result = exp_body;
-            })();
+            if(exp_e !== null){
+              (function(){
+                var scope = _.assign({}, oldScope, {
+                  x_var : exp_e 
+                });
+                stmts_body
+                x_result = exp_body;
+              })();
+            } else {
+              x_result = null;
+            }
           ]|
         ; i_result := i'''
         case upper-many:
