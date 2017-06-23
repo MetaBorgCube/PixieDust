@@ -3,8 +3,6 @@ module desugaring/alternatives
 imports // constructors
   
   signatures/Expressions-sig
-  signatures/pixiedust/View-sig
-  signatures/pixiedust/Types-sig
   signatures/Types-sig
   
 imports // functions
@@ -29,16 +27,6 @@ rules
   desugar-alternative: Count2(a) -> Count(a)
   
   desugar-alternative: e@IfElseNoValue(a, b) -> If(a, b, <custom-origin(|e)>NoValue())
-  
-  desugar-alternative: RenderDomElement2(domId, children) -> RenderDomElement(domId, [], children)
-  desugar-alternative: RenderDomElement3(domId, properties) -> RenderDomElement(domId, properties, [])
-  
-  desugar-alternative: RenderComponent2(name, children) -> RenderComponent(name, [], children) 
-  desugar-alternative: RenderComponent3(name, args) -> RenderComponent(name, args, [])
-  desugar-alternative: RenderComponent4(name) -> RenderComponent(name, [], [])
-  
-  desugar-alternative: TypeParameter2(name, type) -> TypeParameter(name, type, <custom-origin(|type)>One())
-  desugar-alternative: RefTypeParameter2(name, type) -> RefTypeParameter(name, type, <custom-origin(|type)>One())
 
 rules
   
