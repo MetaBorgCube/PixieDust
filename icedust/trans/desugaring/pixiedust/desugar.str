@@ -1,0 +1,5 @@
+module desugaring/pixiedust/desugar
+
+imports
+  desugaring/pixiedust/omitted
+  desugaring/pixiedust/alternatives

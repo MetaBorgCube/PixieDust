@@ -5,6 +5,7 @@ imports // backends
   generating/java
 //  generating/webdsl
   generating/js/build
+  generating/pixiedust/build
 
 imports // functions
 

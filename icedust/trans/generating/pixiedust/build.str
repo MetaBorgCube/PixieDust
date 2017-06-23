@@ -1,0 +1,18 @@
+module generating/pixiedust/build
+
+imports
+  generating/js/build
+  generating/pixiedust/generate
+  
+  signatures/pixiedust/Config-sig
+
+rules
+
+  build(error-handler|backend, moduleName, relativePath): _ -> result
+    where
+      PixieDustBackend(phase, target) := backend
+    with
+      result := <build-build(
+        generate-pixiedust-main-function
+      , generate-pixiedust-main-html
+      )> (relativePath, moduleName, phase, target)

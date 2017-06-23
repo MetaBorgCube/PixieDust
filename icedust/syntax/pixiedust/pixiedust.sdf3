@@ -1,5 +1,7 @@
 module pixiedust/pixiedust
 
 imports
+  pixiedust/Config
   pixiedust/Modules
   pixiedust/Expressions
+  

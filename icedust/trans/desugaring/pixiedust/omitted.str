@@ -1,0 +1,16 @@
+module desugaring/pixiedust/omitted
+
+imports
+  lib/origin
+
+  desugaring/js/omitted
+  
+  signatures/pixiedust/Config-sig
+
+rules
+  generate-default-backend: c -> <custom-origin(|c)> PixieDustBackend(<custom-origin(|c)> None(), <custom-origin(|c)> None())
+  
+  backend-generate-defaults = ?b@PixieDustBackend(phase, target) ; PixieDustBackend(
+        try(javascript-backend-default-phase(|b))
+      , try(javascript-backend-default-target(|b))
+    ) 

@@ -6,6 +6,7 @@ imports // constructors
   signatures/Modules-sig
   
   signatures/js/Config-sig
+  signatures/pixiedust/Config-sig
   
 imports // functions
 
@@ -30,6 +31,7 @@ rules
   is-backend = ?JavaBackend(_)
   is-backend = ?WebDSLBackend(_)
   is-backend = ?JavascriptBackend(_, _)
+  is-backend = ?PixieDustBackend(_, _)
   
   is-javascript-backend = ?JavascriptBackend(_, _)
   

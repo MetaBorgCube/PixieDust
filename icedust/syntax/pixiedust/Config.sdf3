@@ -1,0 +1,11 @@
+module pixiedust/Config
+
+imports
+  js/Config
+
+context-free syntax
+  Config.PixieDustBackend = <
+    backend: PixieDust
+    <BackendPhase?>
+    <BackendTarget?>
+  >
