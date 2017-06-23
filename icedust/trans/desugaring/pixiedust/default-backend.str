@@ -1,0 +1,9 @@
+module desugaring/js/default-backend
+
+imports
+  signatures/pixiedust/Config-sig
+  
+  lib/origin
+
+rules
+  generate-default-backend: c -> <custom-origin(|c)> PixieDustBackend(<custom-origin(|c)> None(), <custom-origin(|c)> None())
