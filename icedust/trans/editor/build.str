@@ -3,7 +3,7 @@ module editor/build
 imports // backends
 
   generating/java
-//  generating/webdsl
+  generating/webdsl
   generating/js/build
   generating/pixiedust/build
 

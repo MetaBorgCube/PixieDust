@@ -241,7 +241,7 @@ rules // config
     with
       backend := <generate-default-backend> c
     ; c'      := <configsection-add(!backend)>c
-  
+
   
   config-section-generate-features: c -> c'
     where
@@ -266,6 +266,3 @@ rules // config
   generate-default-backend = fail
   
   backend-generate-defaults = fail
-  
-  
-  
