@@ -18,7 +18,7 @@ rules
   
   //cast
   
-  do-cast: (exp_e, View(), String()) -> js-exp |[ReactDOM.renderToStaticMarkup(exp_e)]|
+  do-cast: (exp_e, View(), String()) -> js-exp |[Runtime.ReactDOM.renderToStaticMarkup(exp_e)]|
   
   //render
   
@@ -34,7 +34,7 @@ rules
     ; stmts := js-stmt* |[
         stmts_attributes
         stmts_children
-        var x_result = React.createElement(exp_name, {prop_attributes*}, exp_children*);
+        var x_result = Runtime.React.createElement(exp_name, {prop_attributes*}, exp_children*);
       ]|
     ; result := (<js-var> x_result, stmts, i'''')
   

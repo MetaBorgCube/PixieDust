@@ -11,20 +11,22 @@ imports
   api/component-api
 
 rules
-  generate-pixiedust-program : moduleName -> js-program |[
-    stmts_imports
+  generate-pixiedust-main-function : moduleName -> main
+    with
+      stmts_module := <generate-pixiedust-statements> moduleName
+    ; main := js-exp |[
+        function(module, Runtime){
+          stmts_module
+          return module;
+        }
+    ]|
+        
+  generate-pixiedust-statements : moduleName -> js-stmt* |[
     stmts_jsBackend
     stmts_reducer
   ]|
     with
-      Program(stmts_jsBackend) := <generate-javascript-program> moduleName
-    ; stmts_imports := <generate-pixiedust-imports>
+      stmts_jsBackend := <generate-javascript-statements> moduleName
     ; stmts_reducer := <generate-reducer> moduleName
-  
-  generate-pixiedust-imports : _ -> js-stmt* |[
-    var React = require('react');
-    var ReactDOM = require('react-dom/server');
     
-    var _pixiedustRuntime = require('./lib/pixiedust-runtime');
-    var makeReducer = _pixiedustRuntime.makeReducer;
-  ]|
+  

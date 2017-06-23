@@ -29,7 +29,7 @@ rules
     ; stmts_reducer := <reducer-statements>
   
   reducer-statements: _ -> js-stmt* |[
-    var reducer = makeReducer(actions);
+    var reducer = Runtime.PixieDust.makeReducer(actions);
     module.exports.reducer = reducer;
   ]|
   
