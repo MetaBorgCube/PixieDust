@@ -78,10 +78,10 @@ rules
   
   exp-to-js-stmts(|i) : RenderComponent(name, parameters, children) -> []
   
-  exp-to-js-stmts(|i) : RenderLoop(x_var, e, body) -> result 
+  exp-to-js-stmts(|i) : RenderLoop(x_var, e, e_body) -> result 
     with
       (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
-    ; (exp_body, stmts_body, i'') := <exp-to-js-stmts(|i')> body
+    ; (exp_body, stmts_body, i'') := <exp-to-js-stmts(|i')> e_body
     ; (x_result, i''') := <int-to-varname-inc> i''
     with
       switch <get-multiplicity> e
@@ -104,6 +104,7 @@ rules
         ; i_result := i'''
         case upper-many:
           (x_loop, i'''') := <int-to-varname-inc> i'''
+        ; exp_result := <render-loop-identity> (e_body, exp_body, x_var)
         ; stmts_scoped := js-stmt* |[
             var oldScope = scope;
             var x_result = [];
@@ -113,7 +114,7 @@ rules
                   x_var : exp_e[x_loop]
                 });
                 stmts_body
-                x_result.push(exp_body);
+                x_result.push(exp_result);
               })();
             } 
           ]|
@@ -127,6 +128,18 @@ rules
     ; result := (<js-var> x_result, stmts, i_result)
     
     
+  render-loop-identity: (e_body, exp_body, x_var) -> result
+    with
+      switch <get-type2> e_body
+        case ?View():
+          result := js-exp |[
+            Runtime._.assign({}, exp_body, {
+              key: scope.x_var
+            })
+          ]|
+        otherwise:
+          result := exp_body  
+      end
     
      
   
