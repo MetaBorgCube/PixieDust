@@ -3,14 +3,17 @@ module generating/pixiedust/expression
 imports
   generating/js/expression
   
-  signatures/pixiedust/View-sig
+  generating/pixiedust/names
   
+  signatures/pixiedust/Types-sig
+  signatures/pixiedust/View-sig
   signatures/pixiedust/Expressions-sig
   
   js/js-util
   
   api/types-api
   api/types-names-api
+  api/component-api
   
 rules
   exp-to-js-stmts(|i) = ?Length(e) ; unexp-to-js-stmts(!e, js-length|i)
@@ -38,7 +41,7 @@ rules
       ]|
     ; result := (<js-var> x_result, stmts, i'''')
   
-  attribute-to-js-prop-stmts(|i): DomElementProperty(x_key, Map(pairs)) -> result
+  attribute-to-js-prop-stmts(|i): DomElementProperty(x_key, DomElementPropertyValueMap(pairs)) -> result
     with
       (x_map, i') := <int-to-varname-inc> i
     ; (prop_pairs*, stmts_stmts_pairs, i'') := <attribute-fold(|i', x_map)> pairs
@@ -53,7 +56,7 @@ rules
       ]|
     ; result := (prop, stmts, i'')
   
-  attribute-to-js-prop-stmts(|i): DomElementProperty(x_key, e) -> result
+  attribute-to-js-prop-stmts(|i): DomElementProperty(x_key, DomElementPropertyValueExp(e)) -> result
     with
       (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
     ; exp_key := <js-var> x_key
@@ -76,7 +79,36 @@ rules
       (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
     ; result := ([exp_e | exps], [stmts_e | stmts], i')
   
-  exp-to-js-stmts(|i) : RenderComponent(name, parameters, children) -> []
+  exp-to-js-stmts(|i) : RenderComponent(x_name, parameters, children) -> result
+    with
+      x_componentScope := <component-scope-var>
+    ; (x_result, i') := <int-to-varname-inc> i
+    ; (exp_parameter*, stmts_stmts_parameter, i'') := <exp-fold(|i')> parameters
+    ; (exp_children*, stmts_stmts_children, i''') := <exp-fold(|i'')> children
+    ; exp_props := <component-parameters-to-props> (x_name, exp_parameter*)
+    ; stmts_parameter := <concat> stmts_stmts_parameter
+    ; stmts_children := <concat> stmts_stmts_children
+    ; stmts := js-stmt* |[
+      stmts_parameter
+      stmts_children
+      var x_result = Runtime.React.createElement(x_componentScope.x_name, exp_props, exp_children*);
+    ]|
+    ; result := (<js-var> x_result, stmts, i''')
+  
+  
+  component-parameters-to-props: (name, exp_parameter*) -> exp_result
+    with
+      parameterNames := <componentname-get-parameter-names> name
+    ; prop_params* := <zip ; map(component-parameter-to-prop)> (parameterNames, exp_parameter*)
+    ; exp_result := js-exp |[ 
+        {
+          prop_params*
+        }
+      ]|
+    
+  component-parameter-to-prop: (x_name, exp_parameter) -> js-prop |[x_name: exp_parameter]| 
+  
+  
   
   exp-to-js-stmts(|i) : RenderLoop(x_var, e, e_body) -> result 
     with

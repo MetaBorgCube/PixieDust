@@ -22,7 +22,7 @@ context-free syntax
   >
   
   
-  ViewMember = Exp
+  ViewMember.Render = Exp
   ViewMember = Action
   
   Render = RenderLoop
@@ -58,13 +58,13 @@ context-free syntax
     for(<ID> in <Exp>) <Exp>
   >
   
-  DomElementProperty.DomElementProperty = <<ID> = <DomElementValue>>
+  DomElementProperty.DomElementProperty = <<ID> = <DomElementPropertyValue>>
   
-  DomElementValue = Exp
-  DomElementValue.Map = <{
+  DomElementPropertyValue.DomElementPropertyValueExp = Exp
+  DomElementPropertyValue.DomElementPropertyValueMap = <{
     <{DomElementProperty ", "}*>
   }>
-  DomElementValue = Action
+  DomElementPropertyValue = Action
   
   context-free restrictions
   

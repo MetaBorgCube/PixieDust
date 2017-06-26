@@ -1,0 +1,68 @@
+module generating/pixiedust/component
+
+imports
+  signatures/pixiedust/View-sig
+  signatures/pixiedust/Types-sig
+  
+  generating/pixiedust/expression
+  generating/pixiedust/names
+
+  api/component-api
+  api/types-names-api
+  
+  js/js-util
+
+rules
+
+  generate-components: moduleName -> stmts
+    with
+      x_componentScope := <component-scope-var>
+    ; components := <modulename-get-componentnames> moduleName
+    ; exp_component* := <map(componentname-to-js-exp)> components
+    ; prop_component* := <zip ; map(component-to-prop)> (components, exp_component*)
+    ; stmts := js-stmt* |[
+        var x_componentScope = (function(){
+          var oldScope = scope;  
+          return {
+            prop_component*
+          };
+        })();
+      ]|
+      
+  componentname-to-js-exp : componentname -> result
+    where
+      <componentname-is-normal-kind> componentname
+    with
+      body := <componentname-get-body> componentname
+    ; renderExpressions := <componentbody-get-render-expressions> body 
+    ; (exp_body*, stmts_stmts_body, i') := <exp-fold(|0)> renderExpressions
+    ; stmts_body := <concat> stmts_stmts_body
+    ; switch <zip> (exp_body*, renderExpressions)
+        case ?Nil():
+          exp_result := <js-null>
+        case ?(Cons(exp_head, Nil()), Cons(<id>, _)) ; get-type2 ; ?View(): //no need to group if single child of type View
+          exp_result := exp_head
+        otherwise: 
+          exp_result := js-exp |[
+            Runtime.React.createElement('group', {}, exp_body*)
+          ]|
+      end
+    ; result := js-exp |[function(props){
+        var scope = Runtime._.assign({}, oldScope, props);
+        stmts_body
+        return exp_result;
+      }]|
+      
+  componentname-to-js-exp : componentname -> result
+    where
+      <componentname-is-native-kind> componentname
+    with
+      result := js-exp |[
+        function(props){
+          var scope = Runtime._.assign({}, oldScope, props);
+        }
+      ]|
+  
+  component-to-prop: (x_componentname, exp_component) -> js-prop |[
+    x_componentname: exp_component
+  ]|

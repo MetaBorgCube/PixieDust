@@ -7,11 +7,9 @@ imports
   
   generating/pixiedust/reducer
   generating/pixiedust/expression
-  generating/pixiedust/execute
+  generating/pixiedust/component
   
   api/component-api
-  
-  lib/files
 
 rules
   
@@ -19,10 +17,12 @@ rules
   generate-pixiedust-statements : moduleName -> js-stmt* |[
     stmts_jsBackend
     stmts_reducer
+    stmts_component
   ]|
     with
       stmts_jsBackend := <generate-javascript-statements> moduleName
     ; stmts_reducer := <generate-reducer> moduleName
+    ; stmts_component := <generate-components> moduleName
     
   generate-pixiedust-main-function = generate-main-function(generate-pixiedust-statements)
   generate-pixiedust-main-html = generate-main-html(generate-pixiedust-main-function)

@@ -14,7 +14,7 @@ rules
     Component{name}.parameters := params,
     Component{name}.componentKind := NormalComponentKind(),
     Component{name}.body := body,
-    Map1T [[body ^ (body_scope): (_) ]].
+    Map1 [[ body ^ (body_scope) ]].
   
   [[ NativeComponent(name, params) ^ (module_scope) ]] := 
     new dummy_scope,
@@ -25,6 +25,8 @@ rules
     Component{name}.parameters := params,
     Component{name}.componentKind := NativeComponentKind().
     
+  [[ Render(exp) ^ (module_scope) ]] :=
+    [[ exp ^ (module_scope) : _ ]].
   
   [[ RenderComponent(name, parameters, children) ^ (module_scope) : ty ]] :=
     ty == TTuple(TView(), TOne(), TIncremental()),
@@ -38,8 +40,18 @@ rules
   
   [[ RenderDomElement(name, properties, children) ^ (module_scope) : ty ]] :=
     ty == TTuple(TView(), TOne(), TIncremental()),
+    Map1 [[ properties ^ (module_scope) ]],
     Map1T [[ children ^ (module_scope) : (_) ]].
   
+  
+  [[ DomElementProperty(k, value) ^ (s) ]] := 
+    [[ value ^ (s) ]].
+  
+  [[ DomElementPropertyValueExp(e) ^ (s) ]] := 
+    [[ e ^ (s) : _ ]].
+  
+  [[ DomElementPropertyValueMap(pairs) ^ (s) ]] :=
+    Map1 [[ pairs ^ (s) ]].
   
   
   [[ RenderLoop(var, exp, body) ^ (module_scope) : ty ]] :=
@@ -54,7 +66,7 @@ rules
     [[ body ^ (body_scope) : (_) ]].
     
     
-  [[ ActionDeclaration(name, params, stmts) ^ (module_scope) : NoValue() ]] :=
+  [[ ActionDeclaration(name, params, stmts) ^ (module_scope) ]] :=
     Action{name} <- module_scope.
   
   

@@ -25,7 +25,9 @@ rules
   componentname-get-parameters = get-property(|"Component","parameters")
   componentname-get-body = get-property(|"Component","body")
   
-  componentname-get-parameter-names = map(componentparameter-get-name)
+  componentbody-get-render-expressions = filter(?Render(<id>))
+  
+  componentname-get-parameter-names = componentname-get-parameters ; map(componentparameter-get-name)
     
   componentname-get-signature = componentname-get-parameter-names ; map(componentparameter-get-properties)
   componentname-get-signature-pp = componentname-get-signature ; map(componentparameter-properties-pp)
