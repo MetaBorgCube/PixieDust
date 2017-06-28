@@ -38,28 +38,27 @@ rules
     ; renderExpressions := <componentbody-get-render-expressions> body 
     ; (exp_body*, stmts_stmts_body, i') := <exp-fold(|0)> renderExpressions
     ; stmts_body := <concat> stmts_stmts_body
-    ; switch <zip> (exp_body*, renderExpressions)
-        case ?Nil():
-          exp_result := <js-null>
-        case ?(Cons(exp_head, Nil()), Cons(<id>, _)) ; get-type2 ; ?View(): //no need to group if single child of type View
-          exp_result := exp_head
-        otherwise: 
-          exp_result := js-exp |[
-            Runtime.React.createElement('group', {}, exp_body*)
-          ]|
-      end
+    ; exp_wrapped := <component-wrap-elements> (exp_body*, renderExpressions)
     ; result := js-exp |[
         Runtime.PixieDust.Component.Lifted(
           function(props, state){
             var scope = Runtime._.assign({}, oldScope, props);
             stmts_body
             return {
-              result: exp_result,
+              result: exp_wrapped,
               state: state
             };
           }
         )
     ]|
+    
+  component-wrap-elements: ([], []) -> <js-null>
+  component-wrap-elements: ([exp_element|[]], [e_element|[]]) -> exp_element
+    where
+      View() := <get-type2> e_element
+  component-wrap-elements: (exp_element*, _) -> js-exp |[
+    Runtime.React.createElement('group', {}, exp_element*)
+  ]|
   
   component-to-prop: (x_componentname, exp_component) -> js-prop |[
     x_componentname: exp_component

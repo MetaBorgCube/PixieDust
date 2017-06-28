@@ -55,7 +55,7 @@ rules
   
   
   [[ RenderLoop(var, exp, body) ^ (module_scope) : ty ]] :=
-    ty == TTuple(TView(), exp_mult, TIncremental()),
+    ty == TTuple(TView(), exp_mult, exp_strat),
     [[ exp ^ (module_scope) : TTuple(exp_type, exp_mult, exp_strat) ]],
     new body_scope,
     body_scope -P-> module_scope,

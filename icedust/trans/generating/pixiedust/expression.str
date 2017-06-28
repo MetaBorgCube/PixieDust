@@ -81,7 +81,7 @@ rules
   
   exp-to-js-stmts(|i) : RenderComponent(x_name, parameters, children) -> result
     with
-      x_componentScope := <component-scope-var>
+      exp_componentRef := <component-ref> x_name
     ; (x_result, i') := <int-to-varname-inc> i
     ; (exp_parameter*, stmts_stmts_parameter, i'') := <exp-fold(|i')> parameters
     ; (exp_children*, stmts_stmts_children, i''') := <exp-fold(|i'')> children
@@ -91,10 +91,20 @@ rules
     ; stmts := js-stmt* |[
       stmts_parameter
       stmts_children
-      var x_result = Runtime.React.createElement(x_componentScope.x_name, exp_props, exp_children*);
+      var x_result = Runtime.React.createElement(exp_componentRef, exp_props, exp_children*);
     ]|
     ; result := (<js-var> x_result, stmts, i''')
   
+  
+  component-ref : x_name -> js-exp |[x_componentScope.x_name]|
+    where
+      componentname-is-normal-kind
+    with
+      x_componentScope := <component-scope-var>
+      
+  component-ref : x_name -> js-exp |[Runtime.PixieDust.Component.Native.x_name]|
+    where
+      componentname-is-native-kind
   
   component-parameters-to-props: (name, parameters, exp_parameter*) -> exp_result
     with
