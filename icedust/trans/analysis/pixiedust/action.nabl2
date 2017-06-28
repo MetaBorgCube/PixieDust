@@ -6,5 +6,5 @@ rules
   
   [[ CreateAction(entity, bindings) ^ (s) ]] :=
     Entity{entity} -> s,
-    Entity{entity} |-> s.
+    Entity{entity} |-> e_def.
     

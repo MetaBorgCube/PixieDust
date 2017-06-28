@@ -21,7 +21,7 @@ rules
   
   //cast
   
-  do-cast: (exp_e, View(), String()) -> js-exp |[Runtime.ReactDOM.renderToStaticMarkup(exp_e)]|
+  do-cast: (exp_e, View(), String()) -> js-exp |[Runtime.PixieDust.renderToString(store, exp_e)]|
   
   //render
   
@@ -85,7 +85,7 @@ rules
     ; (x_result, i') := <int-to-varname-inc> i
     ; (exp_parameter*, stmts_stmts_parameter, i'') := <exp-fold(|i')> parameters
     ; (exp_children*, stmts_stmts_children, i''') := <exp-fold(|i'')> children
-    ; exp_props := <component-parameters-to-props> (x_name, exp_parameter*)
+    ; exp_props := <component-parameters-to-props> (x_name, parameters, exp_parameter*)
     ; stmts_parameter := <concat> stmts_stmts_parameter
     ; stmts_children := <concat> stmts_stmts_children
     ; stmts := js-stmt* |[
@@ -96,17 +96,36 @@ rules
     ; result := (<js-var> x_result, stmts, i''')
   
   
-  component-parameters-to-props: (name, exp_parameter*) -> exp_result
+  component-parameters-to-props: (name, parameters, exp_parameter*) -> exp_result
     with
       parameterNames := <componentname-get-parameter-names> name
-    ; prop_params* := <zip ; map(component-parameter-to-prop)> (parameterNames, exp_parameter*)
+    ; prop_params* := <zip3 ; mapconcat(component-parameter-to-props)> (parameterNames, parameters, exp_parameter*)
     ; exp_result := js-exp |[ 
         {
           prop_params*
         }
       ]|
     
-  component-parameter-to-prop: (x_name, exp_parameter) -> js-prop |[x_name: exp_parameter]| 
+    
+  component-parameter-to-props: (x_name, e_parameter, exp_parameter) -> result
+    where 
+      <componentparameter-is-boxed> x_name
+    ; MemberAccess(e_inner, name) := e_parameter
+    with
+      x_identity := $[[x_name]$identity]
+    ; (exp_identity, stmts_identity, _) := <exp-to-js-stmts(|0)> e_inner
+    ; x_setter := $[[x_name]$setter]
+    ; exp_setter := <setter-function-name ; js-string> name
+    ; result := js-prop* |[
+        x_identity: (function(){
+          stmts_identity
+          return exp_identity;
+        })(),
+        x_setter: actionCreators[exp_setter],
+        x_name : exp_parameter
+      ]|
+  
+  component-parameter-to-props: (x_name, _, exp_parameter) -> js-prop* |[x_name: exp_parameter]| 
   
   
   

@@ -17,7 +17,7 @@ rules
   generate-components: moduleName -> stmts
     with
       x_componentScope := <component-scope-var>
-    ; components := <modulename-get-componentnames> moduleName
+    ; components := <modulename-get-componentnames ; filter(componentname-is-normal-kind)> moduleName
     ; exp_component* := <map(componentname-to-js-exp)> components
     ; prop_component* := <zip ; map(component-to-prop)> (components, exp_component*)
     ; stmts := js-stmt* |[
@@ -27,6 +27,7 @@ rules
             prop_component*
           };
         })();
+        module.exports.x_componentScope = x_componentScope;
       ]|
       
   componentname-to-js-exp : componentname -> result
@@ -47,21 +48,18 @@ rules
             Runtime.React.createElement('group', {}, exp_body*)
           ]|
       end
-    ; result := js-exp |[function(props){
-        var scope = Runtime._.assign({}, oldScope, props);
-        stmts_body
-        return exp_result;
-      }]|
-      
-  componentname-to-js-exp : componentname -> result
-    where
-      <componentname-is-native-kind> componentname
-    with
-      result := js-exp |[
-        function(props){
-          var scope = Runtime._.assign({}, oldScope, props);
-        }
-      ]|
+    ; result := js-exp |[
+        Runtime.PixieDust.Component.Lifted(
+          function(props, state){
+            var scope = Runtime._.assign({}, oldScope, props);
+            stmts_body
+            return {
+              result: exp_result,
+              state: state
+            };
+          }
+        )
+    ]|
   
   component-to-prop: (x_componentname, exp_component) -> js-prop |[
     x_componentname: exp_component
