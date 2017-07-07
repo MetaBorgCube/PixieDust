@@ -14,12 +14,21 @@ rules
   
         
   generate-pixiedust-statements : moduleName -> js-stmt* |[
+    stmts_import
     stmts_jsBackend
     stmts_component
   ]|
     with
-      stmts_jsBackend := <generate-javascript-statements> moduleName
+      stmts_import := <generate-pixiedust-imports>
+    ; stmts_jsBackend := <generate-javascript-statements> moduleName
     ; stmts_component := <generate-components> moduleName
+    
+  generate-pixiedust-imports = !js-stmt*|[
+    var React = require('react');
+    var ReactDOMServer = require('react-dom-server');
+    var Lifted = require('pixiedust/components/Lifted');
+    var pixiedustRuntime = require('pixiedust/runtime');
+  ]|  
     
   generate-pixiedust-main-function = generate-main-function(generate-pixiedust-statements)
   generate-pixiedust-main-html = generate-main-html(generate-pixiedust-main-function)

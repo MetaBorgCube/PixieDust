@@ -21,7 +21,7 @@ rules
   
   //cast
   
-  do-cast: (exp_e, View(), String()) -> js-exp |[Runtime.PixieDust.renderToString(store, exp_e)]|
+  do-cast: (exp_e, View(), String()) -> js-exp |[pixiedustRuntime.castViewToString(store, exp_e)]|
   
   //render
   
@@ -37,7 +37,7 @@ rules
     ; stmts := js-stmt* |[
         stmts_attributes
         stmts_children
-        var x_result = Runtime.React.createElement(exp_name, {prop_attributes*}, exp_children*);
+        var x_result = React.createElement(exp_name, {prop_attributes*}, exp_children*);
       ]|
     ; result := (<js-var> x_result, stmts, i'''')
   
@@ -91,7 +91,7 @@ rules
     ; stmts := js-stmt* |[
       stmts_parameter
       stmts_children
-      var x_result = Runtime.React.createElement(exp_componentRef, exp_props, exp_children*);
+      var x_result = React.createElement(exp_componentRef, exp_props, exp_children*);
     ]|
     ; result := (<js-var> x_result, stmts, i''')
   
@@ -102,7 +102,7 @@ rules
     with
       x_componentScope := <component-scope-var>
       
-  component-ref : x_name -> js-exp |[Runtime.PixieDust.Component.Native.x_name]|
+  component-ref : x_name -> js-exp |[Runtime.pixiedust.components.native.x_name]|
     where
       componentname-is-native-kind
   
@@ -194,7 +194,7 @@ rules
       switch <get-type2> e_body
         case ?View():
           result := js-exp |[
-            Runtime._.assign({}, exp_body, {
+            _.assign({}, exp_body, {
               key: scope.x_var
             })
           ]|

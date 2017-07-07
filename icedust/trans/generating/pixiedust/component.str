@@ -30,19 +30,19 @@ rules
         module.exports.x_componentScope = x_componentScope;
       ]|
       
-  componentname-to-js-exp : componentname -> result
+  componentname-to-js-exp : x_componentName -> result
     where
-      <componentname-is-normal-kind> componentname
+      <componentname-is-normal-kind> x_componentName
     with
-      body := <componentname-get-body> componentname
+      body := <componentname-get-body> x_componentName
     ; renderExpressions := <componentbody-get-render-expressions> body 
     ; (exp_body*, stmts_stmts_body, i') := <exp-fold(|0)> renderExpressions
     ; stmts_body := <concat> stmts_stmts_body
     ; exp_wrapped := <component-wrap-elements> (exp_body*, renderExpressions)
     ; result := js-exp |[
-        Runtime.PixieDust.Component.Lifted(
-          function(props, state){
-            var scope = Runtime._.assign({}, oldScope, props);
+        Lifted(
+          function x_componentName(props, state){
+            var scope = _.assign({}, oldScope, props);
             stmts_body
             return {
               result: exp_wrapped,
@@ -57,7 +57,7 @@ rules
     where
       View() := <get-type2> e_element
   component-wrap-elements: (exp_element*, _) -> js-exp |[
-    Runtime.React.createElement('group', {}, exp_element*)
+    React.createElement('group', {}, exp_element*)
   ]|
   
   component-to-prop: (x_componentname, exp_component) -> js-prop |[
