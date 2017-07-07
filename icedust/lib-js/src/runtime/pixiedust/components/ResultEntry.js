@@ -35,7 +35,7 @@ var ResultEntry = Class(React.Component, {
       var calc = result.calculation(state);
       var value = calc.result;
       if(_.isArray(value)){
-        value = React.createElement('div',
+        value = React.createElement('div', {},
           value.map(function(e, i){ return React.createElement('div', {key: i}, wrap(e))})
         )
       } else{
