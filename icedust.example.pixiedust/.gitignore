@@ -1,0 +1,13 @@
+/target
+/.classpath
+/.settings
+/.project
+*.analysis.txt
+*.java
+*.class
+*.html
+*.flowsto.txt
+*.dependson.txt
+*.class
+*.js
+*.java
