@@ -17,11 +17,6 @@ context-free syntax
     }
   >
   
-  Component.NativeComponent = <
-    native component <ID>(<{TypeParameter ", "}*>)
-  >
-  
-  
   ViewMember.Render = Exp
   ViewMember = Action
   
@@ -40,19 +35,22 @@ context-free syntax
   RenderDomElement.RenderDomElement3 = <<DomID>[<{DomElementProperty ", "}*>]>
   
   RenderComponent.RenderComponent  = <
-    @<ID>(<{Exp ", "}*>) { 
+    @<ComponentRef>(<{Exp ", "}*>) { 
       <{Exp "\n"}*> 
     }>
   RenderComponent.RenderComponent2 =  <
-    @<ID> { 
+    @<ComponentRef> { 
       <{Exp "\n"}*> 
     }>
-  RenderComponent.RenderComponent3 = <@<ID>(<{Exp ", "}*>)> { prefer } //above Rendercomponent4 ( Exp )
+  RenderComponent.RenderComponent3 = <@<ComponentRef>(<{Exp ", "}*>)> { prefer } //above Rendercomponent4 ( Exp )
   
   
   RenderComponent = RenderComponent4
-  RenderComponent4.RenderComponent4 = <@<ID>> //{ avoid }
+  RenderComponent4.RenderComponent4 = <@<ComponentRef>> //{ avoid }
   
+  
+  ComponentRef.ComponentRef = ID
+  ComponentRef.ComponentRefFromImport = <<ID>.<ID>>
   
   RenderLoop.RenderLoop = <
     for(<ID> in <Exp>) <Exp>

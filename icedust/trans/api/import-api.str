@@ -1,0 +1,14 @@
+module api/import-api
+
+imports
+  lib/nabl2
+
+rules
+
+  modulename-get-importnames = get-decl-assoc(|"Module") ; get-scope-reachable-names(|"Import")
+  
+  modulename-get-imports = modulename-get-importnames ; map(importname-get-type)
+  
+  importname-get-type = get-type-property(|"Import")
+  importname-get-path = importname-get-type ; Fst
+  importname-get-alias = importname-get-type ; Snd

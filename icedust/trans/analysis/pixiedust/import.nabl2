@@ -1,0 +1,36 @@
+module pixiedust/import
+
+rules
+
+  [[ ImportJsModule(path, defs) ^ (s) ]] :=  
+    new import_scope,
+    s -I-> import_scope,
+    [[ path ^ (import_scope) : p_ty ]],
+    Map2 [[ defs ^ (import_scope, p_ty) ]].
+    
+  
+  [[ ImportPath(p) ^ (s) : ty ]] :=    
+    ty == (p,p),
+    Import{p} <- s,
+    Import{p} : ty,
+    Import{p} ===> s.
+    
+    
+  [[ ImportPathAs(p, alias) ^ (s) : ty]] := 
+    ty == (p, alias),
+    Import{alias} <- s,
+    Import{alias} : ty,
+    Import{alias} ===> s.
+  
+  
+  [[ NativeComponent(name, params) ^ (s, path) ]] := 
+    
+    new dummy_scope,
+    dummy_scope -P-> s,
+    
+    Map1T [[ params ^ (s) : tpes ]],
+    Component{name} <- s,
+    Component{name} : TComponent(tpes),
+    Component{name}.parameters := params,
+    Component{name}.importedFrom := path,
+    Component{name}.componentKind := NativeComponentKind().

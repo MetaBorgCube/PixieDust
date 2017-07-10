@@ -25,6 +25,8 @@ rules
   componentname-get-parameters = get-property(|"Component","parameters")
   componentname-get-body = get-property(|"Component","body")
   
+  componentname-get-imported-from = get-property(|"Component", "importedFrom")
+  
   componentbody-get-render-expressions = filter(?Render(<id>))
   
   componentname-get-parameter-names = componentname-get-parameters ; map(componentparameter-get-name)

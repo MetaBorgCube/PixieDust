@@ -25,6 +25,7 @@ imports // functions
   api/types-names-api
   api/model-names-api
   api/component-api
+  api/import-api
   
 rules // Editor services
 
@@ -73,7 +74,9 @@ rules // Editor services
           ("Component Kind",        <try-or-none(componentname-get-component-kind)> t),
           ("Component Type",        <try-or-none(componentname-get-type)> t),
           ("Component Signature",   <try-or-none(componentname-get-signature-pp)> t),
-          ("References",            <try-or-none(componentname-collect-refs)> t)
+          ("References",            <try-or-none(componentname-collect-refs)> t),
+          ("Imported From",         <try-or-none(componentname-get-imported-from)> t),
+          ("Imports",               <try-or-none(modulename-get-imports)> t)
         ]
         
         

@@ -2,10 +2,17 @@ module pixiedust/Modules
 
 imports
   pixiedust/View
+  pixiedust/Import
 
 context-free syntax
   ModuleSection.ViewSection = <
     view
     
       <{View "\n"}*>
+  >
+  
+  ModuleSection.ImportSection = <
+    imports
+    
+      <{Import "\n"}*>
   >

@@ -6,14 +6,13 @@ imports
   pixiedust/module
   pixiedust/types
   pixiedust/view
+  pixiedust/import
 
 
 signature
   constructors
     TView      : Type
     TComponent : list(Type) -> Type
-    
-    
     
 rules
   

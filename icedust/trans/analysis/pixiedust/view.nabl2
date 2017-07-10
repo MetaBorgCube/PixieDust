@@ -16,28 +16,54 @@ rules
     Component{name}.body := body,
     Map1 [[ body ^ (body_scope) ]].
   
-  [[ NativeComponent(name, params) ^ (module_scope) ]] := 
-    new dummy_scope,
-    dummy_scope -P-> module_scope,
-    Map1T [[ params ^ (dummy_scope) : tpes ]],
-    Component{name} <- module_scope,
-    Component{name} : TComponent(tpes),
-    Component{name}.parameters := params,
-    Component{name}.componentKind := NativeComponentKind().
-    
   [[ Render(exp) ^ (module_scope) ]] :=
     [[ exp ^ (module_scope) : _ ]].
   
-  [[ RenderComponent(name, parameters, children) ^ (module_scope) : ty ]] :=
-    ty == TTuple(TView(), TOne(), TIncremental()),
+  [[ RenderComponent(ref, parameters, children) ^ (module_scope) : ty ]] :=
+    ty == TTuple(TView(), TOne(), TOnDemandIncremental()),
+    [[ ref ^ (module_scope) : TComponent(params)]],
+    PairwiseEqual [[ parameters ^ (module_scope, params) ]],
+    Map1T [[ children ^ (module_scope) : (_) ]].
+  
+  [[ ComponentRef(name) ^ (module_scope) : ty ]] :=
     Component{name} -> module_scope,
     Component{name} |-> name_def,
-    Component{name} : TComponent(params),
-    Map1T [[ parameters ^ (module_scope) : tparams ]],
-    tparams == params,
-    Map1T [[ children ^ (module_scope) : (_) ]].
+    name_def : ty.
     
+  [[ ComponentRefFromImport(importRef, name) ^ (module_scope) : ty ]] := 
+    Import{importRef} -> module_scope,
+    Import{importRef} |-> import_def,
+    import_def ?===> import_scope_ref,
+    new import_scope,
+    import_scope ---> import_scope_ref,
+    Component{name} -> import_scope,
+    Component{name} |-> name_def,
+    name_def : ty.
   
+  PairwiseEqual [[ l@[x | xs] ^ (s, expected) ]] :=
+    expected == [y | ys]  | error $[invalid number of arguments] @ l,
+//    TypeCheck [[ x ^ (s, y) ]],
+    [[ x ^ (s) : TTuple(x_ty, x_mult, x_strat) ]],
+    y == TTuple(y_ty, y_mult, y_strat),
+    y_ty <sub? x_ty | error $[expected type: [y_ty], got: [x_ty]],
+    y_mult <mulOrd? x_mult | error $[expected multiplicity: [y_mult], got: [x_mult] ],
+    y_strat <strat? x_strat | error $[expected strategy: [y_strat], got: [x_strat] ],
+    PairwiseEqual [[ xs ^ (s, ys) ]].
+    
+  PairwiseEqual [[ l@[] ^ (s, expected) ]] := 
+    expected == [] | error $[invalid number of arguments] @ l.
+  
+//  TypeCheck [[ x ^ (s, expected) ]] :=
+//    [[ x ^ (s) : TTuple(x_ty, x_mult, x_strat) ]],
+//    expected == TTuple(y_ty, y_mult, y_strat).
+
+//      [[ x ^ (s) : ty ]].
+
+//    x_ty <sub? y_ty | error $[Invalid type, expected [y_type], got [x_type]] @ x.
+//    x_mult <mulOrd? y_mult | error $[Multiplicity mismatch, expected [y_mult], got [x_mult]] @ x,
+//    x_strat <strat? y_strat | error $[Strategy mismatch, expected [y_strat], got [x_strat]] @ x.
+    
+    
   [[ RenderDomElement(name, properties, children) ^ (module_scope) : ty ]] :=
     ty == TTuple(TView(), TOne(), TIncremental()),
     Map1 [[ properties ^ (module_scope) ]],

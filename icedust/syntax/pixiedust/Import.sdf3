@@ -1,0 +1,26 @@
+module pixiedust/Import
+
+imports
+  Common
+  pixiedust/Types
+
+context-free syntax
+
+  Import.ImportJsModule = <<ImportPath> { 
+    <{ImportDefinition "\n"}*>
+  }>
+  
+  ImportPath.ImportPath = Path
+  ImportPath.ImportPathAs = <<Path> as <ID>>
+  
+  ImportDefinition = NativeComponentDefinition
+  
+  NativeComponentDefinition.NativeComponent = <
+    component <ID>(<{TypeParameter ", "}*>)
+  >
+  
+lexical syntax
+  PathPart = PathChar+
+  Path = {PathPart "/"}+
+  
+  PathChar = [a-zA-Z0-9\-\.\_]
