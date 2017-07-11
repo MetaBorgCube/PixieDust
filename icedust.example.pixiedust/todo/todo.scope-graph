@@ -1,0 +1,430 @@
+scope graph {
+  scope #-s-3 {
+    references {
+      Member{"finished" @:73}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+      S ~ #-entity_scope-3
+    }
+  }
+  scope #-s-2 {
+    references {
+      Member{"task" @:69}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+      S ~ #-entity_scope-3
+    }
+  }
+  scope #-module_data_scope-1 {
+    declarations {
+      Member{"t1" @:185} : TTuple(TEntity(Entity{"Todo" @:66}),TOne(),TIncremental())
+      Member{"t2" @:208} : TTuple(TEntity(Entity{"Todo" @:66}),TOne(),TIncremental())
+      Member{"l1" @:181} : TTuple(TEntity(Entity{"TodoList" @:43}),TOne(),TIncremental())
+      Member{"t3" @:231} : TTuple(TEntity(Entity{"Todo" @:66}),TOne(),TIncremental())
+    }
+    references {
+      Entity{"Todo" @:232}
+      Entity{"Todo" @:209}
+      Member{"l1" @:272}
+      Entity{"Todo" @:186}
+      Entity{"TodoList" @:182}
+      Member{"l1" @:268}
+    }
+    direct edges {
+      P ~ #-module_scope-1
+    }
+  }
+  scope #-s-1 {
+    references {
+      Member{"view" @:46}
+    }
+    direct edges {
+      I ~ #-entity_scope-1
+      S ~ #-entity_scope-1
+    }
+  }
+  scope #-new_scope-6 {
+    references {
+      Member{"task" @:188}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-new_scope-7 {
+    references {
+      Member{"finished" @:196}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-new_scope-8 {
+    references {
+      Member{"task" @:211}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-s-4 {
+    references {
+      Member{"view" @:77}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+      S ~ #-entity_scope-3
+    }
+  }
+  scope #-new_scope-9 {
+    references {
+      Member{"finished" @:219}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-entity1_scope-1 {
+    declarations {
+      Member{"todos" @:97} : TTuple(TEntity(Entity{"Todo" @:66}),TZeroOrMore(),TIncremental())
+    }
+    associated declarations {
+      I ~ Entity2{"TodoList" @:96}
+    }
+  }
+  scope #-entity1_scope-2 {
+    declarations {
+      Member{"finishedTodos" @:104} : TTuple(TEntity(Entity{"Todo" @:66}),TZeroOrMore(),TIncremental())
+    }
+    associated declarations {
+      I ~ Entity2{"TodoList" @:103}
+    }
+  }
+  scope #-expr_scope-1 {
+    references {
+      Member{"todos" @:106}
+    }
+    direct edges {
+      P ~ #-module_scope-1
+    }
+    import edges {
+      I ~ Entity{"TodoList" @:103}
+    }
+  }
+  scope #-s2-1 {
+    declarations {
+      Member{"todo" @:108} : TTuple(TEntity(Entity{"Todo" @:66}),TOne(),TIncremental())
+    }
+    references {
+      Member{"todo" @:109}
+    }
+    direct edges {
+      P ~ #-expr_scope-1
+    }
+  }
+  scope #-entity2_scope-1 {
+    declarations {
+      Member{"list" @:101} : TTuple(TEntity(Entity{"TodoList" @:43}),TOne(),TIncremental())
+    }
+    associated declarations {
+      I ~ Entity2{"Todo" @:100}
+    }
+  }
+  scope #-entity2_scope-2 {
+    declarations {
+      Member{"todoList" @:116} : TTuple(TEntity(Entity{"TodoList" @:43}),TZeroOrMore(),TIncremental())
+    }
+    associated declarations {
+      I ~ Entity2{"Todo" @:115}
+    }
+  }
+  scope #-import_scope-1 {
+    declarations {
+      Path{"path" @:24} : "../components/inputs.js"
+    }
+    references {
+      Path{"path" @:34}
+    }
+    direct edges {
+      P ~ #-module_scope-1
+    }
+  }
+  scope #-dummy_scope-1 {
+    declarations {
+      Member{"value" @:27} : TTuple(TBoolean(),TOne(),TOnDemand())
+    }
+    direct edges {
+      P ~ #-module_scope-1
+    }
+  }
+  scope #-entity_scope-1 {
+    references {
+      Implicit{"this" @:60}
+      Member{"todos" @:52}
+    }
+    direct edges {
+      P ~ #-module_scope-1
+      J ~ #-entity_scope_inherit-1
+      I ~ #-entity_scope_local-1
+    }
+    associated declarations {
+      I ~ Entity{"TodoList" @:43}
+    }
+  }
+  scope #-init_scope-1 {
+    declarations {
+      Module{"todo" @:1}
+    }
+  }
+  scope #-body_scope-1 {
+    declarations {
+      Member{"children" @:176} : TTuple(TView(),TZeroOrMore(),TOnDemand())
+      Member{"todo" @:127} : TTuple(TEntity(Entity{"Todo" @:66}),TOne(),TOnDemand())
+    }
+    references {
+      Entity{"Todo" @:128}
+      Member{"todo" @:155}
+      Component{"BooleanInput" @:141}
+      Member{"todo" @:142}
+    }
+    direct edges {
+      P ~ #-module_scope-1
+    }
+  }
+  scope #-new_scope-14 {
+    references {
+      Member{"finishedTodos" @:274}
+    }
+    direct edges {
+      I ~ #-entity_scope-1
+    }
+  }
+  scope #-new_scope-13 {
+    references {
+      Member{"view" @:276}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-new_scope-10 {
+    references {
+      Member{"task" @:234}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-module_scope-1 {
+    declarations {
+      Entity2{"TodoList" @:103}
+      Entity2{"Todo" @:115}
+      Entity2{"Todo" @:100}
+      Component{"Todo" @:126} : TComponent([TTuple(TEntity(Entity{"Todo" @:66}),TOne(),TOnDemand())])
+      Entity{"TodoList" @:43} : TEntity(Entity{"TodoList" @:43})
+      Component{"BooleanInput" @:26} : TComponent([TTuple(TBoolean(),TOne(),TOnDemand())])
+      Entity{"Todo" @:66} : TEntity(Entity{"Todo" @:66})
+      Entity2{"TodoList" @:96}
+      Implicit{"this" @:291} : TTuple(None(),None(),TIncremental())
+    }
+    references {
+      Implicit{"this" @:117}
+      Entity{"TodoList" @:96}
+      Entity2{"TodoList" @:43}
+      Entity2{"Todo" @:66}
+      Implicit{"this" @:45}
+      Implicit{"this" @:68}
+      Entity{"Todo" @:115}
+      Entity{"Todo" @:100}
+      Entity{"TodoList" @:103}
+    }
+    direct edges {
+      P ~ #-init_scope-1
+    }
+    associated declarations {
+      I ~ Module{"todo" @:1}
+    }
+  }
+  scope #-new_scope-12 {
+    references {
+      Member{"view" @:270}
+    }
+    direct edges {
+      I ~ #-entity_scope-1
+    }
+  }
+  scope #-new_scope-11 {
+    references {
+      Member{"finished" @:242}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-member_value_scope-5 {
+    declarations {
+      Implicit{"membervalue" @:225} : TBoolean()
+    }
+  }
+  scope #-member_value_scope-4 {
+    declarations {
+      Implicit{"membervalue" @:218} : TString()
+    }
+  }
+  scope #-member_value_scope-3 {
+    declarations {
+      Implicit{"membervalue" @:202} : TBoolean()
+    }
+  }
+  scope #-member_value_scope-2 {
+    declarations {
+      Implicit{"membervalue" @:195} : TString()
+    }
+  }
+  scope #-member_value_scope-7 {
+    declarations {
+      Implicit{"membervalue" @:248} : TBoolean()
+    }
+  }
+  scope #-member_value_scope-6 {
+    declarations {
+      Implicit{"membervalue" @:241} : TString()
+    }
+  }
+  scope #-entity_scope_local-1 {
+    declarations {
+      Member{"view" @:46} : TTuple(TView(),TOne(),TIncremental())
+      Implicit{"this" @:65} : TTuple(TEntity(Entity{"TodoList" @:43}),TOne(),TIncremental())
+    }
+    import edges {
+      I ~ Entity2{"TodoList" @:43}
+    }
+  }
+  scope #-entity_scope_local-2 {
+    declarations {
+      Implicit{"this" @:95} : TTuple(TEntity(Entity{"Todo" @:66}),TOne(),TIncremental())
+      Member{"task" @:69} : TTuple(TString(),TOne(),TIncremental())
+      Member{"finished" @:73} : TTuple(TBoolean(),TOne(),TIncremental())
+      Member{"view" @:77} : TTuple(TView(),TOne(),TIncremental())
+    }
+    import edges {
+      I ~ Entity2{"Todo" @:66}
+    }
+  }
+  scope #-member_value_scope-1 {
+    declarations {
+      Implicit{"membervalue" @:259} : TEntity(Entity{"Todo" @:66})
+    }
+  }
+  scope #-entity_scope-3 {
+    references {
+      Implicit{"this" @:88}
+      Component{"Todo" @:80}
+      Implicit{"this" @:81}
+    }
+    direct edges {
+      P ~ #-module_scope-1
+      J ~ #-entity_scope_inherit-2
+      I ~ #-entity_scope_local-2
+    }
+    associated declarations {
+      I ~ Entity{"Todo" @:66}
+    }
+  }
+  scope #-new_scope-2 {
+    references {
+      Member{"finished" @:111}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-entity_instance_scope-4 {
+    declarations {
+      MemberValue{"finished" @:242}
+      Implicit{"this" @:253} : TEntity(Entity{"Todo" @:66})
+      MemberValue{"task" @:234}
+    }
+    references {
+      Implicit{"this" @:248}
+      Implicit{"this" @:241}
+    }
+    associated declarations {
+      I ~ Member{"t3" @:231}
+    }
+  }
+  scope #-new_scope-3 {
+    references {
+      Member{"finished" @:144}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-entity_instance_scope-3 {
+    declarations {
+      MemberValue{"finished" @:219}
+      Implicit{"this" @:230} : TEntity(Entity{"Todo" @:66})
+      MemberValue{"task" @:211}
+    }
+    references {
+      Implicit{"this" @:218}
+      Implicit{"this" @:225}
+    }
+    associated declarations {
+      I ~ Member{"t2" @:208}
+    }
+  }
+  scope #-new_scope-4 {
+    references {
+      Member{"task" @:157}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+  scope #-entity_instance_scope-2 {
+    declarations {
+      MemberValue{"finished" @:196}
+      Implicit{"this" @:207} : TEntity(Entity{"Todo" @:66})
+      MemberValue{"task" @:188}
+    }
+    references {
+      Implicit{"this" @:195}
+      Implicit{"this" @:202}
+    }
+    associated declarations {
+      I ~ Member{"t1" @:185}
+    }
+  }
+  scope #-entity_instance_scope-1 {
+    declarations {
+      Implicit{"this" @:263} : TEntity(Entity{"TodoList" @:43})
+      MemberValue{"todos" @:184}
+    }
+    references {
+      Implicit{"this" @:259}
+    }
+    associated declarations {
+      I ~ Member{"l1" @:181}
+    }
+  }
+  scope #-new_scope-5 {
+    references {
+      Member{"todos" @:184}
+    }
+    direct edges {
+      I ~ #-entity_scope-1
+    }
+  }
+  scope #-new_scope-1 {
+    references {
+      Member{"view" @:54}
+    }
+    direct edges {
+      I ~ #-entity_scope-3
+    }
+  }
+}

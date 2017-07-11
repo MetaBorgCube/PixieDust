@@ -9,6 +9,7 @@ imports
 rules
 
   full-path(|path)                       = !$[[<_project-path>]/[path]]
+  full-path: path                        -> $[[<_project-path>]/[path]]
 
 rules // paths
 

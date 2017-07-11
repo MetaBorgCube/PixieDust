@@ -79,13 +79,13 @@ rules
       (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
     ; result := ([exp_e | exps], [stmts_e | stmts], i')
   
-  exp-to-js-stmts(|i) : RenderComponent(x_name, parameters, children) -> result
+  exp-to-js-stmts(|i) : RenderComponent(ref, parameters, children) -> result
     with
-      exp_componentRef := <component-ref> x_name
+      exp_componentRef := <component-ref> ref
     ; (x_result, i') := <int-to-varname-inc> i
     ; (exp_parameter*, stmts_stmts_parameter, i'') := <exp-fold(|i')> parameters
     ; (exp_children*, stmts_stmts_children, i''') := <exp-fold(|i'')> children
-    ; exp_props := <component-parameters-to-props> (x_name, parameters, exp_parameter*)
+    ; exp_props := <component-parameters-to-props> (ref, parameters, exp_parameter*)
     ; stmts_parameter := <concat> stmts_stmts_parameter
     ; stmts_children := <concat> stmts_stmts_children
     ; stmts := js-stmt* |[
@@ -96,19 +96,24 @@ rules
     ; result := (<js-var> x_result, stmts, i''')
   
   
-  component-ref : x_name -> js-exp |[x_componentScope.x_name]|
+  component-ref : ComponentRef(x_name) -> js-exp |[x_componentScope.x_name]|
     where
-      componentname-is-normal-kind
+      <componentname-is-normal-kind> x_name
     with
       x_componentScope := <component-scope-var>
-      
-  component-ref : x_name -> js-exp |[Runtime.pixiedust.components.native.x_name]|
-    where
-      componentname-is-native-kind
   
-  component-parameters-to-props: (name, parameters, exp_parameter*) -> exp_result
+  component-ref : ComponentRef(x_name) -> js-exp |[imports[exp_importAlias].x_name]|
+    where
+      <componentname-is-native-kind> x_name
     with
-      parameterNames := <componentname-get-parameter-names> name
+      (_, x_importAlias) := <componentname-get-imported-from> x_name 
+    ; exp_importAlias := <js-string> x_importAlias
+      
+  component-ref : ComponentRefFromImport(x_import, x_name) -> <component-ref> ComponentRef(x_name)
+  
+  component-parameters-to-props: (ref, parameters, exp_parameter*) -> exp_result
+    with
+      parameterNames := <componentref-get-componentname ; componentname-get-parameter-names> ref
     ; prop_params* := <zip3 ; mapconcat(component-parameter-to-props)> (parameterNames, parameters, exp_parameter*)
     ; exp_result := js-exp |[ 
         {

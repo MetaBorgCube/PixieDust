@@ -14,7 +14,7 @@ var Select = Class(PixieDustComponent, {
 
   onChange: function(e){
     var value = e.target.value;
-    if(value == this.NO_VALUE){
+    if(value == NO_VALUE){
       value = null;
     }
 
@@ -31,7 +31,7 @@ var Select = Class(PixieDustComponent, {
   	var selection = this.props.selection;
   	    
     if(selection == null) {
-      selection = this.NO_VALUE;
+      selection = NO_VALUE;
     }
 
 

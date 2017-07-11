@@ -48,7 +48,7 @@ rules
       fail
 
   read-file: fileName -> fContent
-    with
+    where
       fileDescriptor := <fopen> (fileName, "r")
     ; fContent := <fgets> fileDescriptor
     ; <fclose> fileDescriptor

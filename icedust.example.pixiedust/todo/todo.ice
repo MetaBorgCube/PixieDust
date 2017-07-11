@@ -1,16 +1,21 @@
-module todo
+module todo (on-demand incremental)
 
 config
   backend: PixieDust
   target: html
 
+imports
+  ../components/inputs.js {
+    component BooleanInput(ref value: Boolean)
+  }
+
 model
   
   entity TodoList{
-    view: View = div { todos.view }
+    view: View = div { for(todo in todos) todo.view }
   }
   
-  entity Todo{
+  entity Todo {
     task: String
     finished: Boolean
     
@@ -21,8 +26,6 @@ model
   relation TodoList.finishedTodos = todos.filter(todo => todo.finished) <-> Todo
 
 view
-  native component BooleanInput(ref value: Boolean)
-  
   component Todo(todo: Todo){
     div {
       label {

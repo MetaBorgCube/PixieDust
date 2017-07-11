@@ -47,7 +47,9 @@ rules
   
   componentname-collect-refs = 
     where(componentname-is-normal-kind) ; componentname-get-body ; collect(is-ref)
-    
+  
+  componentref-get-componentname = ?ComponentRef(<id>)
+  componentref-get-componentname = ?ComponentRefFromImport(_, <id>)  
   
   componentparameter-get-properties = !(
     <id>,

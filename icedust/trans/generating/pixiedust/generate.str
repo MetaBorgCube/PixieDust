@@ -2,6 +2,8 @@ module generating/pixiedust/generate
 
 imports
 
+  generating/_ir/paths
+
   generating/js/generate
   generating/js/build
   
@@ -9,6 +11,7 @@ imports
   generating/pixiedust/component
   
   api/component-api
+  api/import-api
 
 rules
   
@@ -19,16 +22,61 @@ rules
     stmts_component
   ]|
     with
-      stmts_import := <generate-pixiedust-imports>
+      stmts_import := <generate-pixiedust-imports> moduleName
     ; stmts_jsBackend := <generate-javascript-statements> moduleName
     ; stmts_component := <generate-components> moduleName
     
-  generate-pixiedust-imports = !js-stmt*|[
+  generate-pixiedust-imports : moduleName -> js-stmt*|[
     var React = require('react');
     var ReactDOMServer = require('react-dom-server');
     var Lifted = require('pixiedust/components/Lifted');
     var pixiedustRuntime = require('pixiedust/runtime');
-  ]|  
     
-  generate-pixiedust-main-function = generate-main-function(generate-pixiedust-statements)
-  generate-pixiedust-main-html = generate-main-html(generate-pixiedust-main-function)
+    var imports = {
+      prop_import*
+    };
+  ]|
+    with
+      prop_import* := <modulename-get-imports ; map(generate-import-import-prop)> moduleName
+      
+  generate-import-import-prop : (path, alias) -> js-prop |[exp_alias : require(exp_require)]|
+    with
+      exp_alias := <js-string> alias
+    ; exp_require := <js-string> $[imports/[alias]]
+    
+    
+  wrap-imported-files(generate-statements|path) : moduleName -> js-stmt*|[
+    var wrapRequire = require('wrapRequire');
+    var loadModule = require('loadModule');
+    var _require = require;
+    (function(){
+      var require = wrapRequire(_require, {
+        prop_imports*
+      });
+      stmts_main
+    })();
+  ]|
+    with
+      imports := <modulename-get-imports> moduleName
+    ; stmts_main := <generate-statements> moduleName
+    ; prop_imports* := <load-imported-modules(|path)> moduleName
+    
+  load-imported-modules(|path) = modulename-get-imports ; map(load-import-module(|path))
+  
+  
+  load-import-module(|modulePath): (path, alias) -> js-prop |[
+    exp_alias : loadModule(function(require, module) {stmts_module})
+  ]|
+    with
+      exp_alias := <js-string> alias
+    ; dir_module := <full-path ; dirname> modulePath
+    ; import_path := $[[dir_module]/[path]]
+    ; stmts_module := <file-exists ; read-file <+ load-import-failure> import_path
+      
+  load-import-failure : path -> js-exp |[function(){console.log("failed to import " + exp_path);}]|
+    with
+      exp_path := <js-string> path
+    ; <debug> $[could not import [path]] 
+    
+  generate-pixiedust-main-function(|path) = generate-main-function(wrap-imported-files(generate-pixiedust-statements|path))
+  generate-pixiedust-main-html(|path) = generate-main-html(generate-pixiedust-main-function(|path))

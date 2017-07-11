@@ -31,7 +31,7 @@ function resolve(name, scope){
   if(entry === undefined){
     throw new Error('require: ' + entryName + ' is not defined in ' + current.path)
   }
-  return current.entries[split[split.length - 1]];
+  return entry;
 }
 
 function lazyModule(module, scope){

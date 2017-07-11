@@ -13,6 +13,6 @@ rules
       PixieDustBackend(phase, target) := backend
     with
       result := <build-build(
-        generate-pixiedust-main-function
-      , generate-pixiedust-main-html
+        generate-pixiedust-main-function(|relativePath)
+      , generate-pixiedust-main-html(|relativePath)
       )> (relativePath, moduleName, phase, target)
