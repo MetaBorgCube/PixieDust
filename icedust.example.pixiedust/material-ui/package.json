@@ -1,0 +1,24 @@
+{
+  "name": "icedust-runner",
+  "version": "0.1.0",
+  "description": "",
+  "scripts": {
+    "build": "webpack --progress --colors"
+  },
+  "author": "besuikerd",
+  "license": "ISC",
+  "dependencies": {
+    "material-ui": "^0.18.6",
+    "react": "^15.6.1",
+    "react-bootstrap": "^0.31.0",
+    "react-dom": "^15.6.1",
+    "react-tap-event-plugin": "^2.0.1"
+  },
+  "devDependencies": {
+    "css-loader": "^0.28.4",
+    "file-loader": "^0.11.2",
+    "style-loader": "^0.18.2",
+    "url-loader": "^0.5.9",
+    "webpack": "3.0.0"
+  }
+}
