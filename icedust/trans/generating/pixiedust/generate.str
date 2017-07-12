@@ -50,9 +50,9 @@ rules
     var loadModule = require('loadModule');
     var _require = require;
     (function(){
-      var require = wrapRequire(_require, {
-        prop_imports*
-      });
+      var imports = {prop_imports*};
+      console.log(imports);
+      var require = wrapRequire(_require, imports);
       stmts_main
     })();
   ]|
