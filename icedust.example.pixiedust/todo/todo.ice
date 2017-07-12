@@ -12,7 +12,7 @@ imports
 model
   
   entity TodoList{
-    view: View = div { for(todo in todos) todo.view }
+    view: View = div { for(todo in todos) (todo.view) }
   }
   
   entity Todo {

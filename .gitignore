@@ -41,6 +41,7 @@ lib-refactoring/*.generated.str
 */*/*.aterm
 */*/*/*.aterm
 */*/*/*/*.aterm
+*.scope-graph
 syntax/*.sdf
 /include
 update/target

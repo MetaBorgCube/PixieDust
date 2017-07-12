@@ -9,5 +9,4 @@
 *.flowsto.txt
 *.dependson.txt
 *.class
-*.js
 *.java
