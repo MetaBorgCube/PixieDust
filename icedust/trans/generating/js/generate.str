@@ -13,6 +13,8 @@ imports
   lib/call-external
 
   js/js-util
+  
+  signatures/js/Config-sig
 
 rules
   generate-javascript-statements: moduleName -> stmts
@@ -35,7 +37,7 @@ rules
   
   generate-javascript-imports = !js-stmt* |[
     var expression = require('expression');
-    var constants = require('constants');
+    var constants = require('pixiedust-constants');
     var _ = require('lodash');
     var moment = require('moment');
     var immutable = require('immutable');
@@ -94,6 +96,6 @@ $[<!doctype html>
       
   generate-javascript-runtime-resolve: ResolveFromSource(source) -> $[<script src="[source]"></script>]
       
-
-  generate-javascript-main-function = generate-main-function(generate-javascript-statements)
+  generate-javascript-main = generate-javascript-statements
+  generate-javascript-main-function = generate-main-function(generate-javascript-main)
   generate-javascript-main-html = generate-main-html(generate-javascript-main-function)

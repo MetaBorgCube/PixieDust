@@ -2,7 +2,7 @@ var Class = require('jsface').Class;
 var _ = require('lodash');
 var React = require('react');
 
-var PixieDustComponent = require('../PixieDustComponent');
+var PixieDustComponent = require('pixiedust/components/PixieDustComponent');
 
 var NO_VALUE = '__NO_VALUE';
 
@@ -57,4 +57,6 @@ var Select = Class(PixieDustComponent, {
   }
 });
 
-module.exports = Select;
+module.exports = {
+		Select: Select
+};

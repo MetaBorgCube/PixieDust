@@ -53,8 +53,6 @@ rules
     ; fContent := <fgets> fileDescriptor
     ; <fclose> fileDescriptor
 
-  external read-resource(|)
-
   fgets = fgetca ; implode-string
 
   fgetca: fileDescriptor -> [c | <fgetca> fileDescriptor]
@@ -62,6 +60,7 @@ rules
 
   fgetca = ![]
 
+  external read-resource(|)
 rules
 
   ensure-dir: path -> path
@@ -131,6 +130,40 @@ rules
   copy-dir(|source, target): file -> None()
     with
       <copy-dir>($[[source]/[file]], $[[target]/[file]])
+
+rules
+  
+  copy-directory-entries: (source-dir, target-dir) -> None()
+    with
+      entries := <readdir> source-dir
+    ; <map(!$[[source-dir]/[<id>]] ; !(<id>, target-dir) ; copy-directory-entry)> entries
+
+  copy-directory-entry: (source-entry, target-dir) -> None()
+    where
+      <isdir> source-entry
+    with
+      base-name := <base-filename> source-entry
+    ; target-dir' := $[[target-dir]/[base-name]]
+    ; <ensure-dir> target-dir'
+    ; <copy-directory-entries> (source-entry, target-dir')
+
+  copy-directory-entry: (source-entry, target-dir) -> None()
+    with
+      base-name := <base-filename> source-entry
+    ; target-entry := $[[target-dir]/[base-name]]
+    where
+      <not(file-exists)> target-entry
+    with
+      <copy-file> (source-entry, target-entry)
+
+  copy-directory-entry = !None()
+
+rules
+  replace-in-file: (file, replacements) -> None()
+    with
+      s := <read-file> file
+    ; replaced := <foldl(\((old, new), acc) -> <string-replace(|$[${[old]}], new)> acc\)> (replacements, s)
+    ; <write-file> (file, replaced)
 
 rules
 

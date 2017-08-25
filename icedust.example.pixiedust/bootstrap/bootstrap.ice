@@ -2,13 +2,19 @@ module bootstrap
 
 config
   backend: PixieDust
-  target: html
+  target: webpack
 
 imports  
-  target/main.generated.js as Native {
+  react-bootstrap as Native {
     component Button(bsSize: String?, bsStyle: String?)
     component ButtonGroup()
     component Alert(bsStyle: String?)
+    component Glyphicon(glyph: String)
+    
+    component ControlLabel()
+    component FormGroup(controlId: String)
+    component FormControl(value: String)
+    component Checkbox(checked: Boolean)
   }
 
 view
@@ -48,6 +54,23 @@ view
       }
     }
     @Warning("Watch out!")
+    
+    @Glyphicon("ok")
+    
+    @FormGroup("checkboxChecked"){
+      @ControlLabel{ "Checkbox" }
+      @Checkbox(true)
+    }
+    @FormGroup("checkboxUnchecked"){
+      @ControlLabel{ "Checkbox(unchecked)" }
+      @Checkbox(false)
+    }
+    
+    @FormGroup("inputText"){
+      @ControlLabel { "Input" }
+      @FormControl("Input Text")
+    }
+
     @Error("Something bad happened")
   }
 

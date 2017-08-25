@@ -28,7 +28,7 @@ rules
     
   generate-pixiedust-imports : moduleName -> js-stmt*|[
     var React = require('react');
-    var ReactDOMServer = require('react-dom-server');
+    var ReactDOMServer = require('react-dom/server');
     var Lifted = require('pixiedust/components/Lifted');
     var pixiedustRuntime = require('pixiedust/runtime');
     
@@ -42,7 +42,7 @@ rules
   generate-import-import-prop : (path, alias) -> js-prop |[exp_alias : require(exp_require)]|
     with
       exp_alias := <js-string> alias
-    ; exp_require := <js-string> $[imports/[alias]]
+    ; exp_require := <js-string> path
     
     
   wrap-imported-files(generate-statements|path) : moduleName -> js-stmt*|[
@@ -78,5 +78,6 @@ rules
       exp_path := <js-string> path
     ; <debug> $[could not import [path]] 
     
+  generate-pixiedust-main = generate-pixiedust-statements
   generate-pixiedust-main-function(|path) = generate-main-function(wrap-imported-files(generate-pixiedust-statements|path))
   generate-pixiedust-main-html(|path) = generate-main-html(generate-pixiedust-main-function(|path))

@@ -15,6 +15,8 @@ rules
     ; box2text-string(|120)
 
 
+    js-program: stmts_s -> js-program |[ stmts_s ]|
+
     js-string: s -> String($["[s]"])
     js-escaped-string = escape ; js-string
     js-int: s -> IntegerLiteral(s)

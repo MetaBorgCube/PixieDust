@@ -3,19 +3,29 @@ var webpack = require('webpack');
 
 module.exports = {
 
-  entry: './src/index',
+  entry: './main',
   output: {
-    libraryTarget: 'commonjs2',
     path: path.join(__dirname, 'target'),
-    filename: '[name].generated.js'
+    filename: '[name].js'
   },
   
   module: {
-  	
   	rules: [
   		{
-        test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
+        test: /\.(css|scss)$/,
+        use: [
+        	{
+        		loader: 'style-loader'
+        	},
+        	
+        	{
+        		loader: 'css-loader'
+        	},
+        	
+        	{
+        		loader: 'sass-loader'
+        	}
+        ]
       },
       
       {
@@ -36,24 +46,21 @@ module.exports = {
   devtool: 'inline-source-map',
   resolve: {
     modules: [
-      "node_modules"
+    	path.join(__dirname, 'node_modules'),
+      path.join(__dirname, 'src/runtime')
     ]
   },
 
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false,
-        drop_console: false
-      }
-    }),
-//    new webpack.DefinePlugin({
-//      'process.env.NODE_ENV': '"production"'
-//    })
   	new webpack.ProvidePlugin({   
       jQuery: 'jquery',
       $: 'jquery',
       jquery: 'jquery'
   	})
-  ]
+  ],
+  
+  devServer: {
+  	publicPath: '/target',
+  	port: 9002
+  }
 };

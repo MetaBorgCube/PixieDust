@@ -1,4 +1,3 @@
-var loadModule = require('../loadModule');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
@@ -9,11 +8,10 @@ var PixieDustComponent = require('./components/PixieDustComponent');
 var runtime = require('./runtime');
 
 function runner(program, container){
-  var module = loadModule(program);
-  var state = module.emptyState;
-  var init = module.init(state);
-  var store = runtime.makeStore(module.reducer, init.state);
-  var execute = module.execute(store, init.ids);
+  var state = program.emptyState;
+  var init = program.init(state);
+  var store = runtime.makeStore(program.reducer, init.state);
+  var execute = program.execute(store, init.ids);
 
   var element = React.createElement(
     PixieDustProvider,

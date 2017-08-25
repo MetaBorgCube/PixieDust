@@ -3,6 +3,7 @@ module generating/pixiedust/build
 imports
   generating/js/build
   generating/pixiedust/generate
+  generating/pixiedust/webpack
   
   signatures/pixiedust/Config-sig
 
@@ -13,6 +14,6 @@ rules
       PixieDustBackend(phase, target) := backend
     with
       result := <build-build(
-        generate-pixiedust-main-function(|relativePath)
+        generate-pixiedust-main
       , generate-pixiedust-main-html(|relativePath)
       )> (relativePath, moduleName, phase, target)

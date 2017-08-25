@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var redux = require('redux');
 var React = require('react');
-var ReactDOMServer = require('react-dom-server');
+var ReactDOMServer = require('react-dom/server');
 
 var PixieDustProvider = require('./components/PixieDustProvider');
 

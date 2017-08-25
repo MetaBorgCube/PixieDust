@@ -21,6 +21,7 @@ context-free syntax
   EvalOption.Overwrite = <overwrite>
   
   BackendTarget.JavascriptTarget = <target: javascript>
+  BackendTarget.WebpackTarget = <target: webpack>
   BackendTarget.HtmlTarget = <target: html <ResolveRuntime?>>
   
   ResolveRuntime.ResolveInline =     <runtime: inline>

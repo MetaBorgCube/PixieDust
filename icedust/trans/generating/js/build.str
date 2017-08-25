@@ -27,15 +27,18 @@ rules
       JavascriptBackend(phase, target) := backend
     with
       result := <build-build(
-        generate-javascript-main-function
+        generate-javascript-main
       , generate-javascript-main-html
       )> (relativePath, moduleName, phase, target)
 
-  build-build(generate-main-function, generate-main-html): (relativePath, moduleName, phase, target) -> result
+  build-build(generate-main, generate-main-html): (relativePath, moduleName, phase, target) -> result
     with
       switch !target
         case ?JavascriptTarget(): 
-          main := <generate-main-function> moduleName
+          main := <generate-main-function(generate-main)> moduleName
+        ; filename := <javascript-generated-path(|relativePath)>
+        case ?WebpackTarget():
+          main := <generate-main ; js-program> moduleName
         ; filename := <javascript-generated-path(|relativePath)>
         case ?HtmlTarget(runtime):
           main := <generate-main-html> (runtime, moduleName)
@@ -46,6 +49,10 @@ rules
       case ?(Generate(), JavascriptTarget()):
           program-pp := <pp-js-program> main
         ; result := (filename, program-pp)
+      case ?(_, WebpackTarget()):
+          program-pp := <pp-js-program> main
+        ; <write-file> (filename, program-pp)
+        ; result := None() 
       case ?(Generate(), HtmlTarget(_)):
           result := (filename, main)
       case ?(Execute(), JavascriptTarget()):

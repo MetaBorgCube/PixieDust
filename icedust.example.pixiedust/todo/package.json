@@ -1,5 +1,5 @@
 {
-  "name": "mui",
+  "name": "todo",
   "version": "0.0.1",
   "description": "",
   "scripts": {
@@ -12,7 +12,6 @@
     "immutable": "4.0.0-rc.2",
     "jsface": "2.4.9",
     "lodash": "4.17.4",
-    "material-ui": "^0.19.0",
     "moment": "2.18.1",
     "prop-types": "15.5.10",
     "react": "15.6.1",

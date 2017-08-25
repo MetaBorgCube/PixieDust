@@ -1,0 +1,5 @@
+module pixiedust/Common
+
+lexical syntax
+  Keyword = "Component"
+  Keyword = "View"
