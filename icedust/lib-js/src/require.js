@@ -8,7 +8,12 @@ function requireFor(global, scope){
 }
 
 function resolve(name, scope){
-  var split = name.split('/');
+	//specific case for react-dom, since this module comes from the prebuilt dependencies and this bundle flattens dependencies. 
+  if(name == 'react-dom/server'){
+  	return resolve('react-dom-server', scope);
+  }
+	
+	var split = name.split('/');
   var current = scope;
   for(var i = 0 ; i < split.length - 1 ; i++){
     var part = split[i];

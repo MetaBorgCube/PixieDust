@@ -62,7 +62,8 @@ rules
       (function(){
         var container = document.createElement('div');
         document.body.appendChild(container);
-        require('pixiedust/runner')(exp_main, container);
+        var runner = require('runner');
+        runner.runner(exp_main, runner.displayToHtml(container));
       })();
     ]|
     ; main-pp := <pp-js-program> main

@@ -8,6 +8,7 @@ var PixieDustComponent = require('./components/PixieDustComponent');
 var runtime = require('./runtime');
 
 function runner(program, container){
+	console.log(program)
   var state = program.emptyState;
   var init = program.init(state);
   var store = runtime.makeStore(program.reducer, init.state);
