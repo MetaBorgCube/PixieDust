@@ -1,0 +1,46 @@
+module pixiedust-features-expressions-complement
+
+language icedust
+
+fixture [[
+  module complement
+  
+  config
+    backend: PixieDust
+  
+  execute
+    42 \ 42
+    42 \ 43
+    no value \ 42
+    42 \ no value
+    42 \ (42 ++ 43)
+    42 \ (43 ++ 44)
+    
+    (42 ++ 43) \ 42
+    (42 ++ 43) \ 44
+    (42 ++ 43) \ no value
+    (42 ++ 43) \ (41 ++ 42)
+    (42 ++ 43) \ (43 ++ 44)
+    (42 ++ 43 ++ 44) \ (42 ++ 43)
+    (42 ++ 43 ++ 44) \ (42 ++ 43 ++ 44)
+    (42 ++ 42) \ 42
+    [[...]]
+]]
+
+
+test complement [[ ]] transform "SPT -> Build" to 
+"null
+42
+null
+42
+null
+42
+[43]
+[42,43]
+[42,43]
+[43]
+[42]
+[44]
+[]
+[]
+"

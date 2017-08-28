@@ -28,13 +28,14 @@ model
   }
   
   relation TodoList.todos * <-> 1 Todo.list
+  relation TodoList.finishedTodos = todos.filter(todo => todo.finished) <-> Todo.inverseFinishedTodos
   relation TodoList.visibleTodos = 
     switch {
       case filter == "ALL" => todos
-      case filter == "NOT_FINISHED" => todos.filter(todo => !todo.finished)
-      case filter == "FINISHED" => todos.filter(todo => todo.finished)
+      case filter == "NOT_FINISHED" => todos \ finishedTodos
+      case filter == "FINISHED" => finishedTodos
       default => todos
-    } <-> Todo
+    } <-> Todo.inverseVisibleTodos
 view
 
   component TodoList(list: TodoList){

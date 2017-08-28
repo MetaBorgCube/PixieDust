@@ -207,5 +207,20 @@ rules
           result := exp_body  
       end
     
-     
+  exp-to-js-stmts(|i) = ?Complement(e1, e2) ; binexp-to-js-stmts(!(e1,e2), \(exp_lhs, exp_rhs) -> <merge-complement> (e1, e2, exp_lhs, exp_rhs)\|i)
+  
+  
+  merge-complement: (e1, e2, exp_lhs, exp_rhs) -> exp_result
+    with
+      switch <(get-multiplicity, get-multiplicity)> (e1, e2)
+        case (upper-one, upper-one):
+          exp_result := js-exp |[exp_lhs == exp_rhs ? null : exp_lhs]|
+        case (upper-one, upper-many):
+          exp_result := js-exp |[_.includes(exp_rhs, exp_lhs) ? null : exp_lhs]|
+        case (upper-many, upper-one):
+          exp_result := js-exp |[exp_rhs == null ? exp_lhs : _.without(exp_lhs, exp_rhs)]|
+        case (upper-many, upper-many):
+          exp_result := js-exp |[_.difference(exp_lhs, exp_rhs)]|
+      end
+  
   
