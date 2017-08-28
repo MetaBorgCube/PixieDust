@@ -107,8 +107,17 @@ context-free priorities
 
   { left:
     Exp.MemberAccess
+  } >
+  { left: 
     Exp.First
     Exp.Count
+    Exp.Filter
+    Exp.FilterType
+    Exp.ElemAt
+    Exp.IndexOf
+    Exp.OrderBy
+    Exp.Find
+    Exp.Length // pixiedust exp
   } >  
   { right:
     Exp.Not
@@ -157,15 +166,6 @@ context-free priorities
   } >
   { left:
     Exp.ChoiceLeft
-  } >
-  {
-    Exp.Filter
-    Exp.FilterType
-    Exp.ElemAt
-    Exp.IndexOf
-    Exp.OrderBy
-    Exp.Find
-    Exp.Length // pixiedust exp
   } >
   {
     left: Exp.Complement // pixiedust exp
