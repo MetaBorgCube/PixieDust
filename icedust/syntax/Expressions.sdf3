@@ -3,7 +3,6 @@ module Expressions
 imports
   Common
   Types
-  
   pixiedust/Expressions
 
 context-free syntax // brackets
@@ -107,17 +106,8 @@ context-free priorities
 
   { left:
     Exp.MemberAccess
-  } >
-  { left: 
     Exp.First
     Exp.Count
-    Exp.Filter
-    Exp.FilterType
-    Exp.ElemAt
-    Exp.IndexOf
-    Exp.OrderBy
-    Exp.Find
-    Exp.Length // pixiedust exp
   } >  
   { right:
     Exp.Not
@@ -166,7 +156,7 @@ context-free priorities
   } >
   { left:
     Exp.ChoiceLeft
-  } >
-  {
-    left: Exp.Complement // pixiedust exp
+  } > {
+    left:
+    Exp.Complement
   }
