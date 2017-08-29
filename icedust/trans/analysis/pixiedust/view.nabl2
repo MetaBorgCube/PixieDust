@@ -93,6 +93,7 @@ rules
     
     
   [[ ActionDeclaration(name, params, stmts) ^ (module_scope) ]] :=
-    Action{name} <- module_scope.
+    Action{name} <- module_scope,
+    Map1 [[ stmts ^ (module_scope) ]].
   
   

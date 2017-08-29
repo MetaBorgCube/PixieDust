@@ -4,7 +4,50 @@ rules
 
   [[ ActionCall(name, args) ^ (s) ]] := true.
   
-  [[ CreateAction(entity, bindings) ^ (s) ]] :=
-    Entity{entity} -> s,
-    Entity{entity} |-> e_def.
+  [[ CreateEntityInstance(var, type, fields) ^ (s) ]] := 
+    [[ type ^ (s) : entity_type ]],
+    entity_type == TEntity(entity),
+    entity ?=I=> entity_scope,
     
+    var_tpl == TTuple(entity_type, TOne(), TIncremental()),
+    Member{var} <- s,
+    Member{var} : var_tpl,
+    Member{var}.side := None(),
+    
+    new instance_scope,
+    instance_scope -P-> s,
+    instance_scope -I-> entity_scope,
+    
+    Implicit{"this"} <- instance_scope,
+    Implicit{"this"} : var_tpl,
+    
+    Map1 [[ fields ^ (instance_scope) ]].
+    
+  [[ UpdateEntity(e, fields) ^ (s) ]] := 
+    [[ e ^ (s) : e_tpl ]],
+    e_tpl == TTuple(e_type, e_mult, e_strat),
+    e_type == TEntity(e_type_entity),
+    e_type_entity ?=I=> entity_scope,
+    new update_scope,
+    update_scope -P-> s,
+    update_scope -I-> entity_scope,
+    Implicit{"this"} <- update_scope,
+    Implicit{"this"} : e_tpl,
+    Map1 [[ fields ^ (update_scope) ]].
+    
+  [[ EntityMember(m, value) ^ (s) ]] :=
+    Implicit{"this"} -> s,
+    Implicit{"this"} |-> this_def,
+    this_def : TTuple(this_type, this_mult, this_strat),
+    this_type == TEntity(this_type_entity),
+    this_type_entity ?=I=> entity_scope,
+    new new_scope,
+    new_scope -I-> entity_scope,
+    Member{m} -> new_scope,
+    Member{m} |-> member_def,
+    member_def : TTuple(m_type, m_mult, m_strat),
+    [[ value ^ (s) : value_tpl ]],
+    value_tpl == TTuple(value_type, value_mult, value_strat),
+    value_type  <sub?    m_type  | error $[Type error: expected [m_type] got [value_type].]@value,
+    value_mult  <mulOrd? m_mult  | error $[Multiplicity error: expected [m_mult] got [value_mult].]@value,
+    value_strat <strat?  m_strat | error $[Calculation strategy error: expected [m_strat] got [value_strat].]@value.
