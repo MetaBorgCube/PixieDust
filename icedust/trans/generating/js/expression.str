@@ -467,8 +467,7 @@ rules
     
   exp-to-js-stmts(|i) : r@Ref(x_attribute) -> <access-to-js-stmts(|i)> (x_attribute, One(), m, exp_source) 
     with
-      exp_this := <this-var ; js-string>
-      ; exp_source := js-exp |[scope[exp_this]]|
+      exp_source := <exp-this>
     ; m := <get-multiplicity> r
   
   
@@ -529,7 +528,9 @@ rules
     with
       exp_dateString := <js-string> d
   literal-to-js-exp: NoValue() -> js-exp |[null]|
-  literal-to-js-exp: This() -> js-exp |[scope[exp_this]]| 
+  literal-to-js-exp: This() -> <exp-this> 
+  
+  exp-this: _ -> js-exp |[scope[exp_this]]| 
     with
       exp_this := <this-var ; js-string>
   
