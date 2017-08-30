@@ -2,7 +2,9 @@ module pixiedust/action
 
 rules
 
-  [[ ActionCall(name, args) ^ (s) ]] := true.
+  [[ ActionCall(name, args) ^ (s) ]] := 
+    Action{name} -> s,
+    Action{name} |-> action_def.
   
   [[ CreateEntityInstance(var, type, fields) ^ (s) ]] := 
     [[ type ^ (s) : entity_type ]],

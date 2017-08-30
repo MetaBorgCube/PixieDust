@@ -9,22 +9,23 @@ imports
   
   generating/pixiedust/expression
   generating/pixiedust/component
+  generating/pixiedust/action
   
   api/component-api
   api/import-api
 
 rules
-  
-        
   generate-pixiedust-statements : moduleName -> js-stmt* |[
     stmts_import
     stmts_jsBackend
     stmts_component
+    stmts_action
   ]|
     with
       stmts_import := <generate-pixiedust-imports> moduleName
     ; stmts_jsBackend := <generate-javascript-statements> moduleName
     ; stmts_component := <generate-components> moduleName
+    ; stmts_action := <generate-component-actions> moduleName
     
   generate-pixiedust-imports : moduleName -> js-stmt*|[
     var React = require('react');

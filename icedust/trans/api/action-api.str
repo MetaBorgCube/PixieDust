@@ -1,0 +1,10 @@
+module api/action-api
+
+imports
+  signatures/pixiedust/Action-sig
+  
+rules
+  actiondeclaration-get-name = ?ActionDeclaration(<id>, _, _)
+  actiondeclaration-get-args = ?ActionDeclaration(_, <id>, _)
+  actiondeclaration-get-statements = ?ActionDeclaration(_, _, <id>)
+  

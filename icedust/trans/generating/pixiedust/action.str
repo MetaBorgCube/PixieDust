@@ -1,0 +1,102 @@
+module generating/pixiedust/action
+
+imports
+  api/component-api
+  api/action-api
+  api/types-names-api
+  api/types-api
+  
+  signatures/pixiedust/Action-sig
+  
+  generating/js/expression
+  generating/js/names
+  
+rules
+  generate-component-actions = 
+    modulename-get-componentnames
+  ; mapconcat(!(<id>, <componentname-get-actions>) ; generate-action-functions) ; debug
+      
+  
+  generate-action-functions: (componentName, actions) -> result 
+    with
+      result := <map(!(componentName, <id>) ; generate-action-function)> actions
+  
+      
+  generate-action-function: (componentName, action) -> result
+    with
+      actionName := <actiondeclaration-get-name> action
+    ; stmts_statements := <actiondeclaration-get-statements ; generate-action-statements ; debug> action
+    ; x_functionName := $[[componentName]_[actionName]]
+    ; result := js-stmt |[
+      function x_functionName(state, action){
+        scoped(scope, action.props, function(scope) {
+          stmts_statements
+        });
+        return state;
+      }
+    ]| ; debug
+    
+  generate-action-statements: statements -> <concat> stmts_stmts_statements 
+    with
+      <debug> statements ;
+      (stmts_stmts_statements, i) := <foldl(fold-action-statement)> (statements, ([], 0))
+    
+  fold-action-statement: (statement, (stmts_stmts_statement, i)) -> result
+    with
+      (stmts_statement, i') := <generate-action-statement(|i)> statement
+    ; result := ([stmts_statement | stmts_stmts_statement], i')
+    
+  generate-action-statement(|i): u @ UpdateEntity(e, fields) -> <generate-entity-field(|i)> u 
+    
+  generate-action-statement(|i): CreateEntityInstance(x_var, tpe, fields) -> ([], i)
+  
+  generate-entity-field(|i): EntityMember(name, e) -> result
+    with
+      exp_this := <exp-this>
+    ; (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
+    ; (x_result, i'') := <int-to-varname-inc> i'
+    ; x_setterFunction := <setter-function-name> name
+    ; stmts := js-stmt* |[
+      stmts_e
+      state = x_setterFunction(state, exp_this, exp_e);
+    ]|
+    ; result := (stmts, i'')
+  
+  generate-entity-field(|i): UpdateEntity(e, fields) -> result
+    with <debug> i ; 
+      (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
+    ; switch <get-multiplicity> e
+      case upper-one:
+        (x_var, i'') := <int-to-varname-inc> i'
+        ; (stmts_fields, i_result) := <generate-entity-fields(|i'')> fields
+        ; stmt_scoped := <scope-this-lexically> (exp_e, stmts_fields)        
+        ; stmts := js-stmt* |[
+          stmts_e
+          stmt_scoped
+        ]|
+      case upper-many:
+        (x_loop, i'') := <int-to-varname-inc> i'
+        ; (x_var, i''') := <int-to-varname-inc> i''
+        ; (stmts_fields, i_result) := <generate-entity-fields(|i''')> fields
+        ; exp_this := js-exp |[exp_e[x_loop]]|
+        ; stmt_scoped := <scope-this-lexically> (exp_this, stmts_fields)
+        ; stmts := js-stmt* |[
+          stmts_e
+          for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++) {
+            stmt_scoped
+          }
+        ]|
+    end
+    ; result := (stmts, i_result) ; debug
+  
+  generate-entity-fields(|i) : fields -> result
+    with
+      (stmts_fields, i') := <foldl(fold-entity-field)> (fields, ([], i))
+    ; result := (<concat> stmts_fields, i')
+    
+  fold-entity-field : (field, (stmts_stmts_field, i)) -> result
+    with
+      (stmts_field, i') := <generate-entity-field(|i)> field
+    ; result := ([stmts_field | stmts_stmts_field], i')
+  
+       
