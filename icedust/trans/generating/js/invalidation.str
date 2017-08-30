@@ -32,21 +32,17 @@ rules
       ; stmts_invalidations := <mapconcat(flowsto-to-invalidation-statements)> flows
   
   
-  flowsto-to-invalidation-statements: DataflowPath(_, MemberAccess(exp, field)) -> js-stmt*|[
-    (function(){
-      var x_first = x_id;
-      stmts_ref
-      stmts_invalidation
-    })();
-  ]|
+  flowsto-to-invalidation-statements: DataflowPath(_, MemberAccess(exp, field)) -> [result]
     with
-      x_first := <int-to-varname> 0
-    ; x_id := "id"
-    ; (exp_ref, stmts_ref, _) := <exp-to-js-stmts(|1)> exp
+      exp_id := <js-var> "id"
+    ; (exp_ref, stmts_ref, _) := <exp-to-js-stmts(|0)> exp
     ; m := <get-multiplicity ; simplify-multiplicity> exp
     ; x_functionName := <invalidation-function-name> field
     ; stmts_invalidation := <invalidation-statements> (m, x_functionName, exp_ref)
-  
+    ; result := <scope-this-lexically> (exp_id, js-stmt* |[
+      stmts_ref
+      stmts_invalidation
+    ]|)
   flowsto-to-invalidation-statements: DataflowPath(_, Ref(field)) -> <invalidation-statements> (m, x_functionName, exp_ref)
     with
       m := One()

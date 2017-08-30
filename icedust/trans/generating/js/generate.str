@@ -42,6 +42,7 @@ rules
     var moment = require('moment');
     var immutable = require('immutable');
     var pixiedustRuntime = require('pixiedust/runtime');
+    var scoped = require('lib/scoped');
   ]|
   
   generate-main-function(generate-statements) : moduleName -> main
