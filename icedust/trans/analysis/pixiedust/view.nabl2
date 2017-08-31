@@ -46,14 +46,14 @@ rules
     y == TTuple(y_ty, y_mult, y_strat),
     x_ty <sub? y_ty | error $[expected type: [y_ty], got: [x_ty]],
     x_mult <mulOrd? y_mult | error $[expected multiplicity: [y_mult], got: [x_mult] ],
-    y_strat <strat? x_strat | error $[expected strategy: [y_strat], got: [x_strat] ],
+    x_strat <strat? y_strat | error $[expected strategy: [y_strat], got: [x_strat] ],
     PairwiseEqual [[ xs ^ (s, ys) ]].
     
   PairwiseEqual [[ l@[] ^ (s, expected) ]] := 
     expected == [] | error $[invalid number of arguments] @ l.
     
   [[ RenderDomElement(name, properties, children) ^ (module_scope) : ty ]] :=
-    ty == TTuple(TView(), TOne(), TIncremental()),
+    ty == TTuple(TView(), TOne(), TOnDemandIncremental()),
     Map1 [[ properties ^ (module_scope) ]],
     Map1T [[ children ^ (module_scope) : (_) ]].
   
@@ -86,7 +86,7 @@ rules
     Map1T [[ params ^ (body_scope) : params_ty ]],
     Map1 [[ stmts ^ (body_scope) ]],
     Member{name} <- module_scope,
-    Member{name} : TTuple(TAction(params_ty), TOne(), TIncremental()),
+    Member{name} : TTuple(TAction(params_ty), TOne(), TOnDemandIncremental()),
     Member{name}.side := None().
     
   

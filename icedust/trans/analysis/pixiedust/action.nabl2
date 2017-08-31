@@ -18,7 +18,7 @@ rules
     entity_type == TEntity(entity),
     entity ?=I=> entity_scope,
     
-    var_tpl == TTuple(entity_type, TOne(), TIncremental()),
+    var_tpl == TTuple(entity_type, TOne(), TOnDemandIncremental()),
     Member{var} <- s,
     Member{var} : var_tpl,
     Member{var}.side := None(),
@@ -59,4 +59,6 @@ rules
     value_tpl == TTuple(value_type, value_mult, value_strat),
     value_type  <sub?    m_type  | error $[Type error: expected [m_type] got [value_type].]@value,
     value_mult  <mulOrd? m_mult  | error $[Multiplicity error: expected [m_mult] got [value_mult].]@value,
-    value_strat <strat?  m_strat | error $[Calculation strategy error: expected [m_strat] got [value_strat].]@value.
+    expected_strat == TOnDemandIncremental(),
+    value_strat <strat? expected_strat | error $[Calculation strategy error: expected [expected_strat] got [value_strat].]@value.
+    
