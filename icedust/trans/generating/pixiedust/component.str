@@ -9,6 +9,7 @@ imports
 
   api/component-api
   api/types-names-api
+  api/action-api
   
   js/js-util
 
@@ -39,6 +40,7 @@ rules
     ; (exp_body*, stmts_stmts_body, i') := <exp-fold(|0)> renderExpressions
     ; stmts_body := <concat> stmts_stmts_body
     ; exp_wrapped := <component-wrap-elements> (exp_body*, renderExpressions)
+    ; exp_actionName* := <componentname-get-actionnames ; map(js-string)> x_componentName
     ; result := js-exp |[
         Lifted(
           function x_componentName(props, state){
@@ -48,7 +50,8 @@ rules
               result: exp_wrapped,
               state: state
             };
-          }
+          }, 
+          [exp_actionName*]
         )
     ]|
     

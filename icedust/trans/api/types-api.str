@@ -3,6 +3,7 @@ module api/types-api
 imports // signatures
 
   signatures/Types-sig
+  signatures/pixiedust/Types-sig
   analysis/_constructors
   
   lib/string
@@ -84,4 +85,7 @@ rules
   mult-inbounds(|multiplicity) = where(!multiplicity;lower-one ;upper-many) ;?i ;where(!(i,1);geq)
   mult-inbounds(|multiplicity) = where(!multiplicity;lower-zero;upper-one ) ;?i ;where(!(i,1);leq)
   mult-inbounds(|multiplicity) = where(!multiplicity;lower-one ;upper-one ) ;?i ;where(!(i,1);eq)
+  
+rules
+  type-parameter-get-name = ?TypeParameter(<id>, _, _)
   

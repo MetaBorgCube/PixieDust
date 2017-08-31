@@ -2,6 +2,7 @@ module generating/pixiedust/expression
 
 imports
   generating/js/expression
+  generating/js/names
   
   generating/pixiedust/names
   
@@ -11,9 +12,11 @@ imports
   
   js/js-util
   
+  
   api/types-api
   api/types-names-api
   api/component-api
+  api/action-api
   
 rules
   exp-to-js-stmts(|i) = ?Length(e) ; unexp-to-js-stmts(!e, js-length|i)
@@ -62,6 +65,15 @@ rules
     ; exp_key := <js-var> x_key
     ; prop_e := js-prop |[x_key : exp_e]| 
     ; result := (prop_e, stmts_e, i')
+  
+  attribute-to-js-prop-stmts(|i): DomElementProperty(x_key,  ActionCall(x_actionName, args)) -> result
+    with
+      (exp_arg*, stmts_stmts_args, i') := <exp-fold(|i)> args
+    ; exp_action := <js-string> x_actionName
+    ; prop := js-prop |[
+        x_key: scope[exp_action](exp_arg*)
+      ]|
+    ; result := (prop, <concat> stmts_stmts_args, i)
     
   attribute-fold(|i, x_obj) = ctx-fold(do-attribute-fold(|x_obj)|i)
   

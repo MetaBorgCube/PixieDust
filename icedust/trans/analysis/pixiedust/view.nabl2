@@ -42,7 +42,6 @@ rules
   
   PairwiseEqual [[ l@[x | xs] ^ (s, expected) ]] :=
     expected == [y | ys]  | error $[invalid number of arguments] @ l,
-//    TypeCheck [[ x ^ (s, y) ]],
     [[ x ^ (s) : TTuple(x_ty, x_mult, x_strat) ]],
     y == TTuple(y_ty, y_mult, y_strat),
     x_ty <sub? y_ty | error $[expected type: [y_ty], got: [x_ty]],
@@ -52,17 +51,6 @@ rules
     
   PairwiseEqual [[ l@[] ^ (s, expected) ]] := 
     expected == [] | error $[invalid number of arguments] @ l.
-  
-//  TypeCheck [[ x ^ (s, expected) ]] :=
-//    [[ x ^ (s) : TTuple(x_ty, x_mult, x_strat) ]],
-//    expected == TTuple(y_ty, y_mult, y_strat).
-
-//      [[ x ^ (s) : ty ]].
-
-//    x_ty <sub? y_ty | error $[Invalid type, expected [y_type], got [x_type]] @ x.
-//    x_mult <mulOrd? y_mult | error $[Multiplicity mismatch, expected [y_mult], got [x_mult]] @ x,
-//    x_strat <strat? y_strat | error $[Strategy mismatch, expected [y_strat], got [x_strat]] @ x.
-    
     
   [[ RenderDomElement(name, properties, children) ^ (module_scope) : ty ]] :=
     ty == TTuple(TView(), TOne(), TIncremental()),
@@ -93,7 +81,12 @@ rules
     
     
   [[ ActionDeclaration(name, params, stmts) ^ (module_scope) ]] :=
-    Action{name} <- module_scope,
-    Map1 [[ stmts ^ (module_scope) ]].
-  
+    new body_scope,
+    body_scope -P-> module_scope,
+    Map1T [[ params ^ (body_scope) : params_ty ]],
+    Map1 [[ stmts ^ (body_scope) ]],
+    Member{name} <- module_scope,
+    Member{name} : TTuple(TAction(params_ty), TOne(), TIncremental()),
+    Member{name}.side := None().
+    
   

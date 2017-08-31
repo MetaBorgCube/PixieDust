@@ -6,6 +6,8 @@ imports
   api/types-names-api
   api/types-api
   
+  js/js-util
+  
   signatures/pixiedust/Action-sig
   
   generating/js/expression
@@ -14,31 +16,40 @@ imports
 rules
   generate-component-actions = 
     modulename-get-componentnames
-  ; mapconcat(!(<id>, <componentname-get-actions>) ; generate-action-functions) ; debug
+  ; mapconcat(!(<id>, <componentname-get-actions>) ; generate-action-functions)
       
   
   generate-action-functions: (componentName, actions) -> result 
     with
-      result := <map(!(componentName, <id>) ; generate-action-function)> actions
+      result := <mapconcat(!(componentName, <id>) ; generate-action-function)> actions
   
       
   generate-action-function: (componentName, action) -> result
     with
       actionName := <actiondeclaration-get-name> action
-    ; stmts_statements := <actiondeclaration-get-statements ; generate-action-statements ; debug> action
-    ; x_functionName := $[[componentName]_[actionName]]
-    ; result := js-stmt |[
+    ; stmts_statements := <actiondeclaration-get-statements ; generate-action-statements> action
+    ; x_functionName := <actionname-get-functionname> (componentName, actionName)
+    ; prop_parameters* := <actiondeclaration-get-args ; map(type-parameter-get-name) ; map-with-index(argument-to-prop)> action
+    ; exp_functionName := <js-string> x_functionName
+    ; result := js-stmt* |[
       function x_functionName(state, action){
-        scoped(scope, action.props, function(scope) {
+        scoped(scope, _.assign({}, _.assign({}, action.props, {prop_parameters*})), function(scope) {
           stmts_statements
         });
         return state;
       }
-    ]| ; debug
+      actions[exp_functionName] = x_functionName;
+    ]|
+    
+  argument-to-prop: (i, x_name) ->
+    js-prop |[
+      x_name: action.args[exp_index]
+    ]|
+      with
+        exp_index := <dec ; int-to-string ; js-int> i
     
   generate-action-statements: statements -> <concat> stmts_stmts_statements 
     with
-      <debug> statements ;
       (stmts_stmts_statements, i) := <foldl(fold-action-statement)> (statements, ([], 0))
     
   fold-action-statement: (statement, (stmts_stmts_statement, i)) -> result
@@ -63,7 +74,7 @@ rules
     ; result := (stmts, i'')
   
   generate-entity-field(|i): UpdateEntity(e, fields) -> result
-    with <debug> i ; 
+    with
       (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
     ; switch <get-multiplicity> e
       case upper-one:
@@ -87,7 +98,7 @@ rules
           }
         ]|
     end
-    ; result := (stmts, i_result) ; debug
+    ; result := (stmts, i_result)
   
   generate-entity-fields(|i) : fields -> result
     with
@@ -98,5 +109,6 @@ rules
     with
       (stmts_field, i') := <generate-entity-field(|i)> field
     ; result := ([stmts_field | stmts_stmts_field], i')
+    
   
        

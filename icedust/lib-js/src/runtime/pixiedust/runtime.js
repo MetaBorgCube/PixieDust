@@ -8,27 +8,9 @@ var PixieDustProvider = require('./components/PixieDustProvider');
 var defaultDebug = false;
 var defaultOptionalActions = ['@@redux/init', '@@INIT', '@@redux/INIT'];
 
-var COMPOSE_ACTIONS = "composeActions";
-
 var uniqueId = 0;
 function generateUniqueId(){ //simple number generator
   return "" + uniqueId++;
-}
-
-function makeComposeActions(reducer){
-  return function(state, message){
-    for(var i = 0 ; i < message.actions.length ; i++){
-      state = reducer(state, message.actions[i]);
-    }
-    return state;
-  };
-}
-
-function composeActions(actions){
-  return {
-    type: COMPOSE_ACTIONS,
-    actions: actions
-  };
 }
 
 
@@ -36,8 +18,6 @@ function makeReducer(actions, debug, optionalActions){
   if(debug === undefined){
     debug = defaultDebug;
   }
-
-  actions = _.assign({}, actions); //clone actions
 
   if(optionalActions === undefined){
     optionalActions = defaultOptionalActions;
@@ -59,8 +39,6 @@ function makeReducer(actions, debug, optionalActions){
     }
     return state;
   }
-
-  actions[COMPOSE_ACTIONS] = makeComposeActions(reducer);
 
   if(debug) {
     return function(state, message){

@@ -3,6 +3,15 @@ module pixiedust/types
 rules
   [[ View() ^ (s) : ty ]] := ty == TView().
   
+  [[ ActionType(args) ^ (s) : ty ]] :=
+    Map1T [[ args ^ (s) : args_ty ]],
+    ty == TAction(args_ty).
+    
+  [[ TypeWithMultiplicity(t, m) ^ (s) : ty ]] :=
+    [[ t ^ (s) : t_ty ]],
+    [[ m ^ (s) : t_m ]],
+    ty == TTuple(t_ty, t_m, TIncremental()).
+    
   [[ TypeParameter(name, type, m) ^ (s) : member_type ]] :=
     [[ type ^ (s) : ttype ]],
     [[ m ^ (s) : mm ]],

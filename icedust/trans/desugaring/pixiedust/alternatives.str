@@ -15,5 +15,7 @@ rules
   desugar-alternative: RenderComponent3(name, args) -> RenderComponent(name, args, [])
   desugar-alternative: RenderComponent4(name) -> RenderComponent(name, [], [])
   
+  desugar-alternative: TypeWithDefaultMultiplicity(type) -> TypeWithMultiplicity(type, <custom-origin(|type)> One())
+  
   desugar-alternative: TypeParameter2(name, type) -> TypeParameter(name, type, <custom-origin(|type)>One())
   desugar-alternative: RefTypeParameter2(name, type) -> RefTypeParameter(name, type, <custom-origin(|type)>One())

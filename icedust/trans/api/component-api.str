@@ -26,6 +26,9 @@ rules
   componentname-get-body = get-property(|"Component","body")
 
   componentname-get-actions = componentname-get-body ; filter(is-action-declaration)
+  componentname-get-actionnames = componentname-get-actions ; map(action-declaration-get-actionname)
+  
+  action-declaration-get-actionname = ?ActionDeclaration(<id>, _, _)
   is-action-declaration = ?ActionDeclaration(_, _, _)
   
   componentname-get-imported-from = get-property(|"Component", "importedFrom")

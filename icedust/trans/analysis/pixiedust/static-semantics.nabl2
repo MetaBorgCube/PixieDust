@@ -12,6 +12,7 @@ imports
 signature
   constructors
     TView      : Type
+    TAction    : list(TTuple) -> Type
     TComponent : list(Type) -> Type
     
 rules

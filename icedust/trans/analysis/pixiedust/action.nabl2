@@ -1,10 +1,17 @@
 module pixiedust/action
 
+imports
+  pixiedust/view
+
 rules
 
   [[ ActionCall(name, args) ^ (s) ]] := 
-    Action{name} -> s,
-    Action{name} |-> action_def.
+    Member{name} -> s,
+    Member{name} |-> action_def,
+    action_def : TTuple(a_ty, TOne(), a_mul),
+    a_ty == TAction(a_args),
+    PairwiseEqual [[ args ^ (s, a_args) ]].
+    
   
   [[ CreateEntityInstance(var, type, fields) ^ (s) ]] := 
     [[ type ^ (s) : entity_type ]],

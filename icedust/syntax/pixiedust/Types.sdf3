@@ -6,7 +6,11 @@ imports
 
 context-free syntax
   PrimitiveType.View = <View>
-
+  PrimitiveType.ActionType = <Action[<{TypeWithMultiplicity ","}*>]>
+  
+  TypeWithMultiplicity.TypeWithMultiplicity = <<AnyType><Multiplicity>>
+  TypeWithMultiplicity.TypeWithDefaultMultiplicity = <<AnyType>>
+  
   TypeParameter.TypeParameter = <<ID> : <AnyType><Multiplicity>>
   TypeParameter.TypeParameter2 = <<ID> : <AnyType>>
   

@@ -25,6 +25,7 @@ rules
   normalize-type = ?TTuple(<id>,_,_);?TNoValue() ;!NoValue()
   normalize-type = ?TTuple(<id>,_,_);?TEntity(Occurrence(_,<id>,_))
   normalize-type = ?TTuple(<id>,_,_);?TView();!View()
+  normalize-type = ?TTuple(<id>,_,_);?TAction(args);!ActionType(<map(normalize-type)> args)
   normalize-type: TComponent(types) -> result 
     with
       types' := <map(normalize-type)> types

@@ -1,6 +1,8 @@
 module api/action-api
 
 imports
+  lib/nabl2
+
   signatures/pixiedust/Action-sig
   
 rules
@@ -8,3 +10,4 @@ rules
   actiondeclaration-get-args = ?ActionDeclaration(_, <id>, _)
   actiondeclaration-get-statements = ?ActionDeclaration(_, _, <id>)
   
+  actionname-get-functionname: (componentname, actionname) -> $[[componentname]_[actionname]]
