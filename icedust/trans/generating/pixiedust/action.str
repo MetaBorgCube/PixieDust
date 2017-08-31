@@ -33,10 +33,11 @@ rules
     ; exp_functionName := <js-string> x_functionName
     ; result := js-stmt* |[
       function x_functionName(state, action){
+        let newState = state;
         scoped(scope, _.assign({}, _.assign({}, action.props, {prop_parameters*})), function(scope) {
           stmts_statements
         });
-        return state;
+        return newState;
       }
       actions[exp_functionName] = x_functionName;
     ]|
@@ -69,7 +70,7 @@ rules
     ; x_setterFunction := <setter-function-name> name
     ; stmts := js-stmt* |[
       stmts_e
-      state = x_setterFunction(state, exp_this, exp_e);
+      newState = x_setterFunction(newState, exp_this, exp_e);
     ]|
     ; result := (stmts, i'')
   
