@@ -1,3 +1,4 @@
 node_modules/
 src/runtime/
 target/
+${project_name}.js
