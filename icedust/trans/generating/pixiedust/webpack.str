@@ -21,6 +21,9 @@ rules
     ; <replace-in-file> ($[[dir]/index.html], [
       ("project_name", app_name)
     ])
+    ; <replace-in-file> ($[[dir]/.gitignore], [
+      ("project_name", app_name)
+    ])
   
   webpack-path = !$[[<component-path>]/lib-js/webpack-files]
   runtime-path = !$[[<component-path>]/lib-js/src/runtime]
