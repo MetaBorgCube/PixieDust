@@ -50,6 +50,10 @@ view
   }
 
   component Main(appState: AppState){
+    action toggleDrawer(){
+      appState { drawerOpen = !drawerOpen }
+    }
+  
     @MuiThemeProvider{
       div {
         @BooleanInput(appState.drawerOpen) {}
