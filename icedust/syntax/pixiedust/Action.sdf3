@@ -15,27 +15,29 @@ context-free syntax
     }
   >
   
-  ActionStatement = CreateOrUpdateEntity 
-  
+  ActionStatement.CreateEntityStatement = CreateEntityInstance 
+  ActionStatement.UpdateEntityStatement = UpdateEntity
   
   CreateOrUpdateEntity = CreateEntityInstance
   CreateOrUpdateEntity = UpdateEntity
   
-  EntityField.EntityMember = <<ID> = <EntityMemberValue>>
-  EntityField = UpdateEntity
+  EntityMember.EntityMember = <<ID> = <EntityMemberValue>> 
+  
+  UpdateField = EntityMember 
+  UpdateField = UpdateEntity
   
   EntityMemberValue = Exp
   EntityMemberValue = CreateEntityInstance
   
   UpdateEntity.UpdateEntity = <
     <Exp> {
-      <{EntityField "\n"}*>
+      <{UpdateField "\n"}*>
     }
   >
   
   CreateEntityInstance.CreateEntityInstance = <
     <ID> : <EntityType> {
-      <{EntityField "\n"}*>
+      <{EntityMember "\n"}*>
     }
   >
   
