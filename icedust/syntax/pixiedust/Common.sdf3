@@ -3,3 +3,8 @@ module pixiedust/Common
 lexical syntax
   Keyword = "Component"
   Keyword = "View"
+  
+  PathPart = PathChar+
+  Path = {PathPart "/"}+
+  
+  PathChar = [a-zA-Z0-9\-\.\_]

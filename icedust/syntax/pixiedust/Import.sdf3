@@ -3,6 +3,7 @@ module pixiedust/Import
 imports
   Common
   pixiedust/Types
+  pixiedust/Common
 
 context-free syntax
 
@@ -19,8 +20,3 @@ context-free syntax
     component <ID>(<{TypeParameter ", "}*>)
   >
   
-lexical syntax
-  PathPart = PathChar+
-  Path = {PathPart "/"}+
-  
-  PathChar = [a-zA-Z0-9\-\.\_]

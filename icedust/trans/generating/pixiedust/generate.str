@@ -11,6 +11,8 @@ imports
   generating/pixiedust/component
   generating/pixiedust/action
   
+  js/js-util
+  
   api/component-api
   api/import-api
 
@@ -72,12 +74,11 @@ rules
       exp_alias := <js-string> alias
     ; dir_module := <full-path ; dirname> modulePath
     ; import_path := $[[dir_module]/[path]]
-    ; stmts_module := <file-exists ; read-file <+ load-import-failure> import_path
+    ; stmts_module := <file-exists ; read-file <+ load-import-failure(|path)> import_path
       
-  load-import-failure : path -> js-exp |[function(){console.log("failed to import " + exp_path);}]|
+  load-import-failure(|path) : _ -> js-stmt* |[module.exports = require(exp_path);]|
     with
       exp_path := <js-string> path
-    ; <debug> $[could not import [path]] 
     
   generate-pixiedust-main = generate-pixiedust-statements
   generate-pixiedust-main-function(|path) = generate-main-function(wrap-imported-files(generate-pixiedust-statements|path))

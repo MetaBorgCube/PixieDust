@@ -55,9 +55,10 @@ rules
       }
     ]|
   
-  generate-main-html(generate-main-function) : (resolve, moduleName) -> document
+  generate-main-html(generate-main-function) : (resolve, includes, moduleName) -> document
     with
      runtime := <generate-javascript-runtime-resolve> resolve
+    ; str_includes := <map(generate-include) ; concat-strings> includes
     ; exp_main := <generate-main-function> moduleName
     ; main := js-program |[
       (function(){
@@ -77,12 +78,31 @@ $[<!doctype html>
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>[moduleName]</title>
+    
+    [str_includes]
     [runtime]
 </head>
 <body>
     <script>[main-pp]</script>
 </body>
 </html>
+]
+ 
+ 
+  generate-include: HtmlInclude(path) -> 
+$[<link rel="stylesheet" href="[path]">
+]
+    where
+      "css" := <get-extension> path
+      
+  generate-include: HtmlInclude(path) -> 
+$[<script type="text/javascript" src="[path]"></script>
+]
+    where
+      "js" := <get-extension> path
+      
+  generate-include: HtmlInclude(path) -> 
+$[<script type="text/javascript">console.log("unknown include: [path]"</script>
 ]
       
   generate-javascript-runtime-resolve: ResolveInline() -> 

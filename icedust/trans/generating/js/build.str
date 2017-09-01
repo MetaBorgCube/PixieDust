@@ -40,8 +40,8 @@ rules
         case ?WebpackTarget():
           main := <generate-main ; js-program> moduleName
         ; filename := <javascript-generated-path(|relativePath)>
-        case ?HtmlTarget(runtime):
-          main := <generate-main-html> (runtime, moduleName)
+        case ?HtmlTarget(runtime, includes):
+          main := <generate-main-html> (runtime, includes, moduleName)
         ; filename := <html-generated-path(|relativePath)>
       end
     with
@@ -53,13 +53,13 @@ rules
           program-pp := <pp-js-program> main
         ; <write-file> (filename, program-pp)
         ; result := None() 
-      case ?(Generate(), HtmlTarget(_)):
+      case ?(Generate(), HtmlTarget(_, _)):
           result := (filename, main)
       case ?(Execute(), JavascriptTarget()):
         runner := <runner-wrap-module> main
       ; output := <eval-javascript> runner
       ; result := output
-      case ?(Execute(), HtmlTarget(_)):
+      case ?(Execute(), HtmlTarget(_, _)):
         <write-file> (filename, main) 
       ; project-path := <project-path ; local-path> 
       ; <open-browser> $[[project-path]/[filename]]

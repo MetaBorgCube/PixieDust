@@ -2,7 +2,8 @@ module todo
 
 config
   backend: PixieDust
-  target: webpack
+  target: html
+  include stylesheets/main.css
 
 imports
   pixiedust/components/native/inputs {

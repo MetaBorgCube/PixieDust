@@ -2,6 +2,7 @@ module js/Config
 
 imports
   Common
+  pixiedust/Common
 
 context-free syntax
 
@@ -22,7 +23,9 @@ context-free syntax
   
   BackendTarget.JavascriptTarget = <target: javascript>
   BackendTarget.WebpackTarget = <target: webpack>
-  BackendTarget.HtmlTarget = <target: html <ResolveRuntime?>>
+  BackendTarget.HtmlTarget = <target: html <ResolveRuntime?> <HtmlInclude*>>
   
   ResolveRuntime.ResolveInline =     <runtime: inline>
   ResolveRuntime.ResolveFromSource = <runtime: "<STRING>">
+  
+  HtmlInclude.HtmlInclude = <include <Path>>
