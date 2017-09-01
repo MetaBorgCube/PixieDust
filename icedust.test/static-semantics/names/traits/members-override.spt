@@ -3,7 +3,7 @@ module names-traits-members-override
 language icedust
 
 fixture [[
-  module test
+  module test (incremental)
   model
   [[...]]
 ]]

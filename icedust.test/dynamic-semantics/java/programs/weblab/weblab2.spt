@@ -4,7 +4,7 @@ language icedust
 
 fixture [[
 
-module weblab2
+module weblab2 (incremental)
 
 config
   backend: Java

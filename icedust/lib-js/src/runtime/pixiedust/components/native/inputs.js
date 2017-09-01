@@ -153,29 +153,29 @@ var AutoFocusStringInput = Class(PixieDustComponent, {
 		this.onKeyPress = this.onKeyPress.bind(this);
 	},
 	
-	componentDidUpdate(prevProps){
+	componentDidUpdate: function(prevProps){
 		if(!prevProps.visible && this.props.visible){
 			this.doFocus();
 		}
 	},
 	
-	doFocus(){
+	doFocus: function(){
 		var node = this.refs.input;
 		node.focus();
 		node.setSelectionRange(node.value.length, node.value.length);
 	},
 	
-	onChange(e) {
+	onChange: function(e) {
 		this.dispatch(this.props.value$setter(this.props.value$identity, e.target.value))
 	},
 	
-	onKeyPress(e) {
+	onKeyPress: function(e) {
 		if(e.key == 'Enter'){
 			this.onSubmit()
 		}
 	},
 	
-	onSubmit(){
+	onSubmit: function(){
 		this.props.onSubmit()();
 	},
 	

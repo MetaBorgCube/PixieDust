@@ -3,7 +3,7 @@ module java-features-inlinefield
 language icedust
 
 fixture [[
-module inlinefield
+module inlinefield (incremental)
 
 config
   backend: Java

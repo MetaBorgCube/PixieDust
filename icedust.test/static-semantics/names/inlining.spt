@@ -3,7 +3,7 @@ module names-inlining
 language icedust
 
 test Error on overriding inline [[
-module test
+module test(incremental)
 model
 
   entity Foo {
