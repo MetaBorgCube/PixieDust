@@ -155,14 +155,12 @@ var AutoFocusStringInput = Class(PixieDustComponent, {
 	
 	componentDidUpdate(prevProps){
 		if(!prevProps.visible && this.props.visible){
-			console.log('focus!')
 			this.doFocus();
 		}
 	},
 	
 	doFocus(){
 		var node = this.refs.input;
-		console.log(node);
 		node.focus();
 		node.setSelectionRange(node.value.length, node.value.length);
 	},
