@@ -25,7 +25,7 @@ model
     finished: Boolean
   }
   
-  relation TodoApp.editing ? <-> Todo.editing_inverse
+  relation TodoApp.editing ? <-> ? Todo.editing_inverse
   relation TodoApp.todos * <-> 1 Todo.app
   relation TodoApp.finishedTodos = todos.filter(todo => todo.finished) <-> Todo.inverseFinishedTodos
   relation TodoApp.visibleTodos = 
@@ -48,7 +48,7 @@ view
     
     action createTodo(task: String) {
       t: Todo {
-        task = app.input
+        task = task
         finished = false
         app = app
       }
@@ -148,7 +148,8 @@ view
       todo.app { editing = no value }
     }
     
-    li[className= if(todo.finished) "completed" else "" ++ if(todo.app.editing == todo) " editing" else ""]{
+    todo.app.editing == todo
+    li[className= if(todo.finished) "completed" else "" ++ if((todo.app.editing == todo <+ false)) " editing" else ""]{
       div[className="view"] {
         @BooleanInput(todo.finished, "toggle", toggleFinished)
         label[onDoubleClick=editTodo()] { todo.task }
@@ -161,5 +162,6 @@ view
   
 data
   app : TodoApp{}
+  
 execute
   @TodoApp(app)
