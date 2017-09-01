@@ -8,6 +8,7 @@ imports
   
   js/js-util
   
+  signatures/Types-sig
   signatures/pixiedust/Action-sig
   
   generating/js/expression
@@ -58,9 +59,9 @@ rules
       (stmts_statement, i') := <generate-action-statement(|i)> statement
     ; result := ([stmts_statement | stmts_stmts_statement], i')
     
-  generate-action-statement(|i): u @ UpdateEntity(e, fields) -> <generate-entity-field(|i)> u 
-    
-  generate-action-statement(|i): CreateEntityInstance(x_var, tpe, fields) -> ([], i)
+  generate-action-statement(|i): UpdateEntityStatement(stmt) -> <generate-entity-field(|i)> stmt 
+  generate-action-statement(|i): CreateEntityStatement(stmt) -> <generate-entity-field(|i)> stmt 
+      
   
   generate-entity-field(|i): EntityMember(name, e) -> result
     with
@@ -99,6 +100,24 @@ rules
           }
         ]|
     end
+    ; result := (stmts, i_result)
+  
+  generate-entity-field(|i) : CreateEntityInstance(x_var, EntityType(tpe), fields) -> result
+    with
+      (x_instance, i') := <int-to-varname-inc> i
+    ; exp_instance := js-exp |[x_instance.id]|
+    ; (stmts_fields, i_result) := <generate-entity-fields(|i')> fields
+    ; stmt_scoped := <scope-this-lexically> (exp_instance, stmts_fields)
+    ; exp_table := <attribute-table-expression> tpe
+    ; stmts := js-stmt* |[
+        var x_instance = {
+          id: pixiedustRuntime.generateUniqueId()
+        };
+        newState = newState.update(exp_table, function(table) {
+          return table.set(x_instance.id, x_instance);
+        });
+        stmt_scoped
+      ]|
     ; result := (stmts, i_result)
   
   generate-entity-fields(|i) : fields -> result

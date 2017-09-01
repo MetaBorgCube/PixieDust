@@ -79,14 +79,4 @@ rules
     Member{var}.variableType := NormalVariableType(),
     [[ body ^ (body_scope) : (_) ]].
     
-    
-  [[ ActionDeclaration(name, params, stmts) ^ (module_scope) ]] :=
-    new body_scope,
-    body_scope -P-> module_scope,
-    Map1T [[ params ^ (body_scope) : params_ty ]],
-    Map1 [[ stmts ^ (body_scope) ]],
-    Member{name} <- module_scope,
-    Member{name} : TTuple(TAction(params_ty), TOne(), TOnDemandIncremental()),
-    Member{name}.side := None().
-    
   

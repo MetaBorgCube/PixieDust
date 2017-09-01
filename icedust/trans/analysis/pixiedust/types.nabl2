@@ -5,6 +5,7 @@ rules
   
   [[ ActionType(args) ^ (s) : ty ]] :=
     Map1T [[ args ^ (s) : args_ty ]],
+    TNoValue() <sub! ty,
     ty == TAction(args_ty).
     
   [[ TypeWithMultiplicity(t, m) ^ (s) : ty ]] :=

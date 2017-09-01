@@ -192,6 +192,7 @@ signature
     //D // definition
       I // import
       J // lower priority import
+      X // even lower priority import ; parent edges are preferred above it
       P // parent
       S // requires a J to be wellformed
 //      N // no edge at all (used for inverse querying)
@@ -206,10 +207,11 @@ signature
       S < P,
       I < J,
       I < P,
-      J < P
+      J < P,
+      P < X
 
     well-formedness
-      P* . (S.J)? . (I|J)*
+      P* . (S.J)? . (I|J|X)*
 
 rules
 
