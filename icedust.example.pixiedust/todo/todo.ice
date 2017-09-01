@@ -2,26 +2,32 @@ module todo
 
 config
   backend: PixieDust
-  target: html
+  target: webpack
 
 imports
+  pixiedust/components/native/inputs {
+    component StringInput(ref value: String, onSubmit: Action[String]?, className: String, autoFocus: Boolean, placeholder: String)
+    component AutoFocusStringInput(ref value: String, className: String, visible: Boolean, onSubmit: Action[])
+  }
+  
 model
   
-  entity TodoList{
-    view: View = div { for(todo in visibleTodos) (todo.view) }
+  entity TodoApp{
     filter: String = "All" (default)
     allFinished: Boolean = conj(todos.finished)
+    todosLeft: Int = (todos \ finishedTodos).count()
+    input: String = "" (default)
   }
   
   entity Todo {
     task: String
     finished: Boolean
-    view : View = @Todo(this)
   }
   
-  relation TodoList.todos * <-> 1 Todo.list
-  relation TodoList.finishedTodos = todos.filter(todo => todo.finished) <-> Todo.inverseFinishedTodos
-  relation TodoList.visibleTodos = 
+  relation TodoApp.editing ? <-> Todo.editing_inverse
+  relation TodoApp.todos * <-> 1 Todo.app
+  relation TodoApp.finishedTodos = todos.filter(todo => todo.finished) <-> Todo.inverseFinishedTodos
+  relation TodoApp.visibleTodos = 
     switch {
       case filter == "All" => todos
       case filter == "Completed" => finishedTodos
@@ -30,49 +36,95 @@ model
     } <-> Todo.inverseVisibleTodos
 view
 
-  component TodoList(list: TodoList){
-    action clearCompleted(){
-      list {
-        todos = todos \ finishedTodos
-      }
-    }
-    
+  component TodoApp(app: TodoApp){
     action toggleAll(){
-      list {
+      app {
           todos {
-            finished = !list.allFinished
+            finished = !app.allFinished
           }
       }
     }
     
-    @Filter(list)
-    @BooleanInput(list.allFinished, toggleAll)
-    input[type="text", placeholder="Todo..."]
-    
-    
-    a[onClick=clearCompleted()]{ "Clear finished todos" }
-    list.view
-  }
-  
-  component Filter(list: TodoList) {
-    @FilterType("All", list)
-    @FilterType("Completed", list)
-    @FilterType("Not Completed", list)
-  }
-  
-
-  component FilterType(name: String, list: TodoList) {
-    action setFilter(){
-      list { filter = name }
+    action createTodo(task: String) {
+      t: Todo {
+        task = app.input
+        finished = false
+        app = app
+      }
+      app { input = "" }
     }
-    span[onClick=setFilter(), style={backgroundColor=if(list.filter == name) "red" else "white"}] { name }
+    
+    section[className="todoapp"]{
+      header[className="header"] {
+      h1 { "todos" }
+        @StringInput(app.input, if(app.input != "") createTodo, "new-todo", true, "What needs to be done?")  
+      }
+      
+      if(app.todos.count() > 0)
+        section[className="main"] {
+          @BooleanInput(app.allFinished, "toggle-all", toggleAll)
+          ul[className="todo-list"] {
+            for(todo in app.visibleTodos) (@TodoItem(todo))
+          }
+        }
+      @TodoFooter(app)
+    }
   }
   
-  component BooleanInput(checked: Boolean, onChange: Action[]) {
-    input[type="checkbox", checked=checked, onChange=onChange()]
+  component TodoFilters(app: TodoApp) {
+    ul[className="filters"]{
+      @FilterType("All", app)
+      @FilterType("Completed", app)
+      @FilterType("Not Completed", app)
+    }
+  }
+  
+
+  component FilterType(name: String, app: TodoApp) {
+    action setFilter(){
+      app { filter = name }
+    }
+    li {
+      a[className=if(app.filter == name) "selected" else "", onClick=setFilter()] { 
+        name 
+      }
+    }
+  }
+  
+  component TodoFooter(app: TodoApp){
+    action clearCompleted(){
+      app {
+        todos = todos \ finishedTodos
+      }
+    }
+  
+    footer[className="footer"] {
+      span[className="todo-count"] {
+        app.todosLeft
+        " "
+        if(app.todosLeft == 1) "item" else "items"
+        " left"
+      }
+      
+      @TodoFilters(app)
+      
+      if(app.finishedTodos.count() > 0) 
+        a[className="clear-completed", onClick=clearCompleted()]{ "Clear completed" }
+    }
+  }
+  
+  component BooleanInput(checked: Boolean, className: String, onChange: Action[]) {
+    input[
+      type="checkbox" 
+    , className=className 
+    , checked=checked
+    , onChange=onChange()
+    ]
   }
 
-  component Todo(todo: Todo){
+
+
+  component TodoItem(todo: Todo){
     action toggleFinished(){
       todo {
         finished = !finished
@@ -81,38 +133,32 @@ view
     
     action removeTodo(){
       todo {
-        list {
+        app {
           todos = todos \ todo
         }
       }
     }
-  
-    div {
-      label {
-        @BooleanInput(todo.finished, toggleFinished)
-        span { todo.task }
-        
+    
+    action editTodo(){
+      todo.app { editing = todo }
+    }
+    
+    action finishEditing(){
+      todo.app { editing = no value }
+    }
+    
+    li[className= if(todo.finished) "completed" else "" ++ if(todo.app.editing == todo) " editing" else ""]{
+      div[className="view"] {
+        @BooleanInput(todo.finished, "toggle", toggleFinished)
+        label[onDoubleClick=editTodo()] { todo.task }
+        button[className="destroy", onClick=removeTodo()]
       }
-      button[onClick=removeTodo()]{ "X" }
+      @AutoFocusStringInput(todo.task, "edit", todo.app.editing == todo, finishEditing)
     }
   }
   
-data
-  l1 : TodoList{
-    todos =
-      t1: Todo{
-        task = "Write js backend"
-        finished = true
-      },
-      t2: Todo{
-        task = "Setup nashorn"
-        finished = true
-      },
-      t3: Todo {
-        task = "Finish thesis"
-        finished = false
-      }
-  }
   
+data
+  app : TodoApp{}
 execute
-  @TodoList(l1)
+  @TodoApp(app)
