@@ -101,10 +101,7 @@ view
   
     footer[className="footer"] {
       span[className="todo-count"] {
-        app.todosLeft
-        " "
-        if(app.todosLeft == 1) "item" else "items"
-        " left"
+        "${app.todosLeft} ${if(app.todosLeft == 1) "item" else "items"} left"
       }
       
       @TodoFilters(app)
