@@ -17,7 +17,7 @@ fixture [[
     (1 ++ 2 ++ 3 ++ 4).first(4)
     [[...]]
 ]]
-
+ 
 
 test first [[ ]] transform "SPT -> Build" to 
 "1

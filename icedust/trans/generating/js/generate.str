@@ -14,7 +14,7 @@ imports
 
   js/js-util
   
-  signatures/js/Config-sig
+  signatures/Config-sig
 
 rules
   generate-javascript-statements: moduleName -> stmts

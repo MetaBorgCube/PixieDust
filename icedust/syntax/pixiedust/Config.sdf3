@@ -1,7 +1,7 @@
 module pixiedust/Config
 
 imports
-  js/Config
+  Config
 
 context-free syntax
   Config.PixieDustBackend = <

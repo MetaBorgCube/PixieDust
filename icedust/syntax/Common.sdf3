@@ -60,8 +60,9 @@ lexical syntax // literals
   INT           = "-"? [0-9]+
   FLOAT         = "-"? [0-9]+ "." [0-9]+
   STRING        = StringChar* 
-  StringChar    = ~[\"\n] 
-  StringChar    = "\\\"" 
+  StringChar    = ~[\"\n\$] 
+  StringChar    = "\\\""
+  StringChar    = "\\$" //dollar escapes: \$ (dart, javascript, php, bash)
   StringChar    = BackSlashChar 
   BackSlashChar = "\\"
   DATETIME      = [0-9][0-9][0-9][0-9] "-" [0-9][0-9]? "-" [0-9][0-9]? LAYOUT [0-9][0-9]? ":" [0-9][0-9] ":" [0-9][0-9] 
@@ -73,6 +74,11 @@ lexical syntax // layout
   LAYOUT        = "/*" ~[\*] | CommentChar* "*/" 
   LAYOUT        = "//" ~[\n\r]* [\n\r] | EOF 
   EOF           =  
+
+  PathPart = PathChar+
+  Path = {PathPart "/"}+
+  
+  PathChar = [a-zA-Z0-9\-\.\_]
 
 lexical restrictions
 

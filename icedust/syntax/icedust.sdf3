@@ -9,8 +9,6 @@ imports
   Model
   Types
   Modules
-  
-  js/js
   pixiedust/pixiedust
 
 context-free start-symbols

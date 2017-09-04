@@ -268,3 +268,17 @@ rules // config
   generate-default-backend = fail
   
   backend-generate-defaults = fail
+  
+  backend-generate-defaults = ?b@JavascriptBackend(phase, target) ; JavascriptBackend(
+      try(javascript-backend-default-phase(|b))
+    , try(javascript-backend-default-target(|b))
+  ) 
+
+  javascript-backend-default-phase(|o)  : None() -> <custom-origin(|o)> Execute()
+  javascript-backend-default-target(|o) : None() -> <custom-origin(|o)> JavascriptTarget()
+  
+  javascript-backend-default-target(|o) : HtmlTarget(None(), includes) -> HtmlTarget(resolve, includes)
+  with
+    resolve := <custom-origin(|o)> ResolveInline()
+  
+  

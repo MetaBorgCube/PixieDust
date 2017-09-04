@@ -79,7 +79,7 @@ signature
     
     anti-symmetric, anti-transitive test : Type * TypeTest
     
-    irreflexive cast : Type * Type
+    cast : Type * Type
  
   functions
     
@@ -299,6 +299,7 @@ rules
     TString() <cast! TBoolean(),
     TString() <cast! TDatetime(),
     TString() <cast! TNoValue(),
+    TString() <cast! TString(),   // allow string to string casting for string interpolation
 
     //PixieDust casting relation
     TString() <cast! TView(),

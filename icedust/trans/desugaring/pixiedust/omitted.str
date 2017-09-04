@@ -3,7 +3,7 @@ module desugaring/pixiedust/omitted
 imports
   lib/origin
 
-  desugaring/js/omitted
+  desugaring/omitted
   
   signatures/pixiedust/Config-sig
 
