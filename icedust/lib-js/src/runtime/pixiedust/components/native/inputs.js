@@ -17,7 +17,7 @@ var defaultOptions = {
 }
 
 
-function InputFactory(name, filter, options){
+function InputFactory(name, filter, options, extraProps){
 	options = options === undefined ? defaultOptions : _.assign({}, defaultOptions, options);
 	
 	function constructor(props){
@@ -56,23 +56,22 @@ function InputFactory(name, filter, options){
 			if(value == null){
 				value = '';
 			}
-			
-			var extraAttributes = _.omit(this.props, [
+
+			var extraAttributes = _.assign({}, extraProps, _.omit(this.props, [
 				options.onChangeAttribute,
 				options.onSubmitAttribute,
 				options.onKeyPressAttribute,
 				options.valueProp,
 				options.valueProp + '$setter',
 				options.valueProp + '$identity',
-			]);
-			
+			]));
+
 			attributes[options.valueAttribute] = value;
 			attributes[options.onChangeAttribute] = this.onChange;
 			if(this.props[options.onSubmitAttribute]){
 				attributes[options.onKeyPressAttribute] = this.onSubmit;
 			}
 			attributes = _.assign(attributes, extraAttributes);
-			
 			return React.createElement(options.elementType, attributes);
 		}
 	});
@@ -82,62 +81,93 @@ function InputFactory(name, filter, options){
 	return Input;
 }
 
+function getTargetValue(e){
+	return e.target.value;
+}
 
-var StringInput = InputFactory('String', 
-	function(e, props, trigger){
-		trigger(e.target.value);
+function getTargetChecked(e){
+	return e.target.checked
+}
+
+function successFilter(v) {
+	return [v];
+}
+
+var stringFilter = successFilter;
+
+function intFilter(v) {
+	var i = parseInt(v, 10);
+	return isNaN(i) ? [] : [i];
+}
+
+function floatFilter(v) {
+	var floatValue = parseFloat(v, 10);
+	return isNaN(floatValue) ? [] : [floatValue];
+}
+
+var booleanFilter = successFilter;
+
+function makeOptional(filter) {
+	return function(v) {
+		return v == '' ? [null] : filter(v);
 	}
-);
+}
+
+function makeTrigger(prop, get, filter) {
+	return function(e, props, trigger) {
+		var previousValue = props[prop];
+		filter(get(e)).forEach(function(v) {
+			if(v !== previousValue){
+				trigger(v);
+			}
+		})
+	}
+}
+
+var stringTrigger = makeTrigger('value', getTargetValue, successFilter);
+var optStringTrigger = makeTrigger('value', getTargetValue, makeOptional(successFilter))
+
+var intTrigger = makeTrigger('value', getTargetValue, intFilter);
+var optIntTrigger = makeTrigger('value', getTargetValue, makeOptional(intFilter));
+
+var floatTrigger = makeTrigger('value', getTargetValue, floatFilter);
+var optFloatTrigger = makeTrigger('value', getTargetValue, makeOptional(floatFilter));
+
+var booleanTrigger = makeTrigger('value', getTargetChecked, successFilter);
+var optBooleanTrigger = makeTrigger('value', getTargetChecked, makeOptional(successFilter));
 
 
-var BooleanInput = InputFactory('Boolean', 
-	function(e, props, trigger){
-		trigger(e.target.checked);
-	}, 
+var StringInput = InputFactory('String', stringTrigger);
+var OptStringInput = InputFactory('String?', optStringTrigger);
+
+var BooleanInput = InputFactory('Boolean', booleanTrigger,
 	{
 		typeAttributeValue: 'checkbox',
 		valueAttribute: 'checked'
 	}
 );
 
-
-var IntInput = InputFactory('Int',
-	function(e, props, trigger){
-		var value = e.target.value;
-	  var integerValue = value == '' ? 0 : parseInt(e.target.value, 10);
-	  if(!isNaN(integerValue) && integerValue !== props.value){
-	  	trigger(integerValue);
-	  }
+var OptBooleanInput = InputFactory('Boolean?', optBooleanTrigger,
+	{
+		typeAttributeValue: 'checkbox',
+		valueAttribute: 'checked'
 	}
 );
 
+var IntInput = InputFactory('Int', intTrigger);
+var OptIntInput = InputFactory('Int?', optIntTrigger);
 
-var FloatInput = InputFactory('Float', 
-	function(e, props, trigger){
-		var value = e.target.value;
-	  var floatValue = value == '' ? 0 : parseFloat(e.target.value);
-	  if(!isNaN(floatValue) && floatValue !== props.value){
-	  	trigger(floatValue);
-	  }
+var FloatInput = InputFactory('Float', floatTrigger);
+var OptFloatInput = InputFactory('Float', optFloatTrigger);
+
+var TextInput = InputFactory('Text', stringTrigger,
+	{
+		elementType: 'textarea',
+		typeAttributeValue: null
 	}
 );
 
-
-var OptFloatInput = InputFactory('Float?',
-	function(e, props, trigger){
-		var value = e.target.value;
-		var floatValue = value == '' ? null : parseFloat(e.target.value);
-		if(!isNaN(floatValue) && floatValue !== props.value){
-			trigger(floatValue);
-		}
-	}
-);
-
-
-var TextInput = InputFactory('Text', 
-	function(e, props, trigger){
-		trigger(e.target.value);
-	}, 
+var OptTextInput = InputFactory('Text?', optStringTrigger,
 	{
 		elementType: 'textarea',
 		typeAttributeValue: null
@@ -193,12 +223,47 @@ var AutoFocusStringInput = Class(PixieDustComponent, {
 });
 
 module.exports = {
-		StringInput: StringInput,
-		BooleanInput: BooleanInput,
-		IntInput: IntInput,
-		FloatInput: FloatInput,
-		OptFloatInput: OptFloatInput,
-		TextInput: TextInput,
-		AutoFocusStringInput: AutoFocusStringInput
+	InputFactory: InputFactory,
+
+	getTargetValue: getTargetValue,
+	getTargetChecked: getTargetChecked,
+
+	successFilter: successFilter,
+	stringFilter: stringFilter,
+	intFilter: intFilter,
+	floatFilter: floatFilter,
+	booleanFilter: booleanFilter,
+
+	stringTrigger: stringTrigger,
+	optStringTrigger: optStringTrigger,
+
+	intTrigger: intTrigger,
+	optIntTrigger: optIntTrigger,
+
+	floatTrigger: floatTrigger,
+	optFloatTrigger: optFloatTrigger,
+
+	booleanTrigger: booleanTrigger,
+	optBooleanTrigger: optBooleanTrigger,
+
+	makeOptional: makeOptional,
+	makeTrigger: makeTrigger,
+
+	StringInput: StringInput,
+	OptStringInput: OptStringInput,
+
+	IntInput: IntInput,
+	OptIntInput: OptIntInput,
+
+	FloatInput: FloatInput,
+	OptFloatInput: OptFloatInput,
+
+	BooleanInput: BooleanInput,
+	OptBooleanInput: OptBooleanInput,
+
+	TextInput: TextInput,
+	OptTextInput: OptTextInput,
+	
+	AutoFocusStringInput: AutoFocusStringInput
 };
 
