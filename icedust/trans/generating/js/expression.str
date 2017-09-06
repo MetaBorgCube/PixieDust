@@ -19,10 +19,6 @@ rules
 
   generate-expression-statements: e -> js-stmt* |[]|
   
-  int-to-varname : i -> $[_[i]]
-  
-  int-to-varname-inc = !(<int-to-varname>, <inc>)   
-  
   //binary expressions
   
   binexp-to-js-stmts(get, merge|i) : e -> result

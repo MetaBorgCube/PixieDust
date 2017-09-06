@@ -50,7 +50,7 @@ rules
   ]|
     with
       x_tpe := <entityinstancename-get-type> x_instance
-    ; exp_table := <attribute-table-expression> x_tpe
+    ; exp_table := <js-string> x_tpe
     ; exp_id := <js-string> x_instance
         
         

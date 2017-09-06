@@ -4,103 +4,164 @@ imports
   signatures/Types-sig
   
   api/types-api
+  api/types-names-api
   api/model-names-api
   
   generating/js/names
   generating/js/common
+  generating/js/expression
 
 rules
   
+  generate-getter-functions = !(<getter-one-function>, <getter-many-function>) ; conc
   
-  getter-function-multiplicities = ![One(), ZeroOrMore()]
+  getter-one-function: x_attributeName -> <getter-function> (x_attributeName, One())
+  getter-many-function: x_attributeName -> <getter-function> (x_attributeName, ZeroOrMore())
   
-  getter-functions = ?attribute ; getter-function-multiplicities ; mapconcat(!(attribute, <id>) ; getter-function)
-  
-  getter-function: (attribute, m) -> js-stmt* |[
-    function x_functionName(state, x_var){
-      stmt_body*
-      return result;
-    }
-    module.exports.x_functionName = x_functionName;
-  ]|
+  getter-function : (x_attributeName, m) -> result
     with
-      x_functionName := <getter-function-name> (attribute, m)
-    ; x_var := <id-var> m
-    ; x_result := "result"
-    ; x_value := "value"
-    ; m_attribute := <name-get-multiplicity> attribute
-    ; stmt_body* := <getter-body> (m, m_attribute, attribute, x_var, x_result, x_value)
+      x_functionName := <getter-function-name> (x_attributeName, m)
+    ; stmts_getter := <getter-statements> (x_attributeName, m)
+    ; result := js-stmt* |[
+        function x_functionName(state, id) {
+          stmts_getter
+        }
+        module.exports.x_functionName = x_functionName;
+      ]|
   
-  getter-body: (m1, m2, attribute, x_name, x_result, x_value) -> stmt_body* 
+  getter-statements : (x_attributeName, m) -> result
     with
-      exp_table := <attribute-table-expression> attribute
+      switch !m
+        case upper-one : result := <getter-one-statements> x_attributeName
+        case upper-many: result := <getter-many-statements> x_attributeName
+      end
+    
+  getter-statements : (x_attributeName, One()) -> <getter-one-statements> x_attributeName
+  
+  getter-one-statements : x_attributeName -> stmts
     with
-      switch !(m1, m2)
-        case (?One() <+ ?ZeroOrOne(), id):
-          exp_empty := <exp-attribute-empty> attribute
-        ; stmt_attribute* := <reference-attribute-in-object> (attribute, x_result, x_result)  
-        ; stmt_body* := js-stmt* |[
-            var x_result = state.get(exp_table).get(x_name);
-            if(x_result === undefined){
-              x_result = exp_empty;
-            } 
-            stmt_attribute*
+      (x_result, i) := <int-to-varname-inc> 0
+    ; exp_attributeTable := <attribute-table-expression> x_attributeName
+    ; exp_entityTable := <entity-table-expression> x_attributeName
+    ; m_attributeName := <name-get-multiplicity> x_attributeName
+    ; exp_empty := <exp-empty> m_attributeName
+    with
+      switch !x_attributeName
+        case attributename-is-derivation:
+          stmts := js-stmt* |[
+            return state.get(exp_attributeTable).get(id);
           ]|
-        case ?(ZeroOrMore(), m2):
-          stmt_push* := <getter-push-statements> (attribute, m2, x_result, x_value)
-        ; stmt_body* := js-stmt* |[
-            var x_result = [];
-            var table = state.get(exp_table);
-            for(var i = 0 ; i < x_name.length ; i++){
-              var x_value = table.get(x_name[i]);
-              stmt_push*
+        case is-relationname:
+          stmts := js-stmt* |[
+            var x_result = state.get(exp_attributeTable).get(id);
+            if(x_result === undefined) {
+              x_result = exp_empty;
             }
+            return x_result;
+          ]|
+        case attributename-is-normal:
+          stmts := js-stmt* |[
+            var x_result = state.get(exp_entityTable).get(id);
+            if(x_result !== undefined) {
+              x_result = x_result.x_attributeName;
+              if(x_result === undefined) {
+                x_result = exp_empty;
+              }
+            }
+            return x_result;
+          ]|
+        case attributename-is-default:
+          stmts := js-stmt* |[
+            var x_result = state.get(exp_entityTable).get(id);
+            if(x_result !== undefined) {
+              x_result = x_result.x_attributeName;
+              if(x_result === undefined || x_result === null) {
+                x_result = state.get(exp_attributeTable).get(id);
+              }
+            }
+            return x_result;
           ]|
       end
       
-  reference-attribute-in-object : (x_attribute, x_result, x_value) -> js-stmt* |[
-    if(x_value != null){
-      x_result = x_value.x_attribute;
-      if(x_result === undefined){
-        x_result = exp_empty;
-      }
-    }
-  ]|
-    where
-      <is-attributename ; attributename-is-normal-default> x_attribute
+  getter-many-statements: x_attributeName -> stmts
     with
-      exp_empty := <name-get-multiplicity ; exp-empty> x_attribute
-  
-  reference-attribute-in-object = ![]
-        
-  getter-push-statements: (attribute, m, x_result, x_value) -> stmt_push*
-    with
-      stmts_attribute := <reference-attribute-in-object> (attribute, x_value, x_value)
-    with
-      switch !m
-        case One():
-          stmt_push* := js-stmt* |[
-            stmts_attribute
-            x_result.push(x_value);
-          ]|
-        case ZeroOrOne():
-          stmt_push* := js-stmt* |[
-            stmts_attribute
-            if(value !== null){
+     (i, (
+      x_result, 
+      x_entityTable,
+      x_attributeTable, 
+      x_loop, 
+      x_value
+    )) := <gen-varnames-inc> (0, 5)
+    ; exp_attributeTable := <attribute-table-expression> x_attributeName
+    ; exp_entityTable := <entity-table-expression> x_attributeName
+    with 
+      switch <name-get-multiplicity> x_attributeName
+        case upper-one:
+          stmts_push := js-stmt* |[
+            if(x_value !== undefined) {
               x_result.push(x_value);
             }
           ]|
-        case upper-many():
-          stmt_push* := js-stmt* |[
-            var value2 = x_value;
-            if(value2 != null){
-              for(var j = 0 ; j < value2.length ; j++){
-                var x_value = value2[j];
-                stmts_attribute
-                x_result.push(x_value);
+        case upper-many: 
+            (x_value2, x_loop2) := <gen-varnames> (i, 2)
+          ; stmts_push := js-stmt* |[
+            for(var x_loop2 = 0 ; x_loop2 < x_value.length ; x_loop2++) {
+              var x_value2 = x_value[x_loop2];
+              if(x_value2 !== null) {
+                x_result.push(x_value2);
               }
             }
           ]|
       end
-  
+    with
+      switch !x_attributeName
+        case attributename-is-derivation:
+          stmts := js-stmt* |[
+            var x_result = [];
+            var x_attributeTable = state.get(exp_attributeTable);
+            for(var x_loop = 0 ; x_loop < ids.length ; x_loop++) {
+              x_value = x_attributeTable.get(ids[x_loop]);
+              if(x_value !== undefined) {
+                x_value = x_value.x_attributeName;
+                if(x_value !== undefined && x_value !== null) {
+                  stmts_push
+                }
+              }
+            }
+            return x_result;
+          ]|
+          
+        case attributename-is-normal:
+          stmts := js-stmt* |[
+            var x_result = [];
+            var x_entityTable = state.get(exp_entityTable);
+            for(var x_loop = 0 ; x_loop < ids.length ; x_loop++) {
+              x_value = x_entityTable.get(ids[x_loop]);
+              if(x_value !== undefined) {
+                x_value = x_value.x_attributeName;
+                if(x_value !== undefined && x_value !== null) {
+                  stmts_push
+                }
+              }
+            }
+            return x_result;
+          ]|
+        case attributename-is-default:
+          stmts := js-stmt* |[
+            var x_result = [];
+            var x_entityTable = state.get(exp_entityTable);
+            var x_attributeTable = state.get(exp_attributeTable);
+            for(var x_loop = 0 ; x_loop < ids.length ; x_loop++) {
+              x_value = x_entityTable.get(ids[x_loop]);
+              if(x_value !== undefined) {
+                x_value = x_value.x_attributeName;
+                if(x_value === undefined) { //no uservalue
+                  x_value = x_attributeTable.get(ids[x_loop]);
+                }
+                stmts_push
+              }
+            }
+            return x_result;
+          ]|
+      end
   

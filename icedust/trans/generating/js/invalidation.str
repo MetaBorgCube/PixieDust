@@ -63,16 +63,16 @@ rules
     }
   ]|  
     
-  generate-derived-value-invalidation: attribute ->
+  generate-derived-value-invalidation: x_attribute ->
     js-stmt* |[
       state = state.update(exp_invalidationattribute, function(set) { 
         return set.remove(id);
       });
     ]|
     where
-      <name-is-derived> attribute
+      <name-is-default-derived> x_attribute
     with
-      exp_invalidationattribute := <attribute-name ; js-string> attribute
+      exp_invalidationattribute := <attribute-table-expression> x_attribute
     
   generate-derived-value-invalidation = ![]
      

@@ -66,7 +66,7 @@ rules
   generate-calculate-function: x_attribute -> js-stmt*|[
     function x_calculateFunctionName(state, x_id){
       var x_result = x_getterFunctionName(state, exp_id);
-      if(x_result === exp_uncalculatedValue){
+      if(x_result === undefined){
         stmt_scoped
       }
       return {
@@ -84,7 +84,7 @@ rules
     ; exp_id := <js-var> x_id
     ; x_result := "result"
     ; x_getterFunctionName := <getter-function-name> (x_attribute, m)
-    ; exp_uncalculatedValue := <exp-uncalculated-value> x_attribute
+//    ; exp_uncalculatedValue := <exp-uncalculated-value> x_attribute
     ; x_calculateFunctionName := <calculate-function-name> x_attribute
     ; (exp_result, stmts_calculate, _) := <exp-to-js-stmts(|1)> exp_attribute
     ; x_setterFunction := <setter-function-name> x_attribute

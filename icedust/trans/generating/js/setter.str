@@ -54,13 +54,14 @@ rules
       is-attributename
     with
       stmts_invalidation := <invalidation> (x_attribute, exp_this)
-      ; exp_table := <attribute-table-expression> x_attribute
+      ; exp_attributeTable := <attribute-table-expression> x_attribute
+      ; exp_entityTable := <entity-table-expression> x_attribute
     with
       switch !x_attribute
         case attributename-is-normal-default:
           stmts_set := js-stmt*|[
             var prop = {x_attribute: exp_value}; 
-            state = state.update(exp_table, function(table) {
+            state = state.update(exp_entityTable, function(table) {
               return table.update(exp_this, function(e){ 
                 return _.assign({}, e, prop);
               });
@@ -68,7 +69,7 @@ rules
           ]|
         case name-is-derived:
           stmts_set := js-stmt*|[
-            state = state.update(exp_table, function(table) {
+            state = state.update(exp_attributeTable, function(table) {
               return table.set(exp_this, exp_value);
             });
           ]|

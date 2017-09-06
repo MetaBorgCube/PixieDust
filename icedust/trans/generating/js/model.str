@@ -27,7 +27,7 @@ rules
   ]|
   with
     attributes := <modulename-get-attributes> moduleName
-    ; stmt_getters* := <mapconcat(getter-functions)> attributes
+    ; stmt_getters* := <mapconcat(generate-getter-functions)> attributes
     ; stmt_setters* := <filter(generate-setter) ; concat> attributes
     ; stmt_add* := <filter(generate-add) ; concat> attributes
     ; stmt_invalidations* := <mapconcat(generate-invalidation-function)> attributes

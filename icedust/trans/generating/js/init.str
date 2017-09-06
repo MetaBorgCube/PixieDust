@@ -40,7 +40,7 @@ rules
       
   field-to-prop: attribute -> js-prop |[exp_key : immutable.Map()]|
     where
-      attributename-is-derivation <+ is-relationname
+      attributename-is-derivation <+ is-relationname <+ attributename-is-default
     with
       exp_key := <attribute-table-expression> attribute
       

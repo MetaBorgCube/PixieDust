@@ -46,22 +46,30 @@ rules
   
   scope-var = !"scope"
       
+  int-to-varname : i -> $[_[i]]
+  int-to-varname-inc = !(<int-to-varname>, <inc>)
+  
+  gen-varnames : (i, n) -> vars 
+    with
+      vars := <dec ; upto ; map(!(<id>, i) ; add ; int-to-varname) ; ListToTuple > n
+  
+  gen-varnames-inc : (i, n) -> (i', vars)
+    with
+      vars := <gen-varnames> (i,n)
+    ; i' := <add> (i, n)
+  
   attribute-table-expression: attribute -> <js-string> x_name
     with
-      switch id
-        case is-attributename ; attributename-is-normal-default:
-          x_name := <attributename-get-entityname> attribute
-        case attributename-is-derivation <+ is-relationname:
-          x_name := <attribute-name> attribute
-        case is-string:
-          x_name := attribute
-      end
+      x_name := <attribute-name> attribute
+  
+  entity-table-expression: x_attributeName -> <js-string> x_entity
+    with
+      x_entity := <attributename-get-entityname> x_attributeName
       
   entityname-to-create-action-name : x_entityname -> $[create[x_Entityname]]
     with
       x_Entityname := <ucfirst> x_entityname
-      
-      
-      
+  
+  
       
       
