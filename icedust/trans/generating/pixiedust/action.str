@@ -34,7 +34,7 @@ rules
     ; exp_functionName := <js-string> x_functionName
     ; result := js-stmt* |[
       function x_functionName(state, action){
-        let newState = state;
+        var newState = state;
         scoped(scope, _.assign({}, _.assign({}, action.props, {prop_parameters*})), function(scope) {
           stmts_statements
         });
