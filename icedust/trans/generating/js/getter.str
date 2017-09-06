@@ -22,8 +22,9 @@ rules
     with
       x_functionName := <getter-function-name> (x_attributeName, m)
     ; stmts_getter := <getter-statements> (x_attributeName, m)
+    ; x_id := <upper-one < !"id" + !"ids"> m
     ; result := js-stmt* |[
-        function x_functionName(state, id) {
+        function x_functionName(state, x_id) {
           stmts_getter
         }
         module.exports.x_functionName = x_functionName;

@@ -108,7 +108,7 @@ rules
     ; exp_instance := js-exp |[x_instance.id]|
     ; (stmts_fields, i_result) := <generate-entity-fields(|i')> fields
     ; stmt_scoped := <scope-this-lexically> (exp_instance, stmts_fields)
-    ; exp_table := <attribute-table-expression> tpe
+    ; exp_table := <js-string> tpe
     ; stmts := js-stmt* |[
         var x_instance = {
           id: pixiedustRuntime.generateUniqueId()

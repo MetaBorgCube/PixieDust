@@ -84,12 +84,24 @@ rules
     ; exp_id := <js-var> x_id
     ; x_result := "result"
     ; x_getterFunctionName := <getter-function-name> (x_attribute, m)
-//    ; exp_uncalculatedValue := <exp-uncalculated-value> x_attribute
     ; x_calculateFunctionName := <calculate-function-name> x_attribute
     ; (exp_result, stmts_calculate, _) := <exp-to-js-stmts(|1)> exp_attribute
-    ; x_setterFunction := <setter-function-name> x_attribute
-    ; stmts_setter := <setter-statements(![]|exp_id, exp_result)> x_attribute
-    ; stmts_calculationBody := js-stmt* |[
+    with
+      switch !x_attribute
+        case attributename-is-default: //dont call regular setter, overwrite calculated value
+          exp_attributeTable := <attribute-table-expression> x_attribute
+        ; stmts_setter := js-stmt* |[
+            state = state.update(exp_attributeTable, function(table) {
+              return table.set(exp_id, exp_result);
+            });
+          ]|
+        otherwise:
+          stmts_setter := 
+            <setter-statements(![]|exp_id, exp_result)> x_attribute
+      end
+      
+    with
+      stmts_calculationBody := js-stmt* |[
       stmts_calculate
       x_result = exp_result;
       stmts_setter
