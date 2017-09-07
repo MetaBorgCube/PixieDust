@@ -530,14 +530,24 @@ rules
     with
       exp_this := <this-var ; js-string>
   
-  scope-variable-lexically: (x_var, exp_e, stmts_body) ->
+  scope-variable-lexically: (x_var, exp_e, stmts_body) -> <scope-variables-lexically> (props, stmts_body)
+    with
+      props := js-prop* |[x_var: exp_e]|
+  
+  scope-this-and-variable-lexically: (exp_this, x_var, exp_e, stmts_body) -> <scope-variables-lexically> (props, stmts_body)
+    with
+      x_thisVar := <this-var>
+    ; props := js-prop* |[
+        x_thisVar : exp_this,
+        x_var : exp_e
+      ]|
+      
+  scope-variables-lexically: (prop_var*, stmts_body) ->
     js-stmt |[
-      scoped(scope, {exp_var: exp_e}, function(scope) {
+      scoped(scope, {prop_var*}, function(scope) {
         stmts_body
       });
     ]|
-    with
-      exp_var := <js-string> x_var
   
   scope-this-lexically: (exp_e, stmts_body) -> <scope-variable-lexically> (x_var, exp_e, stmts_body)
     with

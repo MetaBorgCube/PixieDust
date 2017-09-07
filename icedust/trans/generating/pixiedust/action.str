@@ -35,7 +35,7 @@ rules
     ; result := js-stmt* |[
       function x_functionName(state, action){
         var newState = state;
-        scoped(scope, _.assign({}, _.assign({}, action.props, {prop_parameters*})), function(scope) {
+        scoped(scope, _.assign({}, action.props, {prop_parameters*}), function(scope) {
           stmts_statements
         });
         return newState;
@@ -50,20 +50,30 @@ rules
       with
         exp_index := <dec ; int-to-string ; js-int> i
     
-  generate-action-statements: statements -> <concat> stmts_stmts_statements 
+  generate-action-statements: statements -> stmts_result 
     with
-      (stmts_stmts_statements, i) := <foldl(fold-action-statement)> (statements, ([], 0))
+      (stmts_result, i) := <foldr(!([], 0), foldr-action-statement)> statements
+  
+  foldr-action-statement : (stmt, (stmts_acc, i)) -> 
+    <extract-statement ; generate-entity-field(|stmts_acc, i)> stmt
+  
+  extract-statement = ?CreateEntityStatement(<id>)
+  extract-statement = ?UpdateEntityStatement(<id>)    
+  
+//  fold-action-statement: (statement, (stmts_stmts_statement, i)) -> result
+//    with
+//      (stmts_statement, i') := <generate-action-statement(|i)> statement
+//    ; stmts_statement' := <set-newstate> stmts_statement
+//    ; result := ([stmts_statement' | stmts_stmts_statement], i')
     
-  fold-action-statement: (statement, (stmts_stmts_statement, i)) -> result
-    with
-      (stmts_statement, i') := <generate-action-statement(|i)> statement
-    ; result := ([stmts_statement | stmts_stmts_statement], i')
     
-  generate-action-statement(|i): UpdateEntityStatement(stmt) -> <generate-entity-field(|i)> stmt 
-  generate-action-statement(|i): CreateEntityStatement(stmt) -> <generate-entity-field(|i)> stmt 
+    
+//  generate-action-statement(|i): UpdateEntityStatement(stmt) -> <generate-entity-field(|i)> stmt 
+//  generate-action-statement(|i): CreateEntityStatement(stmt) -> <generate-entity-field(|i)> stmt 
       
   
-  generate-entity-field(|i): EntityMember(name, e) -> result
+  
+  generate-entity-field(|stmts_acc, i): EntityMember(name, e) -> result
     with
       exp_this := <exp-this>
     ; (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
@@ -72,10 +82,11 @@ rules
     ; stmts := js-stmt* |[
       stmts_e
       newState = x_setterFunction(newState, exp_this, exp_e);
+      stmts_acc
     ]|
     ; result := (stmts, i'')
   
-  generate-entity-field(|i): UpdateEntity(e, fields) -> result
+  generate-entity-field(|stmts_acc, i): UpdateEntity(e, fields) -> result
     with
       (exp_e, stmts_e, i') := <exp-to-js-stmts(|i)> e
     ; switch <get-multiplicity> e
@@ -86,6 +97,7 @@ rules
         ; stmts := js-stmt* |[
           stmts_e
           stmt_scoped
+          stmts_acc
         ]|
       case upper-many:
         (x_loop, i'') := <int-to-varname-inc> i'
@@ -98,16 +110,18 @@ rules
           for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++) {
             stmt_scoped
           }
+          stmts_acc
         ]|
     end
     ; result := (stmts, i_result)
   
-  generate-entity-field(|i) : CreateEntityInstance(x_var, EntityType(tpe), fields) -> result
+  generate-entity-field(|stmts_acc, i) : CreateEntityInstance(x_var, EntityType(tpe), fields) -> result
     with
       (x_instance, i') := <int-to-varname-inc> i
     ; exp_instance := js-exp |[x_instance.id]|
     ; (stmts_fields, i_result) := <generate-entity-fields(|i')> fields
     ; stmt_scoped := <scope-this-lexically> (exp_instance, stmts_fields)
+    ; stmt_rest := <scope-variable-lexically> (x_var, exp_instance, stmts_acc)
     ; exp_table := <js-string> tpe
     ; stmts := js-stmt* |[
         var x_instance = {
@@ -117,18 +131,19 @@ rules
           return table.set(x_instance.id, x_instance);
         });
         stmt_scoped
+        stmt_rest
       ]|
     ; result := (stmts, i_result)
   
-  generate-entity-fields(|i) : fields -> result
-    with
-      (stmts_fields, i') := <foldl(fold-entity-field)> (fields, ([], i))
-    ; result := (<concat> stmts_fields, i')
+  generate-entity-fields(|i) : fields -> <foldr(!([], i), foldr-entity-field)> fields
+  
+  foldr-entity-field: (field, (stmts_acc, i)) -> <generate-entity-field(|stmts_acc, i)> field
+  
     
-  fold-entity-field : (field, (stmts_stmts_field, i)) -> result
-    with
-      (stmts_field, i') := <generate-entity-field(|i)> field
-    ; result := ([stmts_field | stmts_stmts_field], i')
+//  fold-entity-field : (field, (stmts_stmts_field, i)) -> result
+//    with
+//      (stmts_field, i') := <generate-entity-field(|i)> field
+//    ; result := ([stmts_field | stmts_stmts_field], i')
     
   
        

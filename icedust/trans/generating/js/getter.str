@@ -122,16 +122,22 @@ rules
             var x_attributeTable = state.get(exp_attributeTable);
             for(var x_loop = 0 ; x_loop < ids.length ; x_loop++) {
               x_value = x_attributeTable.get(ids[x_loop]);
-              if(x_value !== undefined) {
-                x_value = x_value.x_attributeName;
-                if(x_value !== undefined && x_value !== null) {
-                  stmts_push
-                }
-              }
+              stmts_push
             }
             return x_result;
           ]|
-          
+        case is-relationname:
+          stmts := js-stmt* |[
+            var x_result = [];
+            var x_attributeTable = state.get(exp_attributeTable);
+            for(var x_loop = 0 ; x_loop < ids.length ; x_loop++) {
+              x_value = x_attributeTable.get(ids[x_loop]);
+              if(x_value !== undefined) {
+                stmts_push
+              }
+            }
+            return x_result;
+          ]|  
         case attributename-is-normal:
           stmts := js-stmt* |[
             var x_result = [];
