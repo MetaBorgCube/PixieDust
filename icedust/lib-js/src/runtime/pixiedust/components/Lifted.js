@@ -51,7 +51,7 @@ function Lifted(render, actions){
     },
 
     stateUpdate: function(context, newState){
-      context.store.dispatch({type: 'state_update', newState: newState})
+      context.store.dispatch({type: 'cacheUpdate[' + componentName + ']', updatedState: newState})
     },
 
     render: function(){

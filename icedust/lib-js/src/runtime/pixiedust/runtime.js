@@ -23,8 +23,14 @@ function makeReducer(actions, debug, optionalActions){
     optionalActions = defaultOptionalActions;
   }
 
+  var stateUpdateActionPattern = /^cacheUpdate(\[.+\])$/;
+  
   function reducer(state, message){
-    var action = actions[message.type];
+    if(stateUpdateActionPattern.test(message.type)){
+    	return message.updatedState;
+    }
+    
+  	var action = actions[message.type];
     if(action !== undefined){
       state = action(state, message)
     } else if(message.type !== undefined){

@@ -40,7 +40,6 @@ rules
     ; exp_eAsString := <pp-partial-icedust-string ; js-escaped-string> e 
     ; exp_typeAsString := <get-type2 ; pp-partial-icedust-string ; js-string> e
     ; exp_multiplicityAsString := <get-multiplicity ; pp-partial-icedust-string ; trim-whitespace ; js-string> e
-    ; exp_update := <set-state-action-name ; js-string>
     ; result := js-stmt |[
       (function(){
         function calculation(state){

@@ -35,24 +35,19 @@ rules
   generate-actions: (attributes, entities) -> js-stmt* |[
     var actions = {
       prop_init,
-      prop_setState,
       prop_setter*,
-      prop_calculate*,
-      prop_create*
+      prop_calculate*
     };
     module.exports.actions = actions;
   ]|
     with
       prop_init := <init-action>
-    ; prop_setState := <set-state-action>
     ; prop_setter* := <mapconcat(attribute-to-setter-action-props(setter-action-expression))> attributes
     ; prop_calculate* := <mapconcat(attribute-to-calculate-action-props(calculate-action-expression))> attributes
-    ; prop_create* := <map(entityname-to-create-action-prop)> entities
   
   generate-action-creators: (attributes, entities) -> js-stmt* |[
     var actionCreators = {
       prop_init,
-      prop_setState,
       prop_setter*,
       prop_calculate*,
       prop_create*
@@ -61,7 +56,6 @@ rules
   ]|
     with
       prop_init := <init-action-creator>
-    ; prop_setState := <set-state-action-creator>
     ; prop_setter* := <mapconcat(attribute-to-setter-action-props(setter-action-creator-expression))> attributes
     ; prop_calculate* := <mapconcat(attribute-to-calculate-action-props(calculate-action-creator-expression))> attributes
     ; prop_create* := <map(entityname-to-create-action-creator-prop)> entities
@@ -186,27 +180,6 @@ rules
     with
       x_name := <init-action-name>
     ; exp_name := <js-string> x_name
-    
-  set-state-action-name = !"state_update"
-  
-  set-state-action: _ -> js-prop |[
-    exp_name : function(state, action){
-      return action.newState;
-    }
-  ]|
-    with
-      exp_name := <set-state-action-name ; js-string>
-    
-  set-state-action-creator: _ -> js-prop |[
-    exp_name : function(newState){
-      return {
-        type: exp_name,
-        newState: newState
-      };
-    }
-  ]|
-    with
-      exp_name := <set-state-action-name ; js-string>
     
   entityname-to-create-action-creator-prop: x_entityname -> js-prop |[
     exp_name: function(entity){
