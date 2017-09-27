@@ -7,8 +7,13 @@ var PixieDustProvider = Class(React.Component, {
 
   },
   componentDidMount: function(){
-    this.props.store.subscribe(this.forceUpdate.bind(this));
+    this.unsubscribe = this.props.store.subscribe(this.forceUpdate.bind(this));
   },
+
+  componentWillUnmount: function(){
+    this.unsubscribe();
+  },
+
   getChildContext: function(){
     return {
       store: this.props.store

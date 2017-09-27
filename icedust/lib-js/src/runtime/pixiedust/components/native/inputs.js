@@ -222,6 +222,51 @@ var AutoFocusStringInput = Class(PixieDustComponent, {
 	}
 });
 
+var KeyboardListener = Class(React.Component, {
+	
+	constructor: function KeyboardListener(){
+		this.callback = this.callback.bind(this);
+	},
+	
+	callback: function(e){
+		var action = this.props['on' + e.key];
+		if(action !== undefined && action !== null){
+			action()();
+		}
+	},
+	
+	componentDidMount: function(){
+		document.addEventListener('keydown', this.callback);
+	},
+	
+	componentWillUnmount: function(){
+		document.removeEventListener('keydown', this.callback);
+	},
+	
+	render: function(){return null;}
+});
+
+var Trigger = Class(React.Component, {
+	constructor: function Trigger(){
+		this.trigger = this.trigger.bind(this);
+	},
+	
+	componentWillMount: function(){
+		this.trigger();
+	},
+	
+	trigger: function(){
+		var action = this.props.action;
+		if(action !== undefined && action !== null){
+			action()();
+		}
+	},
+	
+	render: function(){
+		return null;
+	}
+})
+
 module.exports = {
 	InputFactory: InputFactory,
 
@@ -264,6 +309,10 @@ module.exports = {
 	TextInput: TextInput,
 	OptTextInput: OptTextInput,
 	
-	AutoFocusStringInput: AutoFocusStringInput
+	AutoFocusStringInput: AutoFocusStringInput,
+	
+	KeyboardListener: KeyboardListener,
+	
+	Trigger: Trigger
 };
 

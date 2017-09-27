@@ -31,11 +31,15 @@ function Lifted(render, actions){
 				this.actions[actionName] = actionCreator;
 			}).bind(this)();
 		}
-		this.materialize(props, context);
 	}
 	
 	var LiftedComponent = Class(PixieDustComponent, {
 		constructor: constructor,
+		
+		componentWillMount: function(){
+			this.materialize(this.props, this.context);
+		},
+		
 		componentWillReceiveProps: function(props, context){
       this.materialize(props, context);
     },
@@ -43,7 +47,7 @@ function Lifted(render, actions){
     materialize: function(props, context){
     	var state = context.store.getState();
     	var scope = _.assign({}, props, this.actions);
-    	var rendered = render(scope, state);
+    	var rendered = render(scope, state, context.store);
       this.materialized = rendered.result;
       if(rendered.state !== state){
         this.stateUpdate(context, rendered.state);
