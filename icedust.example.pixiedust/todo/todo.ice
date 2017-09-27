@@ -2,18 +2,19 @@ module todo
 
 config
   backend: PixieDust
-  target: html
-  include stylesheets/main.css
+  target: webpack
+//  target: html
+//  include stylesheets/main.css
 
 imports
   pixiedust/components/native/inputs {
-    component StringInput(ref value: String, onSubmit: Action[String]?, className: String, autoFocus: Boolean, placeholder: String)
+    component StringInput(ref value: String, onSubmit: Action[String]?, id: String, autoFocus: Boolean, placeholder: String)
     component AutoFocusStringInput(ref value: String, className: String, visible: Boolean, onSubmit: Action[])
   }
   
 model
   
-  entity TodoApp{
+  entity TodoList{
     filter: String = "All" (default)
     allFinished: Boolean = conj(todos.finished)
     todosLeft: Int = (todos \ finishedTodos).count()
@@ -25,10 +26,10 @@ model
     finished: Boolean
   }
   
-  relation TodoApp.editing ? <-> ? Todo.editing_inverse
-  relation TodoApp.todos * <-> 1 Todo.app
-  relation TodoApp.finishedTodos = todos.filter(todo => todo.finished) <-> Todo.inverseFinishedTodos
-  relation TodoApp.visibleTodos = 
+  relation TodoList.editing ? <-> ? Todo.editing_inverse
+  relation TodoList.todos * <-> 1 Todo.list
+  relation TodoList.finishedTodos = todos.filter(todo => todo.finished) <-> Todo.inverseFinishedTodos
+  relation TodoList.visibleTodos = 
     switch {
       case filter == "All" => todos
       case filter == "Completed" => finishedTodos
@@ -37,12 +38,12 @@ model
     } <-> Todo.inverseVisibleTodos
 view
 
-  component TodoApp(app: TodoApp){
+  component TodoList(list: TodoList){
     action toggleAll(){
-      app {
-          todos {
-            finished = !app.allFinished
-          }
+      list {
+        todos {
+          finished = !list.allFinished
+        }
       }
     }
     
@@ -50,63 +51,63 @@ view
       t: Todo {
         task = task
         finished = false
-        app = app
+        list = list
       }
-      app { input = "" }
+      list { input = "" }
     }
     
-    section[className="todoapp"]{
+    section[className="todolist"]{
       header[className="header"] {
       h1 { "todos" }
-        @StringInput(app.input, if(app.input != "") createTodo, "new-todo", true, "What needs to be done?")  
+        @StringInput(list.input, if(list.input != "") createTodo, "new-todo", false, "What needs to be done?")  
       }
       
-      if(app.todos.count() > 0)
+      if(list.todos.count() > 0)
         section[className="main"] {
-          @BooleanInput(app.allFinished, "toggle-all", toggleAll)
+          @BooleanInput(list.allFinished, "toggle-all", toggleAll)
           ul[className="todo-list"] {
-            for(todo in app.visibleTodos) (@TodoItem(todo))
+            for(todo in list.visibleTodos) (@TodoItem(todo))
           }
         }
-      @TodoFooter(app)
+      @TodoFooter(list)
     }
   }
   
-  component TodoFilters(app: TodoApp) {
+  component TodoFilters(list: TodoList) {
     ul[className="filters"]{
-      @FilterType("All", app)
-      @FilterType("Completed", app)
-      @FilterType("Not Completed", app)
+      @FilterType("All", list)
+      @FilterType("Completed", list)
+      @FilterType("Not Completed", list)
     }
   }
   
 
-  component FilterType(name: String, app: TodoApp) {
+  component FilterType(name: String, list: TodoList) {
     action setFilter(){
-      app { filter = name }
+      list { filter = name }
     }
     li {
-      a[className=if(app.filter == name) "selected" else "", onClick=setFilter()] { 
+      a[className=if(list.filter == name) "selected" else "", onClick=setFilter()] { 
         name 
       }
     }
   }
   
-  component TodoFooter(app: TodoApp){
+  component TodoFooter(list: TodoList){
     action clearCompleted(){
-      app {
+      list {
         todos = todos \ finishedTodos
       }
     }
   
     footer[className="footer"] {
       span[className="todo-count"] {
-        "${app.todosLeft} ${if(app.todosLeft == 1) "item" else "items"} left"
+        "${list.todosLeft} ${if(list.todosLeft == 1) "item" else "items"} left"
       }
       
-      @TodoFilters(app)
+      @TodoFilters(list)
       
-      if(app.finishedTodos.count() > 0) 
+      if(list.finishedTodos.count() > 0) 
         a[className="clear-completed", onClick=clearCompleted()]{ "Clear completed" }
     }
   }
@@ -120,8 +121,6 @@ view
     ]
   }
 
-
-
   component TodoItem(todo: Todo){
     action toggleFinished(){
       todo {
@@ -131,34 +130,39 @@ view
     
     action removeTodo(){
       todo {
-        app {
+        list {
           todos = todos \ todo
         }
       }
     }
     
     action editTodo(){
-      todo.app { editing = todo }
+      todo.list { editing = todo }
     }
     
     action finishEditing(){
-      todo.app { editing = no value }
+      todo.list { editing = no value }
     }
     
-    todo.app.editing == todo
-    li[className= if(todo.finished) "completed" else "" ++ if((todo.app.editing == todo <+ false)) " editing" else ""]{
+    todo.list.editing == todo
+    li[className= if(todo.finished) "completed" else "" ++ if((todo.list.editing == todo <+ false)) " editing" else ""]{
       div[className="view"] {
         @BooleanInput(todo.finished, "toggle", toggleFinished)
         label[onDoubleClick=editTodo()] { todo.task }
         button[className="destroy", onClick=removeTodo()]
       }
-      @AutoFocusStringInput(todo.task, "edit", todo.app.editing == todo, finishEditing)
+      @AutoFocusStringInput(todo.task, "edit", todo.list.editing == todo, finishEditing)
     }
   }
   
   
 data
-  app : TodoApp{}
+  l1 : TodoList {
+//    todos =
+//      t1 { task="t1" finished = true }
+//    , t2 { task="t2" }
+//    , t3 { task="t3" finished = true }
+  }
   
 execute
-  @TodoApp(app)
+  @TodoList(l1)

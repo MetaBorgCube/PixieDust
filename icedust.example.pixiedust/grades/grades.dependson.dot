@@ -1,0 +1,18 @@
+digraph {
+"App.view" -> "App.courses"
+  "App.view" -> "App.selectedCourse"
+  "App.view" -> "Course.name"[label="(courses)"]
+  "App.view" -> "Course.view"[label="(selectedCourse)"]
+  "Course.avgGrade" -> "Course.submissions"
+  "Course.avgGrade" -> "Submission.grade2"[label="(submissions)"]
+  "Course.view" -> "Course.avgGrade"
+  "Course.view" -> "Course.name"
+  "Course.view" -> "Course.submissions"
+  "Course.view" -> "Submission.view"[label="(submissions)"]
+  "Submission.grade2" -> "Submission.grade"
+  "Submission.grade2" -> "Submission.pass"
+  "Submission.pass" -> "Submission.grade"
+  "Submission.view" -> "Student.name"[label="(student)"]
+  "Submission.view" -> "Submission.grade"
+  "Submission.view" -> "Submission.student"
+}

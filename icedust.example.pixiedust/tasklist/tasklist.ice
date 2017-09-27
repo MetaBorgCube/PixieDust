@@ -6,9 +6,7 @@ config
 
 model
 
-entity 
-  
-  TaskApp{
+entity TaskApp{
     filter: String = "All" (default)
     input: String = "" (default)
     remainder : Int = rootList.allTasks.filter(task => !task.finished).count()
@@ -31,7 +29,7 @@ entity
   relation TaskApp.lists * <-> 1 TaskList.app
   relation TaskApp.rootList 1 <-> ? TaskList.app2
   
-  relation TaskList.rootList 1 = parent.rootList <+ this <-> * TaskList.inverseRootList
+  relation TaskList.rootList 1 = parent.rootList <+ this <-> * TaskList
   relation TaskList.tasks * <-> 1 Task.list
   relation TaskList.children * <-> ? TaskList.parent
   
@@ -67,9 +65,9 @@ view
       app { input = "" }
     }
     
-    button[className="fa fa-home", onClick=setRoot(app.rootList.rootList)]
+    button[onClick=setRoot(app.rootList.rootList)] { "Root" }
     for(parent in app.rootList.parent) div {
-      button[className="fa fa-level-up", onClick=setRoot(parent)]
+      button[onClick=setRoot(parent)] { "Parent" }
     }
     @StringInput(app.input, if(app.input != "") addTask)
     span { "${app.remainder} ${if(app.remainder == 1) "task" else "tasks"}  left" }
@@ -88,17 +86,19 @@ view
       list { parent = no value }
     }
     
-    action deleteListAsRoot(){
-      list { parent = no value }
-      list.app { rootList = list.parent <+ list }
-    }
-    
     action addList(){
       l : TaskList {
         app = list.app
         parent = list
       }
-      list.app { input = "" }
+      
+    }
+    
+    action addTaskHere(){
+      task: Task {
+        description = list.app.input
+        list = list
+      }
     }
     
     action setAsRoot(){
@@ -107,13 +107,14 @@ view
     
     div {
       @Checkbox(list.allFinished, toggleChildren)
-      button[className="fa fa-search-plus", onClick=setAsRoot()]
-      if(list.app.rootList != list) button[className="fa fa-trash", onClick=deleteList()]
+      button[onClick=setAsRoot()] { "Zoom" }
+      if(list.app.rootList != list) button[onClick=deleteList()] {"Delete List"}
+      if(list.app.input != "") button[onClick=addTaskHere()] { "Add task" }
       @Nested {
         for(task in list.visibleTasks) @TaskItem(task)
       }
       if(list.rootDistance <= 3) @Nested {
-        button[className="fa fa-plus", onClick=addList()]
+        button[onClick=addList()] { "Add child" }
         for(child in list.children) (@TaskList(child))
       }
     }
@@ -140,16 +141,12 @@ view
   }
   
   component TaskFilters(app: TaskApp) {
-    ul{we
+    ul{
       @FilterType("All", app)
       @FilterType("Completed", app)
       @FilterType("Not Completed", app)
     }
   }
-
-  component IconButton(icon: String, onClick: Action[]){
-    i[className="fa fa-${icon}", onClick=onClick()]
-  }  
 
   component FilterType(name: String, app: TaskApp) {
     action setFilter(){

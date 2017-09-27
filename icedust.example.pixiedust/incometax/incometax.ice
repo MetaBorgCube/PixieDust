@@ -3,10 +3,12 @@ module incometax
 config
   backend: PixieDust
   target: webpack
+//  target: html
+//  include ./stylesheets/pure.css
   
   
 imports
-  ../components/inputs as Native {
+  pixiedust/components/native/inputs as Native {
     component StringInput(ref value: String)
     component TextInput(ref value: String)
     component IntInput(ref value: Int)
@@ -88,69 +90,87 @@ data
 
 view
 
-component IncomeTax(income: Income){
-  h2 { income.name }
-  
-  div{
-    label { "Monthly Salary" }
-    @FloatInput(income.monthlySalary)
+  component IncomeTax(income: Income){
+    h2 { income.name }
+    @TwoColumn(
+      @IncomeForm(income)
+    , div{}//@IncomeSummary(income)
+    )
   }
-  
-  div{
-    label { "Holiday Allowance" }
-    @FloatInput(income.holidayAllowance)
-  }
-  
-  div{
-    label { "Thirteenth month?" }
-    @BooleanInput(income.thirteenthMonth)
-  }
-  
-  div {
-    label { "Lease car price" }
-    @OptFloatInput(income.leaseCarPrice)
-  }
-  
-  div {
-    label { "Lease car percent" }
-    @OptFloatInput(income.leaseCarPercent)
-  }
-  
-  @IncomeSummary(income)
-}
 
-component IncomeSummary(income: Income){
-  
-  table {
-    thead{
-      tr{
-        th {
-          "Property"
-        }
-        th {
-          "Value"
-        }
-      }  
-    }
-    tbody{
-      @IncomeProperty("Gross salary", income.grossSalary)
-      @IncomeProperty("Monthly tax", income.tax / 12.0)
-      @IncomeProperty("Net salary", income.netSalary)
-      @IncomeProperty("Taxable income", income.taxableIncome)
-      @IncomeProperty("General tax discount", income.gernalTaxDiscount)
-      @IncomeProperty("Lease car?", if(count(income.leaseCarPrice) == 0) "No" else "Yes")
-      if(count(income.leaseCarPrice) == 1)
-        @IncomeProperty("Monthly Lease car addition", income.leaseCarAddition / 12.0 <+ 0.0)
+  component IncomeForm(income: Income){
+    div[className="pure-form"]{
+    
+      label {
+        h4[style={marginBottom="0px"}]{"Monthly Salary"}
+        (@FloatInput(income.monthlySalary))
+      }
+      
+      label {
+        h4[style={marginBottom="0px"}]{"Holiday allowance"}
+        (@FloatInput(income.holidayAllowance))
+      }
+      
+      label {
+        h4[style={marginBottom="0px"}]{ "Thirteenth month?" }
+        (@BooleanInput(income.thirteenthMonth))
+      }
+      
+      label {
+        h4[style={marginBottom="0px"}]{ "Lease car price" }
+        (@OptFloatInput(income.leaseCarPrice))
+      }
+      
+      label {
+        h4[style={marginBottom="0px"}]{ "Lease car percent" }
+        (@OptFloatInput(income.leaseCarPercent))
+      }
     }
   }
-}
 
-component IncomeProperty(name: String, value: String){
-  tr{
-    td { name }
-    td { value }
+  component IncomeSummary(income: Income){
+    
+    table[className="pure-table"] {
+      thead{
+        tr{
+          th {
+            "Property"
+          }
+          th {
+            "Value"
+          }
+        }  
+      }
+      tbody{
+        @IncomeProperty("Gross salary", income.grossSalary)
+        @IncomeProperty("Monthly tax", income.tax / 12.0)
+        @IncomeProperty("Net salary", income.netSalary)
+        @IncomeProperty("Taxable income", income.taxableIncome)
+        @IncomeProperty("General tax discount", income.gernalTaxDiscount)
+        @IncomeProperty("Lease car?", if(count(income.leaseCarPrice) == 0) "No" else "Yes")
+        if(count(income.leaseCarPrice) == 1)
+          @IncomeProperty("Monthly Lease car addition", income.leaseCarAddition / 12.0 <+ 0.0)
+      }
+    }
   }
-}
+
+  component IncomeProperty(name: String, value: String){
+    tr{
+      td { name }
+      td { value }
+    }
+  }
+
+  component TwoColumn(left: View, right: View){
+    div[className="pure-g"]{
+      div[className="pure-u-1-2"]{
+        left
+      }
+      div[className="pure-u-1-2"]{
+        right
+      }
+    }
+  }
 
 execute
   @IncomeTax(phpProgrammer)

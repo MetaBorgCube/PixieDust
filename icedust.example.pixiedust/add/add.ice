@@ -1,9 +1,11 @@
-module counter
+module ice
 
 config
   backend: PixieDust
   target: webpack
 //  target: html
+
+
 
 model
   entity Counter {
@@ -12,12 +14,16 @@ model
   
   entity Add {
     value: Int = lhs.value + rhs.value
-    equation: View = span { lhs.value " + " rhs.value " = " value }
   }
   
   relation Add.lhs 1 <-> Counter.inverseLhs
   relation Add.rhs 1 <-> Counter.inverseRhs
   
+
+imports
+  pixiedust/components/native/inputs {
+    component IntInput(ref value: Int)
+  }
   
 view
   component Counter(c: Counter) {
@@ -26,24 +32,17 @@ view
         value = value + by
       }
     }
-    div{
-      button[onClick=increment(1)] { "+" }
-      span  { c.value }
-      button[onClick=increment(-1)] { "-" }
-    }
   }
   
   component Add(add: Add) {
-    @Counter(add.lhs)
-    @Counter(add.rhs)
-    add.equation
-  }
-  
-  component Main(add: Add){
-    @Add(add)
-    div{
-      @CodeBlock("html", @Add(add as String))
+    action reset(){
+      add {
+        lhs { value = 0 }
+        rhs { value = 0 }
+      }
     }
+    button[onClick=reset()]{ "Reset" }
+    @IntInput(add.lhs.value) "+" @IntInput(add.rhs.value) "=" add.value
   }
 
 data
@@ -53,4 +52,4 @@ data
   }  
   
 execute
-  @Main(add)
+  @Add(add)
