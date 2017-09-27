@@ -43,7 +43,7 @@ rules
     ; exp_actionName* := <componentname-get-actionnames ; map(js-string)> x_componentName
     ; result := js-exp |[
         Lifted(
-          function x_componentName(props, state){
+          function x_componentName(props, state, store){
             var scope = _.assign({}, oldScope, props);
             stmts_body
             return {
