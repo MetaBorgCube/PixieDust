@@ -1,0 +1,95 @@
+module scopes
+
+imports
+  libstratego-lib
+
+
+signature
+  sorts
+    Env
+    Scope
+    Binding
+
+  constructors
+    Env : list(Scope) * Int -> Env
+    Scope : list(Binding) -> Scope
+    Binding: String * Int -> Binding
+
+rules
+  main = 
+    test-scopes
+  ; test-fresh-variables
+  ; test-store-variable
+  ; !"success"
+  ; test-get-local-variable
+  ; test-get-lexical-variable
+  
+  assert-equals(|to) = !(<id>, to) ; ?(fst, snd) ; (eq <+ print(|"Not equal: ") ; print(|fst) ; print(|snd) ; fail)
+  
+  print(|value) = !value ; write-to-string ; debug
+  
+  test-scopes = new-environment ; push-scope ; pop-scope ; assert-equals(|<new-environment>)
+  test-fresh-variables = new-environment ; fresh-variable ; assert-equals(|(Env([Scope([])], 1), "_0"))
+  test-store-variable = new-environment ; <store-variable> (<id>, "foo") ; assert-equals(|(Env([Scope([Binding("foo", 0)])], 1), "_0"))
+  test-get-local-variable = new-environment ; <store-variable> (<id>, "foo") ; <get-variable> (<Fst>, "foo") ; assert-equals(|"_0")
+  test-get-lexical-variable = new-environment ; <store-variable> (<id>, "foo") ; Fst ; push-scope ; <get-variable> (<id>, "foo") ; assert-equals(|"_0")
+  
+  /**
+    new-environment :: Env
+    
+  */
+  
+  new-environment = !Env([<new-scope>], 0)
+  
+  /**
+    environment-get-offset :: Env -> Int
+  */
+  environment-get-offset = ?Env(_, <id>)
+  
+  /**
+    new-scope :: Scope
+  */
+  new-scope = !Scope([])
+  
+  
+  /**
+    push-scope :: Env -> Env
+  */
+  push-scope : Env(scopes, offset) -> Env([scope | scopes], offset)
+    with
+      scope := <new-scope>
+  
+  /**
+    pop-scope :: Env -> Env
+  */
+  pop-scope = Env(Tl, id)
+  
+  /**
+    fresh-variable :: Env -> (Env, String)
+  */
+  fresh-variable = !(<Env(id, inc)>, <environment-get-offset ; offset-to-variable>)
+  
+  offset-to-variable = !$[_[<id>]]
+  
+  /**
+    store-variable :: (Env, String) -> (Env, String)
+  */
+  store-variable : (env, var) -> (env', <offset-to-variable> offset)
+    with
+      Env([Scope(bindings) |ss], offset) := env
+    ; binding := Binding(var, offset)
+    ; env' := Env([Scope([binding | bindings]) | ss], <inc> offset)
+  
+  /**
+    get-variable :: (Env,String) -> String
+  */
+  get-variable = ?(<id>, var) ; ?Env(<fetch-elem(get-variable-from-scope(|var))>, _) ; offset-to-variable
+    
+  //get-variable-from-scope :: Scope -> Int
+  get-variable-from-scope(|var) = ?Scope(<fetch-elem(?Binding(var, <id>))>)
+  
+  
+  
+  
+  
+  
