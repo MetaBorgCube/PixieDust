@@ -3,7 +3,6 @@ module scopes
 imports
   libstratego-lib
 
-
 signature
   sorts
     Env
@@ -14,15 +13,16 @@ signature
     Env : list(Scope) * Int -> Env
     Scope : list(Binding) -> Scope
     Binding: String * Int -> Binding
-
+    
 rules
   main = 
     test-scopes
   ; test-fresh-variables
   ; test-store-variable
-  ; !"success"
   ; test-get-local-variable
   ; test-get-lexical-variable
+  ; test-thread-env
+  
   
   assert-equals(|to) = !(<id>, to) ; ?(fst, snd) ; (eq <+ print(|"Not equal: ") ; print(|fst) ; print(|snd) ; fail)
   
@@ -33,7 +33,10 @@ rules
   test-store-variable = new-environment ; <store-variable> (<id>, "foo") ; assert-equals(|(Env([Scope([Binding("foo", 0)])], 1), "_0"))
   test-get-local-variable = new-environment ; <store-variable> (<id>, "foo") ; <get-variable> (<Fst>, "foo") ; assert-equals(|"_0")
   test-get-lexical-variable = new-environment ; <store-variable> (<id>, "foo") ; Fst ; push-scope ; <get-variable> (<id>, "foo") ; assert-equals(|"_0")
-  
+  test-thread-env =
+    new-environment 
+    ; thread-environment(fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable)
+    ; assert-equals(|(<new-environment ; Env(id, !8)>, ["_0", "_1", "_2", "_3", "_4", "_5", "_6", "_7"]))
   /**
     new-environment :: Env
     
@@ -79,6 +82,8 @@ rules
       Env([Scope(bindings) |ss], offset) := env
     ; binding := Binding(var, offset)
     ; env' := Env([Scope([binding | bindings]) | ss], <inc> offset)
+  store-variable(|var) = <store-variable> (<id>, var)
+  
   
   /**
     get-variable :: (Env,String) -> String
@@ -89,7 +94,18 @@ rules
   get-variable-from-scope(|var) = ?Scope(<fetch-elem(?Binding(var, <id>))>)
   
   
-  
+  /**
+    s_i: Env -> (Env, Term)
+    thread-env :: Env -> (Env, (Term_i))
+  */
+  thread-environment(s1) = s1 ; (id, ![<id>])
+  thread-environment(s1, s2) = s1 ; ?(<thread-environment(s2)>, t) ; (id, ![t | <id>])
+  thread-environment(s1, s2, s3) = s1 ; ?(<thread-environment(s2, s3)>, t) ; (id, ![t | <id>])
+  thread-environment(s1, s2, s3, s4) = s1 ; ?(<thread-environment(s2, s3, s4)>, t) ; (id, ![t | <id>])
+  thread-environment(s1, s2, s3, s4, s5) = s1 ; ?(<thread-environment(s2, s3, s4, s5)>, t) ; (id, ![t | <id>])
+  thread-environment(s1, s2, s3, s4, s5, s6) = s1 ; ?(<thread-environment(s2, s3, s4, s5, s6)>, t) ; (id, ![t | <id>])
+  thread-environment(s1, s2, s3, s4, s5, s6, s7) = s1 ; ?(<thread-environment(s2, s3, s4, s5, s6, s7)>, t) ; (id, ![t | <id>])
+  thread-environment(s1, s2, s3, s4, s5, s6, s7, s8) = s1 ; ?(<thread-environment(s2, s3, s4, s5, s6, s7, s8)>, t) ; (id, ![t | <id>])
   
   
   
