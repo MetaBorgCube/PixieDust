@@ -69,6 +69,11 @@ context-free syntax
   
   ResolveRuntime.ResolveInline =     <runtime: inline>
   ResolveRuntime.ResolveFromSource = <runtime: "<STRING>">
+
+context-free syntax
+  Config.PixieDustBackend = <
+    backend: PixieDust
+  >
   
 context-free syntax
   

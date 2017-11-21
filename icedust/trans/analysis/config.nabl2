@@ -46,6 +46,11 @@ rules
 
 rules
 
+  [[ PixieDustBackend() ^ (module_scope, module_name) ]] :=
+    true.
+
+rules
+
   [[ LanguageFeatures(features) ^ (module_scope, module_name) ]] :=
     true.
 

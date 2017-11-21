@@ -15,28 +15,6 @@ signature
     Binding: String * Int -> Binding
     
 rules
-  main = 
-    test-scopes
-  ; test-fresh-variables
-  ; test-store-variable
-  ; test-get-local-variable
-  ; test-get-lexical-variable
-  ; test-thread-env
-  
-  
-  assert-equals(|to) = !(<id>, to) ; ?(fst, snd) ; (eq <+ print(|"Not equal: ") ; print(|fst) ; print(|snd) ; fail)
-  
-  print(|value) = !value ; write-to-string ; debug
-  
-  test-scopes = new-environment ; push-scope ; pop-scope ; assert-equals(|<new-environment>)
-  test-fresh-variables = new-environment ; fresh-variable ; assert-equals(|(Env([Scope([])], 1), "_0"))
-  test-store-variable = new-environment ; <store-variable> (<id>, "foo") ; assert-equals(|(Env([Scope([Binding("foo", 0)])], 1), "_0"))
-  test-get-local-variable = new-environment ; <store-variable> (<id>, "foo") ; <get-variable> (<Fst>, "foo") ; assert-equals(|"_0")
-  test-get-lexical-variable = new-environment ; <store-variable> (<id>, "foo") ; Fst ; push-scope ; <get-variable> (<id>, "foo") ; assert-equals(|"_0")
-  test-thread-env =
-    new-environment 
-    ; thread-environment(fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable)
-    ; assert-equals(|(<new-environment ; Env(id, !8)>, ["_0", "_1", "_2", "_3", "_4", "_5", "_6", "_7"]))
   /**
     new-environment :: Env
     

@@ -14,11 +14,14 @@ rules
     ; !V([], <id>)
     ; box2text-string(|120)
 
+    js-program: stmts_program -> js-program |[stmts_program]|
 
     js-string: s -> String($["[s]"])
     js-escaped-string = escape ; js-string
     js-int: s -> IntegerLiteral(s)
     js-float: s -> FloatLiteral(s)
+    js-true = !True()
+    js-false = !False()
     
     
     js-add = !Addition(<Fst>, <Snd>)

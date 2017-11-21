@@ -105,6 +105,10 @@ context-free syntax // literal values
   LitVal.False           = <false>
   LitVal.Datetime        = <<DATETIME>>
   LitVal.NoValue         = <no value>
+  
+context-free syntax // views
+
+
 
 syntax // literal values: use kernel syntax to make sure " abc " is parsed as String(" abc ") instead of String("abc")
 

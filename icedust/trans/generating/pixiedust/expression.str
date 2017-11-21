@@ -1,0 +1,69 @@
+module generating/pixiedust/expression
+
+imports
+  signatures/Expressions-sig
+  
+  js/js-util
+  lib/scopes
+  
+  api/expressions-api
+  
+rules
+  
+  exp-to-js-stmts(|e) = !(<id>, e) ; exp-to-js-stmts  
+  
+  // Binary expressions
+  
+  binexp-to-js-stmts(get, merge) : (env, e) -> result
+    with
+      (e1, e2) := <get> e
+    ; (env', [
+      (exp_e1, stmts_e1), 
+      (exp_e2, stmts_e2),
+      x_merge
+    ]) := <thread-environment(exp-to-js-stmts(|e1), exp-to-js-stmts(|e2), fresh-variable)> env
+    ; exp_merge := <merge> (exp_e1, exp_e2)
+    ; stmts_result := js-stmt* |[
+      stmts_e1
+      stmts_e2
+      var x_merge = exp_merge;
+    ]|
+    ; result := (env', (<js-var> x_merge, stmts_result))
+    
+  binexp-null-check(merge|e1, e2) : (exp_lhs, exp_rhs) -> exp_result
+    with
+      exp_merge := <merge> (exp_lhs, exp_rhs)
+      ; switch !(e1, e2)
+        case (is-literal, is-literal):
+          exp_result := exp_merge
+        case (is-literal, id):
+          exp_result := js-exp |[exp_rhs !== null ? exp_merge : null]|
+        case (id, is-literal):
+          exp_result := js-exp |[exp_lhs !== null ? exp_merge : null]|
+        case (id, id):
+          exp_result := js-exp |[exp_lhs !== null && exp_rhs !== null ? exp_merge : null]|
+      end
+   
+  binexp-to-js-stmts-with-null-check(get, merge) = ?(_, <get ; ?(e1,e2)>) ; binexp-to-js-stmts(!(e1, e2), binexp-null-check(merge|e1, e2))   
+  
+  
+  exp-to-js-stmts = ?(_, Addition(e1, e2)) ; binexp-to-js-stmts(!(e1, e2), js-add)
+  
+  
+  //Literal expressions
+  
+  exp-to-js-stmts = (id, where(is-literal) ; literal-to-js-stmts ; !(<id>, []))
+  
+  literal-to-js-stmts = ?Int(<id>) ; js-int
+  literal-to-js-stmts = ?Float(<id>) ; js-float
+  literal-to-js-stmts = ?True() ; js-true
+  literal-to-js-stmts = ?False() ; js-false
+  literal-to-js-stmts = ?Datetime(<js-string ; ?x_date>) ; !js-exp |[new Date(x_date)]|
+  literal-to-js-stmts = ?NoValue() ; js-null
+  literal-to-js-stmts = ?LitString(<id>) ; js-string
+  
+  
+  
+  
+  
+  

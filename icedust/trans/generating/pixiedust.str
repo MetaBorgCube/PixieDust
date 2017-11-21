@@ -1,0 +1,21 @@
+module generating/pixiedust
+
+imports
+  signatures/Config-sig
+  
+  generating/pixiedust/generate
+  generating/_ir/paths
+  js/js-util
+  lib/origin
+
+rules
+  build(error-handler|backend, x_moduleName, relativePath): _ -> result
+    where
+      PixieDustBackend() := backend
+    with
+      filename := <javascript-generated-path(|relativePath)>
+    ; stmts_result := <generate-pixiedust-code ; js-program> x_moduleName
+    ; program-pp := <pp-js-program> stmts_result
+    ; result := (filename, program-pp)
+    
+  generate-default-backend: c -> <custom-origin(|c)> PixieDustBackend()

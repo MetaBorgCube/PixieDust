@@ -1,0 +1,10 @@
+module generating/pixiedust/generate
+
+imports
+  generating/pixiedust/execute
+
+rules
+
+  generate-pixiedust-code: x_moduleName -> stmts_result
+    with
+      stmts_result := <modulename-to-execute-stmts> x_moduleName

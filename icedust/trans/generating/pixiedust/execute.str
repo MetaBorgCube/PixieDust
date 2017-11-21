@@ -1,0 +1,26 @@
+module generating/pixiedust/execute
+
+imports
+  api/module-names-api
+
+  lib/scopes
+  
+  generating/pixiedust/expression
+
+rules
+
+  modulename-to-execute-stmts: x_moduleName -> stmts_result
+    with
+      env := <new-environment>
+    ; stmts_result := <modulename-get-exprs ; mapconcat(exp-to-execute-stmts)> x_moduleName
+  
+  
+  exp-to-execute-stmts: e -> result
+    with
+      (_, e_s) := <exp-to-js-stmts> (<new-environment>, e) 
+    ; result := <output-exp-stmts> e_s
+    
+  output-exp-stmts : (exp_e, stmts_e) -> js-stmt* |[
+    stmts_e
+    console.log(exp_e);
+  ]|
