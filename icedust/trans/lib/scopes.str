@@ -86,4 +86,10 @@ rules
   thread-environment(s1, s2, s3, s4, s5, s6, s7, s8) = s1 ; ?(<thread-environment(s2, s3, s4, s5, s6, s7, s8)>, t) ; (id, ![t | <id>])
   
   
+  /**
+    do-fold :: ((env, [value]), value) -> (env, [value])
+  */
+  env-fold(do-fold) = env-fold(do-fold |[])
+  env-fold(do-fold | initial) : (env, values) -> <foldl(flip(do-fold))> (values, (env, initial))
+  
   

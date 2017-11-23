@@ -7,10 +7,24 @@ imports
   lib/scopes
   
   api/expressions-api
+  api/types-names-api
+  api/types-api
   
 rules
   
   exp-to-js-stmts(|e) = !(<id>, e) ; exp-to-js-stmts  
+  
+  //Literals
+  
+  exp-to-js-stmts = (id, where(is-literal) ; literal-to-js-stmts ; !(<id>, []))
+  
+  literal-to-js-stmts = ?Int(<id>) ; js-int
+  literal-to-js-stmts = ?Float(<id>) ; js-float
+  literal-to-js-stmts = ?True() ; js-true
+  literal-to-js-stmts = ?False() ; js-false
+  literal-to-js-stmts = ?Datetime(<js-string ; ?exp_date>) ; !js-exp |[new Date(exp_date)]|
+  literal-to-js-stmts = ?NoValue() ; js-null
+  literal-to-js-stmts = ?LitString(<id>) ; js-string
   
   // Binary expressions
   
@@ -23,51 +37,261 @@ rules
       (exp_e2, stmts_e2),
       x_merge
     ]) := <thread-environment(exp-to-js-stmts(|e1), exp-to-js-stmts(|e2), fresh-variable)> env
-    ; exp_merge := <merge> (exp_e1, exp_e2)
+    ; (env'', exp_merge) := <
+         (!(env', e1, e2, exp_e1, exp_e2) ; merge)
+      <+ (!(e1, e2, exp_e1, exp_e2) ; merge ; !(env', <id>))
+      <+ (!(env', exp_e1, exp_e2) ; merge) 
+      <+ (!(exp_e1, exp_e2) ; merge ; !(env', <id>))
+    > //overload merge
     ; stmts_result := js-stmt* |[
       stmts_e1
       stmts_e2
       var x_merge = exp_merge;
     ]|
-    ; result := (env', (<js-var> x_merge, stmts_result))
+    ; result := (env'', (<js-var> x_merge, stmts_result))
+  
+  get-lhs-rhs = ?(exp_e1, exp_e2)
+  get-lhs-rhs = ?(_, exp_e1, exp_e2)        ; !(exp_e1, exp_e2)
+  get-lhs-rhs = ?(_, _, exp_e1, exp_e2)     ; !(exp_e1, exp_e2)
+  get-lhs-rhs = ?(_, _, _, exp_e1, exp_e2)  ; !(exp_e1, exp_e2)
     
-  binexp-null-check(merge|e1, e2) : (exp_lhs, exp_rhs) -> exp_result
+  binexp-null-check(merge|e1, e2) : params -> exp_result
+    where
+      exp_merge := <merge> params
     with
-      exp_merge := <merge> (exp_lhs, exp_rhs)
-      ; switch !(e1, e2)
-        case (is-literal, is-literal):
+      (exp_lhs, exp_rhs) := <get-lhs-rhs> params
+    ; switch !(<get-multiplicity> e1, <get-multiplicity> e2)
+        case (lower-one, lower-one):
           exp_result := exp_merge
-        case (is-literal, id):
+        case (lower-one, id):
           exp_result := js-exp |[exp_rhs !== null ? exp_merge : null]|
-        case (id, is-literal):
+        case (id, lower-one):
           exp_result := js-exp |[exp_lhs !== null ? exp_merge : null]|
         case (id, id):
           exp_result := js-exp |[exp_lhs !== null && exp_rhs !== null ? exp_merge : null]|
       end
-   
-  binexp-to-js-stmts-with-null-check(get, merge) = (id, get ; ?(e1,e2)) ; debug ; binexp-to-js-stmts(!(e1,e2), binexp-null-check(merge|e1, e2))   
   
-  get-binexp(merge) = merge(?Addition(e1, e2)       ; debug ; !(e1, e2), js-add) 
-  get-binexp(merge) = merge(?Subtraction(e1, e2)    ; !(e1 ,e2), js-subtract)
-  get-binexp(merge) = merge(?Multiplication(e1, e2) ; !(e1, e2), js-mul)
-  get-binexp(merge) = merge(?Division(e1, e2)       ; !(e1, e2), js-div)
+  binexp-merge(get, merge) : (env, e) -> result
+    where 
+      (e1, e2) := <get> e
+    with
+      (env', [
+        (exp_lhs, stmts_lhs),
+        (exp_rhs, stmts_rhs)
+      ]) := <thread-environment(exp-to-js-stmts(|e1), exp-to-js-stmts(|e2))> env
+    ; result := <
+       (!(env', (e1, e2, exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) ; merge)
+    <+ (!(env', (exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) ; merge)
+    >
+   
+  binexp-to-js-stmts-with-null-check(get, merge) = (id, get ; ?(e1,e2)) ; binexp-to-js-stmts(!(e1,e2), binexp-null-check(merge|e1, e2))   
   
   exp-to-js-stmts = get-binexp(binexp-to-js-stmts-with-null-check)
- 
-  //Literal expressions
   
-  exp-to-js-stmts = (id, where(is-literal) ; literal-to-js-stmts ; !(<id>, []))
+  get-binexp(merge) = merge(?Addition(e1, e2)           ; !(e1, e2), js-add) 
   
-  literal-to-js-stmts = ?Int(<id>) ; js-int
-  literal-to-js-stmts = ?Float(<id>) ; js-float
-  literal-to-js-stmts = ?True() ; js-true
-  literal-to-js-stmts = ?False() ; js-false
-  literal-to-js-stmts = ?Datetime(<js-string ; ?x_date>) ; !js-exp |[new Date(x_date)]|
-  literal-to-js-stmts = ?NoValue() ; js-null
-  literal-to-js-stmts = ?LitString(<id>) ; js-string
+  get-binexp(merge) = merge(?Subtraction(e1, e2)        ; !(e1 ,e2), merge-subtract)
+  merge-subtract: (e1, e2, exp_lhs, exp_rhs) -> js-exp |[
+    (exp_lhs.getTime() - exp_rhs.getTime()) / 1000
+  ]|
+    where
+      (Datetime(), Datetime()) := <(get-type2, get-type2)> (e1, e2)
+  merge-subtract = js-sub
+  
+  get-binexp(merge) = merge(?Multiplication(e1, e2)     ; !(e1, e2), js-mul)
+  get-binexp(merge) = merge(?Division(e1, e2)           ; !(e1, e2), js-div)
+  get-binexp(merge) = merge(?FloorDivision(e1, e2)      ; !(e1, e2), merge-floor-div)
+  merge-floor-div : (exp_lhs, exp_rhs) -> js-exp|[
+    parseInt(exp_lhs / exp_rhs)
+  ]|
+  get-binexp(merge) = merge(?Modulo(e1, e2)             ; !(e1, e2), js-modulo)
+  
+  //comparison operators
+  get-binexp(merge) = merge(?LessThan(e1, e2)           ; !(e1, e2), merge-compare(js-lt))
+  get-binexp(merge) = merge(?LessThanEqual(e1, e2)      ; !(e1, e2), merge-compare(js-lte))
+  get-binexp(merge) = merge(?GreaterThan(e1, e2)        ; !(e1, e2), merge-compare(js-gt))
+  get-binexp(merge) = merge(?GreaterThanEqual(e1, e2)   ; !(e1, e2), merge-compare(js-gte))
+  get-binexp(merge) = merge(?Equal(e1, e2)              ; !(e1, e2), merge-compare(js-eq))
+  get-binexp(merge) = merge(?Inequal(e1, e2)            ; !(e1, e2), merge-compare(js-neq))
+  
+  merge-compare(compare) : (e1, e2, exp_lhs, exp_rhs) -> <compare> (exp_lhs', exp_rhs')
+    where
+      (Datetime(), Datetime()) := <(get-type2, get-type2)> (e1, e2)
+    with
+      exp_lhs' := js-exp |[exp_lhs.getTime()]|
+    ; exp_rhs' := js-exp |[exp_rhs.getTime()]|
+  merge-compare(compare) = compare
+  
+  //Logical operators
+  
+  
+  exp-to-js-stmts = ?(_, And(e1, e2)) ; binexp-merge(!(e1,e2), merge-and)
+  merge-and: (env, (exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) -> result
+    with
+      (env', x_result) := <fresh-variable> env
+    ; stmts :=
+      js-stmt* |[
+      var x_result;
+      stmts_lhs
+      if(exp_lhs === false){
+        x_result = false;
+      } else {
+        stmts_rhs
+        x_result = exp_rhs;
+      }
+    ]|
+    ; result := (env', (<js-var> x_result, stmts))
+  
+  
+  exp-to-js-stmts = ?(_, Or(e1, e2)) ; binexp-merge(!(e1,e2), merge-or)
+  merge-or: (env, (exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) -> result
+    with
+      (env', x_result) := <fresh-variable> env
+    ; stmts := js-stmt* |[
+      var x_result;
+      stmts_lhs
+      if(exp_lhs === true){
+        x_result = true;
+      } else {
+        stmts_rhs
+        x_result = exp_rhs;
+      }
+    ]|
+    ; result := (env', (<js-var> x_result, stmts))
+  
+  exp-to-js-stmts = ?(_, ChoiceLeft(e1, e2)) ; binexp-merge(!(e1,e2), merge-choiceleft)
+  
+  merge-choiceleft: (env, (e_lhs, e_rhs, exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) -> result
+    with
+      (env', x_result) := <fresh-variable> env
+    ; exp_nonempty := <check-nonempty> (<get-multiplicity> e_lhs, exp_lhs)
+    ; stmts := js-stmt* |[
+      stmts_lhs
+      if(exp_nonempty){
+        x_result = exp_lhs;
+      } else{
+        stmts_rhs
+        x_result = exp_rhs;
+      }
+    ]|
+    ; result := (env', (<js-var> x_result, stmts))
+  
+  exp-to-js-stmts = ?(env, Merge(e1, e2)) ; binexp-to-js-stmts(!(e1, e2), merge-merge)
+  
+  merge-merge : (e1, e2, exp_lhs, exp_rhs) -> js-exp |[
+    exp_lhs2.concat(exp_rhs2)
+  ]|
+    with
+      exp_lhs2 := <exp-to-list> (e1, exp_lhs) 
+    ; exp_rhs2 := <exp-to-list> (e2, exp_rhs)
+  
+  exp-to-list: (e, exp_e) -> exp_result
+    with
+      exp_empty := <exp-empty> ZeroOrMore()
+    ; switch <get-multiplicity> e
+        case lower-one; upper-one:
+          exp_result := js-exp |[[exp_e]]|
+        case lower-zero ; upper-one:
+          exp_result := js-exp |[exp_e == null ? exp_empty : [exp_e]]|
+        otherwise:
+          exp_result := exp_e
+      end
+  
+  // Unary expressions
+  
+  unexp-to-js-stmts(get, merge) : (env, e) -> result
+    where
+      e_inner := <get> e
+    with
+      (env', [
+        (exp_inner, stmts_inner),
+        x_result
+      ]) := <thread-environment(exp-to-js-stmts(|e_inner), fresh-variable)> env
+    ; exp_merge := <merge> exp_inner
+    ; stmts_result := js-stmt* |[
+      stmts_inner
+      var x_result = exp_merge;
+    ]|
+    ; exp_result := <js-var> x_result
+    ; stmts := <conc> (stmts_inner, stmts_result)
+    ; result := (env', (exp_result, stmts_result))
+  
+  unexp-null-check(merge|e) : exp_e -> exp_result 
+    where
+      exp_merge := <merge> exp_e
+    with
+     switch !e
+      case is-literal:
+        exp_result := exp_merge
+      otherwise:
+        exp_result := js-exp |[exp_e !== null ? exp_merge : null]|
+    end
   
   
   
+  //?Cast(e)
+  //?Not(e)
   
+  exp-to-js-stmts : (env, If(c, t, f)) -> result
+    with
+      (env', [
+        (exp_c, stmts_c),
+        (exp_t, stmts_t),
+        (exp_f, stmts_f),
+        x_result
+      ]) := <thread-environment(
+        exp-to-js-stmts(|c),
+        exp-to-js-stmts(|t),
+        exp-to-js-stmts(|f),
+        fresh-variable
+      )> env
+    ; stmts_result := js-stmt* |[
+      var x_result;
+      stmts_c
+      if(exp_c){
+        stmts_t
+        x_result = exp_t; 
+      } else{
+        stmts_f
+        x_result = exp_f;
+      }
+    ]|
+    ; exp_result := <js-var> x_result
+    ; result := (env', (exp_result, stmts_result))
+  
+//  exp-to-js-stmts = get-unexp(unexp-to-js-stmts)
+//  get-unexp(merge) = merge(?Not(<id>)   ; js-not)
+  
+  exp-to-js-stmts: (env, Function(name, args)) -> result
+    with
+      (env', (exps_exp_args, stmts_stmts_args)) := <exp-fold2> (env, args)
+    ; exp_result := <js-function-call> (name, exps_exp_args)
+    ; stmts_args := <concat> stmts_stmts_args
+    ; result := (env', (exp_result, stmts_args))
+    
+    
+  js-function-call: (x_fn, exp_args*) -> js-exp |[functions.x_fn(exp_args*)]|
+
+  //Helpers
+  
+  check-nonempty = where((upper-one, ?exp_e)) ; !js-exp |[exp_e !== null]|
+  check-nonempty = where((upper-many, ?exp_e)) ; !js-exp |[exp_e.length !== 0]|
+  
+  exp-fold = env-fold(do-exp-fold)
+  do-exp-fold : ((env, acc), e) -> result
+    with
+      (env', exp_e, stmts_e) := <exp-to-js-stmts> (env, e)
+    ; result := (env', [(exp_e, stmts_e) | acc])
+  
+  exp-fold2 = env-fold(do-exp-fold2| ([], []))  
+  do-exp-fold2 : ((env, (exps, stmts)), e) -> result
+    with
+      (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
+    ; result := (env', ([exp_e | exps], [stmts_e | stmts]))
+  
+  exp-empty = upper-one ; exp-empty-one
+  exp-empty = upper-many ; exp-empty-many
+  exp-empty-one  = !js-exp |[null]|
+  exp-empty-many = !js-exp |[EMPTY_ARRAY]|
   
   

@@ -12,13 +12,14 @@ rules
   modulename-to-execute-stmts: x_moduleName -> stmts_result
     with
       env := <new-environment>
-    ; stmts_result := <modulename-get-exprs ; mapconcat(exp-to-execute-stmts)> x_moduleName
+    ; exps := <modulename-get-exprs> x_moduleName
+    ; (_, stmts_result) := <env-fold(fold-execute-stmts)> (env, exps)
   
-  
-  exp-to-execute-stmts: e -> result
+  fold-execute-stmts: ((env, stmts), e) -> result
     with
-      (_, e_s) := <exp-to-js-stmts> (<new-environment>, e) 
-    ; result := <output-exp-stmts> e_s
+      (env', e_s) := <exp-to-js-stmts> (env, e) 
+    ; stmts' := <conc> (stmts, <output-exp-stmts> e_s)
+    ; result := (env', stmts')
     
   output-exp-stmts : (exp_e, stmts_e) -> js-stmt* |[
     stmts_e

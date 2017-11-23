@@ -3,7 +3,7 @@ module api/types-names-api
 imports // signatures
 
   analysis2/constructors
-  static-semantics
+  nabl2/static-semantics
   signatures/Types-sig
   
 imports // functions
