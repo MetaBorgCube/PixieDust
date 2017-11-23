@@ -15,9 +15,10 @@ rules
   // Binary expressions
   
   binexp-to-js-stmts(get, merge) : (env, e) -> result
-    with
+    where
       (e1, e2) := <get> e
-    ; (env', [
+    with
+      (env', [
       (exp_e1, stmts_e1), 
       (exp_e2, stmts_e2),
       x_merge
@@ -44,12 +45,15 @@ rules
           exp_result := js-exp |[exp_lhs !== null && exp_rhs !== null ? exp_merge : null]|
       end
    
-  binexp-to-js-stmts-with-null-check(get, merge) = ?(_, <get ; ?(e1,e2)>) ; binexp-to-js-stmts(!(e1, e2), binexp-null-check(merge|e1, e2))   
+  binexp-to-js-stmts-with-null-check(get, merge) = (id, get ; ?(e1,e2)) ; debug ; binexp-to-js-stmts(!(e1,e2), binexp-null-check(merge|e1, e2))   
   
+  get-binexp(merge) = merge(?Addition(e1, e2)       ; debug ; !(e1, e2), js-add) 
+  get-binexp(merge) = merge(?Subtraction(e1, e2)    ; !(e1 ,e2), js-subtract)
+  get-binexp(merge) = merge(?Multiplication(e1, e2) ; !(e1, e2), js-mul)
+  get-binexp(merge) = merge(?Division(e1, e2)       ; !(e1, e2), js-div)
   
-  exp-to-js-stmts = ?(_, Addition(e1, e2)) ; binexp-to-js-stmts(!(e1, e2), js-add)
-  
-  
+  exp-to-js-stmts = get-binexp(binexp-to-js-stmts-with-null-check)
+ 
   //Literal expressions
   
   exp-to-js-stmts = (id, where(is-literal) ; literal-to-js-stmts ; !(<id>, []))
