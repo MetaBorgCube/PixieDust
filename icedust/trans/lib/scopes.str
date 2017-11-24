@@ -66,25 +66,32 @@ rules
   /**
     get-variable :: (Env,String) -> String
   */
-  get-variable = ?(<id>, var) ; ?Env(<fetch-elem(get-variable-from-scope(|var))>, _) ; offset-to-variable
+  get-variable = ?(<id>, var) ; ?Env(<debug ; fetch-elem(get-variable-from-scope(|var)) ; debug>, _) ; offset-to-variable
+  get-variable(|var) = !(<id>, var) ; get-variable
     
   //get-variable-from-scope :: Scope -> Int
-  get-variable-from-scope(|var) = ?Scope(<fetch-elem(?Binding(var, <id>))>)
+  get-variable-from-scope(|var) = ?Scope(<fetch-elem(debug(!var) ; where(binding-equals(|var)) ; ?Binding(_, <id>))>)
   
+  binding-equals(|x) = ?Binding(x', offset) ; <(rm-annotations, rm-annotations) ; eq> (x, x')
   
   /**
     s_i: Env -> (Env, Term)
     thread-env :: Env -> (Env, (Term_i))
   */
   thread-environment(s1) = s1 ; (id, ![<id>])
-  thread-environment(s1, s2) = s1 ; ?(<thread-environment(s2)>, t) ; (id, ![t | <id>])
-  thread-environment(s1, s2, s3) = s1 ; ?(<thread-environment(s2, s3)>, t) ; (id, ![t | <id>])
-  thread-environment(s1, s2, s3, s4) = s1 ; ?(<thread-environment(s2, s3, s4)>, t) ; (id, ![t | <id>])
-  thread-environment(s1, s2, s3, s4, s5) = s1 ; ?(<thread-environment(s2, s3, s4, s5)>, t) ; (id, ![t | <id>])
-  thread-environment(s1, s2, s3, s4, s5, s6) = s1 ; ?(<thread-environment(s2, s3, s4, s5, s6)>, t) ; (id, ![t | <id>])
-  thread-environment(s1, s2, s3, s4, s5, s6, s7) = s1 ; ?(<thread-environment(s2, s3, s4, s5, s6, s7)>, t) ; (id, ![t | <id>])
-  thread-environment(s1, s2, s3, s4, s5, s6, s7, s8) = s1 ; ?(<thread-environment(s2, s3, s4, s5, s6, s7, s8)>, t) ; (id, ![t | <id>])
+  thread-environment(s1) = s1 ; !(<id>, [])
   
+  thread-environment(s1, s2) = do-threading(s1, thread-environment(s2))
+  thread-environment(s1, s2, s3) = do-threading(s1, thread-environment(s2, s3))
+  thread-environment(s1, s2, s3, s4) = do-threading(s1, thread-environment(s2, s3, s4))
+  thread-environment(s1, s2, s3, s4, s5) = do-threading(s1, thread-environment(s2, s3, s4, s5))
+  thread-environment(s1, s2, s3, s4, s5, s6) = do-threading(s1, thread-environment(s2, s3, s4, s5, s6))
+  thread-environment(s1, s2, s3, s4, s5, s6, s7) = do-threading(s1, thread-environment(s2, s3, s4, s5, s6, s7))
+  thread-environment(s1, s2, s3, s4, s5, s6, s7, s8) = do-threading(s1, thread-environment(s2, s3, s4, s5, s6, s7, s8))
+  
+  
+  do-threading(s, cont) = s ; ?(<cont>, t) ; (id, ![t | <id>])
+  do-threading(s, cont) = s ; cont
   
   /**
     do-fold :: ((env, [value]), value) -> (env, [value])

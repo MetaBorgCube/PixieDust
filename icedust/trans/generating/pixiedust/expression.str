@@ -4,6 +4,7 @@ imports
   signatures/Expressions-sig
   
   js/js-util
+  js/pp/Expression-pp
   lib/scopes
   
   api/expressions-api
@@ -207,30 +208,40 @@ rules
         (exp_inner, stmts_inner),
         x_result
       ]) := <thread-environment(exp-to-js-stmts(|e_inner), fresh-variable)> env
-    ; exp_merge := <merge> exp_inner
+    ; (env'', exp_merge) := < debug(!"premerge ") ; merge ; debug(!"postmerge ") ; (?(_,_) <+ !(env', <id>)) ; debug(!"merge")> (env', e_inner, exp_inner) 
     ; stmts_result := js-stmt* |[
       stmts_inner
       var x_result = exp_merge;
     ]|
     ; exp_result := <js-var> x_result
-    ; stmts := <conc> (stmts_inner, stmts_result)
-    ; result := (env', (exp_result, stmts_result))
+    ; result := (env'', (exp_result, stmts_result))
   
-  unexp-null-check(merge|e) : exp_e -> exp_result 
+  unexp-null-check(merge) : params @ (_, e, exp_e) -> exp_result 
     where
-      exp_merge := <merge> exp_e
-    with
-     switch !e
-      case is-literal:
+      exp_merge := <merge> params
+    with  
+     switch <get-multiplicity> e
+      case lower-one:
         exp_result := exp_merge
       otherwise:
         exp_result := js-exp |[exp_e !== null ? exp_merge : null]|
     end
   
+  unexp-to-js-stmts-with-null-check(get, merge) = unexp-to-js-stmts(get, unexp-null-check(merge))
   
+  exp-to-js-stmts = get-unexp(unexp-to-js-stmts-with-null-check)
   
-  //?Cast(e)
-  //?Not(e)
+  get-unexp(merge) = merge(?Not(<id>), ?(_, _, <js-not>))
+  get-unexp(merge) = merge(?Cast(<id>, t), merge-cast(|t))
+  
+  merge-cast(|t2) : (_, e, exp_e) -> exp_result
+    with
+      t1 := <get-type2> e
+    ; exp_result := <switch !(t1,t2)
+      case ?(Float(), Int())        : !js-exp |[parseInt(exp_e)]|
+      case ?(Datetime(), String())  : <js-function-call> ("dateToString", [exp_e])
+      otherwise                     : !exp_e
+    end>
   
   exp-to-js-stmts : (env, If(c, t, f)) -> result
     with
@@ -259,8 +270,7 @@ rules
     ; exp_result := <js-var> x_result
     ; result := (env', (exp_result, stmts_result))
   
-//  exp-to-js-stmts = get-unexp(unexp-to-js-stmts)
-//  get-unexp(merge) = merge(?Not(<id>)   ; js-not)
+  //Functions
   
   exp-to-js-stmts: (env, Function(name, args)) -> result
     with
@@ -271,6 +281,42 @@ rules
     
     
   js-function-call: (x_fn, exp_args*) -> js-exp |[functions.x_fn(exp_args*)]|
+
+  exp-to-js-stmts: (env, Filter(e_source, var, e_body)) -> result
+    with
+      (env', [
+        (exp_source, stmts_source),
+        x_var,
+        (exp_body, stmts_body),
+        x_result,
+        x_loop
+      ]) := <thread-environment(
+        exp-to-js-stmts(|e_source),
+        push-scope,
+        store-variable(|var),
+        exp-to-js-stmts(|e_body),
+        pop-scope,
+        fresh-variable,
+        fresh-variable
+      )> env
+    ; stmts_result := js-stmt* |[
+      stmts_source
+      stmts_body
+      var x_result = [];
+      for(var x_loop = 0 ; x_loop < exp_source.length ; x_loop++){
+        var x_var = exp_source[x_loop];
+        stmts_body
+        if(exp_body){
+          x_result.push(x_var);
+        }
+      }
+    ]|
+    ; exp_result := <js-var> x_result
+    ; result := (env', (exp_result, stmts_result))
+    
+
+  //References
+  exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<debug(!"preget") ; get-variable ; debug(!"postget") ; js-var> (env, x), []))
 
   //Helpers
   
