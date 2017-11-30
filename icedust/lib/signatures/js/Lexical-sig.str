@@ -1,7 +1,7 @@
-module js/signatures/Lexical-sig
+module signatures/js/Lexical-sig
 
 imports
-  js/signatures/Common-sig
+  signatures/js/Common-sig
 
 
 signature

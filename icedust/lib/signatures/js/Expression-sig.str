@@ -1,0 +1,104 @@
+module signatures/js/Expression-sig
+
+imports
+  signatures/js/Common-sig
+  signatures/js/Statement-sig
+  signatures/js/Assignment-sig
+
+
+signature
+  sorts
+    CondMid
+
+  constructors
+    Property                         : Expression * ID -> Expression
+    Index                            : Expression * Expression -> Expression
+    New                              : Expression * List(Expression) -> Expression
+    Call                             : Expression * List(Expression) -> Expression
+    PostfixIncrement                 : Expression -> Expression
+    PostfixDecrement                 : Expression -> Expression
+    Not                              : Expression -> Expression
+    BitwiseNot                       : Expression -> Expression
+    Plus                             : Expression -> Expression
+    Negate                           : Expression -> Expression
+    PrefixIncrement                  : Expression -> Expression
+    PrefixDecrement                  : Expression -> Expression
+    TypeOf                           : Expression -> Expression
+    Void                             : Expression -> Expression
+    Delete                           : Expression -> Expression
+    Exponentiation                   : Expression * Expression -> Expression
+    Multiplication                   : Expression * Expression -> Expression
+    Division                         : Expression * Expression -> Expression
+    Modulo                           : Expression * Expression -> Expression
+    Addition                         : Expression * Expression -> Expression
+    Substraction                     : Expression * Expression -> Expression
+    LeftShit                         : Expression * Expression -> Expression
+    RightShift                       : Expression * Expression -> Expression
+    URightShift                      : Expression * Expression -> Expression
+    LessThan                         : Expression * Expression -> Expression
+    LessThanEquals                   : Expression * Expression -> Expression
+    GreaterThan                      : Expression * Expression -> Expression
+    GreaterThanEquals                : Expression * Expression -> Expression
+    In                               : Expression * Expression -> Expression
+    InstanceOf                       : Expression * Expression -> Expression
+    Equals                           : Expression * Expression -> Expression
+    NotEquals                        : Expression * Expression -> Expression
+    EqualsStrict                     : Expression * Expression -> Expression
+    NotEqualsStrict                  : Expression * Expression -> Expression
+    BitwiseAnd                       : Expression * Expression -> Expression
+    BitwiseXOR                       : Expression * Expression -> Expression
+    BitwiseOr                        : Expression * Expression -> Expression
+    And                              : Expression * Expression -> Expression
+    Or                               : Expression * Expression -> Expression
+    Cond                             : Expression * CondMid * Expression -> Expression
+    CondMid                          : Expression -> CondMid
+    IntegerLiteral                   : INT -> Expression
+    FloatLiteral                     : FLOAT -> Expression
+    True                             : Expression
+    False                            : Expression
+    Null                             : Expression
+    Undefined                        : Expression
+    Identifier                       : ID -> Expression
+    This                             : Expression
+    Super                            : Expression
+    FunctionExpression               : Option(ID) * List(LeftHandSideExpression) * List(Statement) -> Expression
+    ObjectLiteral                    : List(ObjectProperty) -> Expression
+    PropertyFromVariable             : ID -> ObjectProperty
+    ObjectProperty                   : Expression * Expression -> ObjectProperty
+    ArrayLiteral                     : List(Expression) -> Expression
+    Lambda                           : LambdaParameters * Expression -> Expression
+    LambdaBlock                      : LambdaParameters * BlockStatement -> Expression
+    LambdaParameters                 : List(ID) -> LambdaParameters
+    SingleParameter                  : ID -> LambdaParameters
+    CondMid-Plhdr                    : CondMid
+    INT-Plhdr                        : INT
+    FLOAT-Plhdr                      : FLOAT
+    LeftHandSideExpression-Plhdr     : LeftHandSideExpression
+    Statement-Plhdr                  : Statement
+    ObjectProperty-Plhdr             : ObjectProperty
+    Expression-Plhdr                 : Expression
+    BlockStatement-Plhdr             : BlockStatement
+    LambdaParameters-Plhdr           : LambdaParameters
+    ID-Plhdr                         : ID
+    CondMid-Plhdr                    : COMPLETION-INSERTION -> CondMid
+    INT-Plhdr                        : COMPLETION-INSERTION -> INT
+    FLOAT-Plhdr                      : COMPLETION-INSERTION -> FLOAT
+    LeftHandSideExpression-Plhdr     : COMPLETION-INSERTION -> LeftHandSideExpression
+    Statement-Plhdr                  : COMPLETION-INSERTION -> Statement
+    ObjectProperty-Plhdr             : COMPLETION-INSERTION -> ObjectProperty
+    Expression-Plhdr                 : COMPLETION-INSERTION -> Expression
+    BlockStatement-Plhdr             : COMPLETION-INSERTION -> BlockStatement
+    LambdaParameters-Plhdr           : COMPLETION-INSERTION -> LambdaParameters
+    ID-Plhdr                         : COMPLETION-INSERTION -> ID
+    LeftHandSideExpression-Opt-Plhdr : LeftHandSideExpression
+    Statement-Opt-Plhdr              : Statement
+    ObjectProperty-Opt-Plhdr         : ObjectProperty
+    Expression-Opt-Plhdr             : Expression
+    ID-Opt-Plhdr                     : ID
+    String                           : QMLex * StringLex * QMLex -> Expression
+    Expression-Plhdr                 : Expression
+    StringLex-Plhdr                  : StringLex
+    QMLex-Plhdr                      : QMLex
+    Expression-Plhdr                 : COMPLETION-INSERTION -> Expression
+    StringLex-Plhdr                  : COMPLETION-INSERTION -> StringLex
+    QMLex-Plhdr                      : COMPLETION-INSERTION -> QMLex

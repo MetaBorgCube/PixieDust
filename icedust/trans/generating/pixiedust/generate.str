@@ -1,10 +1,18 @@
 module generating/pixiedust/generate
 
 imports
+  api/model-names-api
+
+  generating/pixiedust/model
   generating/pixiedust/execute
+  
 
 rules
 
-  generate-pixiedust-code: x_moduleName -> stmts_result
+  generate-pixiedust-code: x_moduleName -> js-stmt* |[
+    stmts_model
+    stmts_execute
+  ]|
     with
-      stmts_result := <modulename-to-execute-stmts> x_moduleName
+      stmts_model := <modulename-get-entitynames ; mapconcat(entityname-to-js-stmts)> x_moduleName
+    ; stmts_execute := <modulename-to-execute-stmts> x_moduleName

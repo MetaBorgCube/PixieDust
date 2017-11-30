@@ -1,11 +1,11 @@
-module js/pp/Common-pp
+module pp/js/Common-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/Common-sig
+  signatures/js/Common-sig
 
 
 strategies
@@ -38,7 +38,10 @@ strategies
     prettyprint-javascript-FLOAT
 
   prettyprint-javascript =
-    prettyprint-javascript-STRING
+    prettyprint-javascript-QMLex
+
+  prettyprint-javascript =
+    prettyprint-javascript-StringLex
 
   prettyprint-javascript =
     prettyprint-javascript-StringChar
@@ -74,8 +77,12 @@ strategies
     where <?"FLOAT"> sort
 
   prettyprint-javascript(|sort):
-    t -> <prettyprint-javascript-STRING>
-    where <?"STRING"> sort
+    t -> <prettyprint-javascript-QMLex>
+    where <?"QMLex"> sort
+
+  prettyprint-javascript(|sort):
+    t -> <prettyprint-javascript-StringLex>
+    where <?"StringLex"> sort
 
   prettyprint-javascript(|sort):
     t -> <prettyprint-javascript-StringChar>
@@ -114,7 +121,10 @@ strategies
   prettyprint-javascript-FLOAT =
     ![S(<is-string>)]
 
-  prettyprint-javascript-STRING =
+  prettyprint-javascript-QMLex =
+    ![S(<is-string>)]
+
+  prettyprint-javascript-StringLex =
     ![S(<is-string>)]
 
   prettyprint-javascript-StringChar =
@@ -147,8 +157,11 @@ strategies
   prettyprint-javascript-FLOAT :
     amb([h|hs]) -> <prettyprint-javascript-FLOAT> h
 
-  prettyprint-javascript-STRING :
-    amb([h|hs]) -> <prettyprint-javascript-STRING> h
+  prettyprint-javascript-QMLex :
+    amb([h|hs]) -> <prettyprint-javascript-QMLex> h
+
+  prettyprint-javascript-StringLex :
+    amb([h|hs]) -> <prettyprint-javascript-StringLex> h
 
   prettyprint-javascript-StringChar :
     amb([h|hs]) -> <prettyprint-javascript-StringChar> h

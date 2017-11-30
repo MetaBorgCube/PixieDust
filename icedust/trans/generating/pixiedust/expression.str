@@ -2,9 +2,10 @@ module generating/pixiedust/expression
 
 imports
   signatures/Expressions-sig
+  signatures/Types-sig
   
-  js/js-util
-  js/pp/Expression-pp
+  js/util
+  pp/js/Expression-pp
   lib/scopes
   
   api/expressions-api
@@ -160,6 +161,24 @@ rules
     ]|
     ; result := (env', (<js-var> x_result, stmts))
   
+  
+  exp-to-js-stmts = ?(_, Difference(e1,e2)) ; binexp-merge(!(e1,e2), merge-difference)
+  
+  merge-difference: (env, (e1, e2, exp_lhs, exp_rhs)) -> result
+    with
+      exp_result := <switch <(get-multiplicity, get-multiplicity)> (e1, e2)
+        case (upper-one, upper-one):
+          !js-exp |[exp_lhs == exp_rhs ? null : exp_lhs]|
+        case (upper-one, upper-many):
+          !js-exp |[_.includes(exp_rhs, exp_lhs) ? null : exp_lhs]|
+        case (upper-many, upper-one):
+          !js-exp |[exp_rhs == null ? exp_lhs : _.without(exp_lhs, exp_rhs)]|
+        case (upper-many, upper-many):
+          !js-exp |[_.difference(exp_lhs, exp_rhs)]|
+      end>
+    ; result := (env, (exp_result, []))
+  
+  
   exp-to-js-stmts = ?(_, ChoiceLeft(e1, e2)) ; binexp-merge(!(e1,e2), merge-choiceleft)
   
   merge-choiceleft: (env, (e_lhs, e_rhs, exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) -> result
@@ -208,7 +227,7 @@ rules
         (exp_inner, stmts_inner),
         x_result
       ]) := <thread-environment(exp-to-js-stmts(|e_inner), fresh-variable)> env
-    ; (env'', exp_merge) := < debug(!"premerge ") ; merge ; debug(!"postmerge ") ; (?(_,_) <+ !(env', <id>)) ; debug(!"merge")> (env', e_inner, exp_inner) 
+    ; (env'', exp_merge) := <merge ; (?(_,_) <+ !(env', <id>))> (env', e_inner, exp_inner) 
     ; stmts_result := js-stmt* |[
       stmts_inner
       var x_result = exp_merge;
@@ -314,9 +333,73 @@ rules
     ; exp_result := <js-var> x_result
     ; result := (env', (exp_result, stmts_result))
     
-
+  exp-to-js-stmts: (env, OrderBy(e_source, var, e_body)) -> result
+    with
+      (env', [
+        (exp_source, stmts_source),
+        x_arg1,
+        x_arg2,
+        x_var,
+        (exp_body, stmts_body),
+        x_result
+      ]) := <thread-environment(
+        exp-to-js-stmts(|e_source),
+        fresh-variable,
+        fresh-variable,
+        push-scope,
+        store-variable(|var),
+        exp-to-js-stmts(|e_body),
+        pop-scope,
+        fresh-variable
+      )> env
+    ; stmts_result := js-stmt* |[
+      stmts_source
+      var x_result = exp_source.slice().sort(function(x_arg1, x_arg2){
+        var x_var = x_arg1;
+        stmts_body
+        x_arg1 = exp_body;
+        x_var = x_arg2;
+        stmts_body
+        x_arg2 = exp_body;
+        return x_arg1 - x_arg2;
+      });
+    ]|
+    ; exp_result := <js-var> x_result
+    ; result := (env', (exp_result, stmts_result))
+    
+  exp-to-js-stmts: (env, Find(e_source, var, e_body)) -> result
+    with
+      (env', [
+        (exp_source, stmts_source),
+        x_var,
+        (exp_body, stmts_body),
+        x_loop,
+        x_result
+      ]) := <thread-environment(
+        exp-to-js-stmts(|e_source),
+        push-scope,
+        store-variable(|var),
+        exp-to-js-stmts(|e_body),
+        pop-scope,
+        fresh-variable,
+        fresh-variable
+      )> env
+    ; stmts_result := js-stmt* |[
+      stmts_source
+      var x_result = null;
+      for(var x_loop = 0 ; x_loop < exp_source.length && x_result === null ; x_loop++){
+        var x_var = exp_source[x_loop];
+        stmts_body
+        if(exp_body){
+          x_result = x_var;
+        }
+      }
+    ]|
+    ; exp_result := <js-var> x_result
+    ; result := (env', (exp_result, stmts_result))
+    
   //References
-  exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<debug(!"preget") ; get-variable ; debug(!"postget") ; js-var> (env, x), []))
+  exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
 
   //Helpers
   

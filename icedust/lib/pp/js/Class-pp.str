@@ -1,25 +1,25 @@
-module js/pp/Class-pp
+module pp/js/Class-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/Class-sig
+  signatures/js/Class-sig
 
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Expression-sig
-  js/signatures/Statement-sig
-  js/signatures/Assignment-sig
+  signatures/js/Common-sig
+  signatures/js/Expression-sig
+  signatures/js/Statement-sig
+  signatures/js/Assignment-sig
 
 
 imports
-  js/pp/Common-pp
-  js/pp/Expression-pp
-  js/pp/Statement-pp
-  js/pp/Assignment-pp
+  pp/js/Common-pp
+  pp/js/Expression-pp
+  pp/js/Statement-pp
+  pp/js/Assignment-pp
 
 
 strategies
@@ -230,7 +230,7 @@ strategies
                          , [t1__']
                          )
                        ]
-    with t1__' := <pp-V-list(prettyprint-javascript-ClassElement) <+ pp-one-Z(prettyprint-completion-aux)> t1__
+    with t1__' := <pp-H-list(prettyprint-javascript-ClassElement) <+ pp-one-Z(prettyprint-completion-aux)> t1__
 
   is-javascript-ClassBody =
     ?ClassBody(_)
@@ -252,7 +252,7 @@ strategies
           ; <?"ClassBody"> sort
     with switch !index
            case ?1 :
-             separator := "\n"
+             separator := ""
            otherwise :
              separator := ""
          end

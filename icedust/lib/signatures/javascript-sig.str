@@ -1,10 +1,11 @@
-module js/signatures/javascript-sig
+module signatures/javascript-sig
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Lexical-sig
-  js/signatures/Expression-sig
-  js/signatures/Statement-sig
+  signatures/js/Common-sig
+  signatures/js/Lexical-sig
+  signatures/js/Expression-sig
+  signatures/js/Statement-sig
+  signatures/js/Class-sig
 
 
 signature

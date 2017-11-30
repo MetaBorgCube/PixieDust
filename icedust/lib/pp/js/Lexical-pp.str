@@ -1,19 +1,19 @@
-module js/pp/Lexical-pp
+module pp/js/Lexical-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/Lexical-sig
+  signatures/js/Lexical-sig
 
 
 imports
-  js/signatures/Common-sig
+  signatures/js/Common-sig
 
 
 imports
-  js/pp/Common-pp
+  pp/js/Common-pp
 
 
 strategies

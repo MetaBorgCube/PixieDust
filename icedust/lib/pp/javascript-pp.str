@@ -1,25 +1,27 @@
-module js/pp/javascript-pp
+module pp/javascript-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/javascript-sig
+  signatures/javascript-sig
 
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Lexical-sig
-  js/signatures/Expression-sig
-  js/signatures/Statement-sig
+  signatures/js/Common-sig
+  signatures/js/Lexical-sig
+  signatures/js/Expression-sig
+  signatures/js/Statement-sig
+  signatures/js/Class-sig
 
 
 imports
-  js/pp/Common-pp
-  js/pp/Lexical-pp
-  js/pp/Expression-pp
-  js/pp/Statement-pp
+  pp/js/Common-pp
+  pp/js/Lexical-pp
+  pp/js/Expression-pp
+  pp/js/Statement-pp
+  pp/js/Class-pp
 
 
 strategies
@@ -44,6 +46,15 @@ strategies
 strategies
   prettyprint-javascript-start-symbols =
     prettyprint-javascript-Start
+
+  prettyprint-javascript-start-symbols =
+    prettyprint-javascript-Expression
+
+  prettyprint-javascript-start-symbols =
+    prettyprint-javascript-Statement
+
+  prettyprint-javascript-start-symbols =
+    prettyprint-javascript-ClassElement
 
 
 strategies

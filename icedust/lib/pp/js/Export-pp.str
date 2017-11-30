@@ -1,27 +1,27 @@
-module js/pp/Export-pp
+module pp/js/Export-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/Export-sig
+  signatures/js/Export-sig
 
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Statement-sig
-  js/signatures/Import-sig
-  js/signatures/Class-sig
-  js/signatures/Expression-sig
+  signatures/js/Common-sig
+  signatures/js/Statement-sig
+  signatures/js/Import-sig
+  signatures/js/Class-sig
+  signatures/js/Expression-sig
 
 
 imports
-  js/pp/Common-pp
-  js/pp/Statement-pp
-  js/pp/Import-pp
-  js/pp/Class-pp
-  js/pp/Expression-pp
+  pp/js/Common-pp
+  pp/js/Statement-pp
+  pp/js/Import-pp
+  pp/js/Class-pp
+  pp/js/Expression-pp
 
 
 strategies

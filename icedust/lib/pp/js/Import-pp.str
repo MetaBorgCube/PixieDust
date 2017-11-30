@@ -1,19 +1,21 @@
-module js/pp/Import-pp
+module pp/js/Import-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/Import-sig
+  signatures/js/Import-sig
 
 
 imports
-  js/signatures/Common-sig
+  signatures/js/Expression-sig
+  signatures/js/Common-sig
 
 
 imports
-  js/pp/Common-pp
+  pp/js/Expression-pp
+  pp/js/Common-pp
 
 
 strategies
@@ -519,7 +521,7 @@ strategies
                           , [S("from "), t1__']
                           )
                         ]
-    with t1__' := <pp-one-Z(prettyprint-javascript-STRING) <+ pp-one-Z(prettyprint-completion-aux)> t1__
+    with t1__' := <pp-one-Z(prettyprint-javascript-Expression) <+ pp-one-Z(prettyprint-completion-aux)> t1__
 
   is-javascript-FromClause =
     ?FromClause(_)
@@ -695,15 +697,15 @@ strategies
   is-javascript-FromClause =
     ?FromClause-Plhdr()
 
-  prettyprint-javascript-STRING :
-    STRING-Plhdr() -> [ H(
-                          [SOpt(HS(), "0")]
-                        , [S("$STRING")]
-                        )
-                      ]
+  prettyprint-javascript-Expression :
+    Expression-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("$Expression")]
+                            )
+                          ]
 
-  is-javascript-STRING =
-    ?STRING-Plhdr()
+  is-javascript-Expression =
+    ?Expression-Plhdr()
 
   prettyprint-javascript-Import :
     Import-Plhdr(_) -> [ H(
@@ -795,15 +797,15 @@ strategies
   is-javascript-FromClause =
     ?FromClause-Plhdr(_)
 
-  prettyprint-javascript-STRING :
-    STRING-Plhdr(_) -> [ H(
-                           [SOpt(HS(), "0")]
-                         , [S("$STRING")]
-                         )
-                       ]
+  prettyprint-javascript-Expression :
+    Expression-Plhdr(_) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("$Expression")]
+                             )
+                           ]
 
-  is-javascript-STRING =
-    ?STRING-Plhdr(_)
+  is-javascript-Expression =
+    ?Expression-Plhdr(_)
 
   prettyprint-javascript-ImportSpecifier :
     ImportSpecifier-Opt-Plhdr() -> [ H(

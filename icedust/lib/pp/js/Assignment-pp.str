@@ -1,21 +1,21 @@
-module js/pp/Assignment-pp
+module pp/js/Assignment-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/Assignment-sig
+  signatures/js/Assignment-sig
 
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Expression-sig
+  signatures/js/Common-sig
+  signatures/js/Expression-sig
 
 
 imports
-  js/pp/Common-pp
-  js/pp/Expression-pp
+  pp/js/Common-pp
+  pp/js/Expression-pp
 
 
 strategies

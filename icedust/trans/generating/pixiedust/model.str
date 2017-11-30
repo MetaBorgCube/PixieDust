@@ -1,0 +1,16 @@
+module generating/pixiedust/model
+
+imports
+
+rules
+  entityname-to-js-stmts: x_entityname -> js-stmt* |[
+    class x_entityname {
+      
+    }
+  ]|
+  
+  
+  
+  
+  
+  

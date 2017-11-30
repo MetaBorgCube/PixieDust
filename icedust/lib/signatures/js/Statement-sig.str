@@ -1,12 +1,12 @@
-module js/signatures/Statement-sig
+module signatures/js/Statement-sig
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Expression-sig
-  js/signatures/Import-sig
-  js/signatures/Export-sig
-  js/signatures/Class-sig
-  js/signatures/Assignment-sig
+  signatures/js/Common-sig
+  signatures/js/Expression-sig
+  signatures/js/Import-sig
+  signatures/js/Export-sig
+  signatures/js/Class-sig
+  signatures/js/Assignment-sig
 
 
 signature
@@ -26,6 +26,7 @@ signature
     DeclarationStatement             : Declaration -> Statement
                                      : FunctionDeclaration -> Statement
                                      : ClassDeclaration -> Statement
+    Throw                            : Expression -> Statement
     InitializeAssignment             : Expression -> InitializeAssignment
     VarDeclaration                   : LeftHandSideExpression * Option(InitializeAssignment) -> Declaration
     ConstDeclaration                 : LeftHandSideExpression * Option(InitializeAssignment) -> Declaration

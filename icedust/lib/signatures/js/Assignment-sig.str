@@ -1,8 +1,8 @@
-module js/signatures/Assignment-sig
+module signatures/js/Assignment-sig
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Expression-sig
+  signatures/js/Common-sig
+  signatures/js/Expression-sig
 
 
 signature

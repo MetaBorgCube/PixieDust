@@ -1,29 +1,29 @@
-module js/pp/Statement-pp
+module pp/js/Statement-pp
 
 imports
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/term/origin
   libstratego-sglr
-  js/signatures/Statement-sig
+  signatures/js/Statement-sig
 
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Expression-sig
-  js/signatures/Import-sig
-  js/signatures/Export-sig
-  js/signatures/Class-sig
-  js/signatures/Assignment-sig
+  signatures/js/Common-sig
+  signatures/js/Expression-sig
+  signatures/js/Import-sig
+  signatures/js/Export-sig
+  signatures/js/Class-sig
+  signatures/js/Assignment-sig
 
 
 imports
-  js/pp/Common-pp
-  js/pp/Expression-pp
-  js/pp/Import-pp
-  js/pp/Export-pp
-  js/pp/Class-pp
-  js/pp/Assignment-pp
+  pp/js/Common-pp
+  pp/js/Expression-pp
+  pp/js/Import-pp
+  pp/js/Export-pp
+  pp/js/Class-pp
+  pp/js/Assignment-pp
 
 
 strategies
@@ -743,6 +743,53 @@ strategies
             ]
     where not(is-javascript-Statement)
     where t1__' := <pp-one-Z(prettyprint-javascript-ClassDeclaration) <+ pp-one-Z(prettyprint-completion-aux)> t1__
+
+  prettyprint-javascript-Statement :
+    Throw(t1__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [ S("throw ")
+                       , t1__'
+                       , S(";")
+                       ]
+                     )
+                   ]
+    with t1__' := <pp-one-Z(prettyprint-javascript-Expression) <+ pp-one-Z(prettyprint-completion-aux)> t1__
+
+  is-javascript-Statement =
+    ?Throw(_)
+
+  javascript-get-indent :
+    (t@Throw(t1__), index) -> indent
+    where sort := <ia-get-sort> t
+          ; <?"Statement"> sort
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  javascript-get-separator :
+    (t@Throw(t1__), index) -> separator
+    where sort := <ia-get-sort> t
+          ; <?"Statement"> sort
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  javascript-get-leading-ws :
+    (t@Throw(t1__), index) -> ws
+    where sort := <ia-get-sort> t
+          ; <?"Statement"> sort
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
 
   prettyprint-javascript-InitializeAssignment :
     InitializeAssignment(t1__) -> [ H(

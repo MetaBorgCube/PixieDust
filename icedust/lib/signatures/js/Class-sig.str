@@ -1,10 +1,10 @@
-module js/signatures/Class-sig
+module signatures/js/Class-sig
 
 imports
-  js/signatures/Common-sig
-  js/signatures/Expression-sig
-  js/signatures/Statement-sig
-  js/signatures/Assignment-sig
+  signatures/js/Common-sig
+  signatures/js/Expression-sig
+  signatures/js/Statement-sig
+  signatures/js/Assignment-sig
 
 
 signature

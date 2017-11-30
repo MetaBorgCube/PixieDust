@@ -1,7 +1,8 @@
-module js/signatures/Import-sig
+module signatures/js/Import-sig
 
 imports
-  js/signatures/Common-sig
+  signatures/js/Expression-sig
+  signatures/js/Common-sig
 
 
 signature
@@ -18,7 +19,7 @@ signature
     NamedImportSpecifier        : ID * ImportedBinding -> ImportSpecifier
                                 : NameSpaceImport -> NonDefaultImport
                                 : NamedImports -> NonDefaultImport
-    FromClause                  : STRING -> FromClause
+    FromClause                  : Expression -> FromClause
     Import-Plhdr                : Import
     ImportClause-Plhdr          : ImportClause
     ImportSpecifier-Plhdr       : ImportSpecifier
@@ -28,7 +29,7 @@ signature
     NonDefaultImport-Plhdr      : NonDefaultImport
     NamedImports-Plhdr          : NamedImports
     FromClause-Plhdr            : FromClause
-    STRING-Plhdr                : STRING
+    Expression-Plhdr            : Expression
     Import-Plhdr                : COMPLETION-INSERTION -> Import
     ImportClause-Plhdr          : COMPLETION-INSERTION -> ImportClause
     ImportSpecifier-Plhdr       : COMPLETION-INSERTION -> ImportSpecifier
@@ -38,5 +39,5 @@ signature
     NonDefaultImport-Plhdr      : COMPLETION-INSERTION -> NonDefaultImport
     NamedImports-Plhdr          : COMPLETION-INSERTION -> NamedImports
     FromClause-Plhdr            : COMPLETION-INSERTION -> FromClause
-    STRING-Plhdr                : COMPLETION-INSERTION -> STRING
+    Expression-Plhdr            : COMPLETION-INSERTION -> Expression
     ImportSpecifier-Opt-Plhdr   : ImportSpecifier
