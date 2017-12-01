@@ -15,7 +15,7 @@ rules
       PixieDustBackend() := backend
     with
       filename := <javascript-generated-path(|relativePath)>
-    ; stmts_result := <generate-pixiedust-code ; js-program ; desugar-program-to-es5> x_moduleName
+    ; stmts_result := <generate-pixiedust-code ; js-program> x_moduleName
     ; program-pp := <pp-js-program> stmts_result
     ; result := (filename, program-pp)
     

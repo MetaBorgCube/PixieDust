@@ -1,0 +1,14 @@
+module generating/js/names
+
+imports
+  lib/string
+
+rules
+  
+  getter-name = !$[get[<ucfirst>]]
+  setter-name = !$[set[<ucfirst>]]
+  unisetter-name = !$[unidirectionalSet[<ucfirst>]]
+  flag-dirty-name = !$[flagDirty[<ucfirst>]]
+  sub-dirty-name = !$[subscribeDirty[<ucfirst>]]
+  unsub-dirty-name = !$[unsubcribeDirty[<ucfirst>]]
+  sub-field-name = !$[[<ucfirst>]DirtySubscribers]

@@ -407,6 +407,7 @@ rules
   check-nonempty = where((upper-many, ?exp_e)) ; !js-exp |[exp_e.length !== 0]|
   
   exp-fold = env-fold(do-exp-fold)
+  
   do-exp-fold : ((env, acc), e) -> result
     with
       (env', exp_e, stmts_e) := <exp-to-js-stmts> (env, e)

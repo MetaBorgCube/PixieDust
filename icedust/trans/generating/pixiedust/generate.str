@@ -6,13 +6,13 @@ imports
   generating/pixiedust/model
   generating/pixiedust/execute
   
-
+  lib/scopes
+  
 rules
 
-  generate-pixiedust-code: x_moduleName -> js-stmt* |[
-    stmts_model
-    stmts_execute
-  ]|
+  generate-pixiedust-code: x_moduleName -> stmts_pixiedust
     with
-      stmts_model := <modulename-get-entitynames ; mapconcat(entityname-to-js-stmts)> x_moduleName
-    ; stmts_execute := <modulename-to-execute-stmts> x_moduleName
+      (env, stmts_pixiedust) := <thread-environment( debug;
+        env-thread-param(env-fold-mapconcat(entityname-to-js-stmts) | <modulename-get-entitynames> x_moduleName),
+        env-thread-param(modulename-to-execute-stmts | x_moduleName) ; debug
+      ) ; debug ; (id, concat) ; debug> <new-environment> 

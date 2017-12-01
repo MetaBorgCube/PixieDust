@@ -1,13 +1,53 @@
 module generating/pixiedust/model
 
 imports
+  api/model-names-api
+  
+  generating/pixiedust/names
+  
+  lib/scopes
 
 rules
-  entityname-to-js-stmts: x_entityname -> js-stmt* |[
+  entityname-to-js-stmts: (env, x_entityname) -> <!(env', <id>)> js-stmt* |[
     class x_entityname {
+      constructor(){
       
+      }
+      
+      methods_attributes
     }
   ]|
+    with
+      (env', methods_attributes) := <env-fold-mapconcat(attributename-to-js-methods)> (env, <entityname-get-arrinames-defined> x_entityname)
+  
+  
+rules // Normal attribute
+  
+  attributename-to-js-methods : (env, x_attributename) -> 
+    <thread-environment(
+        env-thread-param(normal-getter-function|x_attributename)
+    )> env
+    where
+      <attributename-is-normal> x_attributename
+  
+  normal-getter-function: (env, x_attributename) -> <!(env, <id>)> js-method |[
+    x_methodName(){
+      return this.x_attributename;
+    }
+  ]|
+    with
+      x_methodName := <getter-name> x_attributename
+  
+rules // TODO  
+  
+  attributename-to-js-method : (env, x_attributename) -> <!(env, <id>)> js-method* |[
+    x_attributename(){
+      todo();
+    }
+  ]|
+  
+  
+      
   
   
   

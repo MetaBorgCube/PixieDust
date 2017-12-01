@@ -102,19 +102,23 @@ rules
   /**
     do-fold :: (env, value) -> (env, value)
   */
-  env-fold-map(do-fold) = env-fold(do-fold-map(do-fold))
+  env-fold-map(do-fold) = env-fold(do-env-fold-map(do-fold))
   
-  do-fold-map(do-fold) : ((env, acc), cur) -> (env', [value | acc])
+  do-env-fold-map(do-fold) : ((env, acc), cur) -> (env', [value | acc])
     with
       (env', value) := <do-fold> (env, cur)
   
   /**
     do-fold :: (env, value) -> (env, [value])
   */
-  env-fold-mapconcat(do-fold) =  env-fold(do-fold-mapconcat(do-fold))
+  env-fold-mapconcat(do-fold) =  env-fold(do-env-fold-mapconcat(do-fold))
   
-  do-fold-mapconcat(do-fold): ((env, acc), cur) -> (env', <conc> (value*, acc))
+  do-env-fold-mapconcat(do-fold): ((env, acc), cur) -> (env', <conc> (value*, acc))
     with
       (env', value*) := <do-fold; (id, reverse)> (env, cur) 
   
+  /**
+    s :: (env, param) -> (env, value)
+  */
+  env-thread-param(s|param): env -> <s> (env, param) 
   
