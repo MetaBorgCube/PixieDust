@@ -96,7 +96,25 @@ rules
   /**
     do-fold :: ((env, [value]), value) -> (env, [value])
   */
-  env-fold(do-fold) = env-fold(do-fold |[])
+  env-fold(do-fold) = env-fold(do-fold |[]) ; (id, reverse)
   env-fold(do-fold | initial) : (env, values) -> <foldl(flip(do-fold))> (values, (env, initial))
+  
+  /**
+    do-fold :: (env, value) -> (env, value)
+  */
+  env-fold-map(do-fold) = env-fold(do-fold-map(do-fold))
+  
+  do-fold-map(do-fold) : ((env, acc), cur) -> (env', [value | acc])
+    with
+      (env', value) := <do-fold> (env, cur)
+  
+  /**
+    do-fold :: (env, value) -> (env, [value])
+  */
+  env-fold-mapconcat(do-fold) =  env-fold(do-fold-mapconcat(do-fold))
+  
+  do-fold-mapconcat(do-fold): ((env, acc), cur) -> (env', <conc> (value*, acc))
+    with
+      (env', value*) := <do-fold; (id, reverse)> (env, cur) 
   
   
