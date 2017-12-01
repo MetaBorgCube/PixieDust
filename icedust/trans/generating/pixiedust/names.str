@@ -4,6 +4,10 @@ imports
   lib/string
   js/util
 
+  api/model-names-api
+  api/types-names-api
+  api/types-api
+
 rules // method names  
   getter-name = !$[get[<ucfirst>]]
   setter-name = !$[set[<ucfirst>]]
@@ -17,5 +21,9 @@ rules // method names
   cache-value = !$[[<id>]_cache]
   
 rules // constant expressions
+  exp-empty-array = !js-exp |[[]]|
+
   exp-call-dirty-subscriber = !js-exp |[callDirtySubscriber]|
   
+  exp-empty-attribute = name-get-multiplicity ; upper-many ; exp-empty-array
+  exp-empty-attribute = name-get-multiplicity ; upper-one ; js-null

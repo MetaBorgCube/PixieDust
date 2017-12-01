@@ -7,19 +7,27 @@ imports
   generating/pixiedust/expression
   
   lib/scopes
+  lib/lists-tuples
 
 rules
   entityname-to-js-stmts: (env, x_entityname) -> <!(env', <id>)> js-stmt* |[
     class x_entityname {
       constructor(){
-      
+        stmts_init
       }
-      
       methods_attributes
     }
   ]|
     with
-      (env', methods_attributes) := <env-fold-mapconcat(attributename-to-js-methods)> (env, <entityname-get-arrinames-defined> x_entityname)
+      attributenames := <entityname-get-arrinames-defined> x_entityname
+    ; (env', [
+        stmts_init,
+        methods_attributes
+      ]) := <thread-environment(
+        env-thread-param(env-fold-mapconcat(init-attribute)|attributenames),
+        env-thread-param(env-fold-mapconcat(attributename-to-js-methods)|attributenames)
+      )> env
+      
   
 rules // Dirty flagging
 
@@ -51,7 +59,7 @@ rules // Dirty flagging
       <name-is-default-derived> x_attributename
     ; x_cache := <cache-value> x_attributename
     ; stmts_clear := js-stmts |[
-      this.x_cache = null;
+      this.x_cache = undefined;
     ]|
   
   flag-dirty-clear-cached-value = (id, ![])
@@ -78,6 +86,25 @@ rules // Normal attribute
     where
       <attributename-is-normal> x_attributename
   
+  
+  attributename-to-js-methods : (env, x_attributename) ->
+    <thread-environment(
+//        env-thread-param(normal-getter-method|x_attributename),
+        env-thread-param(flag-dirty-method| x_attributename),
+        env-thread-param(derived-getter-method| x_attributename)
+    )> env
+    where
+      <attributename-is-derivation> x_attributename
+  
+  attributename-to-js-methods : (env, x_attributename) ->
+    <thread-environment(
+//        env-thread-param(normal-getter-method|x_attributename),
+        env-thread-param(flag-dirty-method| x_attributename)
+    )> env
+    where
+      <attributename-is-default> x_attributename
+  
+rules // Getter  
   normal-getter-method: (env, x_attributename) -> <!(env, <id>)> js-method |[
     x_methodName(){
       return this.x_attributename;
@@ -85,7 +112,59 @@ rules // Normal attribute
   ]|
     with
       x_methodName := <getter-name> x_attributename
+      
+  derived-getter-method: (env, x_attributename) -> result
+    with
+      e_derived := <attributename-get-expr> x_attributename
+    ; x_methodName := <getter-name> x_attributename
+    ; x_cacheValue := <cache-value> x_attributename
+    ; (env', (exp_derived, stmts_derived)) := <exp-to-js-stmts> (env, e_derived)
+    ; method := js-method |[
+      x_methodName(){
+        if(this.x_cacheValue === undefined) {
+          stmts_derived
+          this.x_cacheValue = exp_derived;      
+        }
+        return this.x_cacheValue;
+      }
+    ]|
+    ; result := (env', method)
   
+  default-getter-method: (env, x_attributename) -> result
+    with
+      e_default := <attributename-get-expr> x_attributename
+    ; x_methodName := <getter-name> x_attributename
+    ; x_cacheValue := <cache-value> x_attributename
+    ; x_userValue := <user-value> x_attributename
+    ; (env', (exp_default, stmts_default)) := <exp-to-js-stmts> (env, e_default)
+    ; method := js-method |[
+      x_methodName(){
+        if(this.x_userValue !== null) {
+          return this.x_userValue;
+        } else {
+          if(this.x_cacheValue === undefined) {
+            stmts_default
+            this.x_cacheValue = exp_default;      
+          }
+          return this.x_cacheValue;
+        }
+      }
+    ]|
+    ; result := (env', method)
+    
+rules // Constructor
+
+  init-attribute = where((id, attributename-is-default)) ; init-default-attribute
+  init-attribute = where((id, attributename-is-derivation)) ; init-derived-attribute
+  init-attribute = where((id, attributename-is-normal)) ; init-normal-attribute
+
+  init-normal-attribute = (id, ![<assign-empty-user-value>])
+  init-derived-attribute = (id, ![<assign-empty-cache-value>])
+  init-default-attribute = (id, ![<assign-empty-user-value>, <assign-empty-cache-value>])
+      
+  assign-empty-user-value = !(<user-value>, <exp-empty-attribute>) ; ?(x_userValue, exp_empty) ; !js-stmt |[this.x_userValue = exp_empty;]|
+  assign-empty-cache-value = cache-value ; ?x_cacheValue ; !js-stmt |[this.x_cacheValue = undefined;]|
+      
 rules // TODO  
   
   attributename-to-js-methods : (env, x_attributename) -> <!(env, <id>)> js-method* |[
