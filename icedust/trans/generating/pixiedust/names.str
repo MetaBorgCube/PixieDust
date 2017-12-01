@@ -2,13 +2,20 @@ module generating/js/names
 
 imports
   lib/string
+  js/util
 
-rules
-  
+rules // method names  
   getter-name = !$[get[<ucfirst>]]
   setter-name = !$[set[<ucfirst>]]
   unisetter-name = !$[unidirectionalSet[<ucfirst>]]
   flag-dirty-name = !$[flagDirty[<ucfirst>]]
   sub-dirty-name = !$[subscribeDirty[<ucfirst>]]
   unsub-dirty-name = !$[unsubcribeDirty[<ucfirst>]]
-  sub-field-name = !$[[<ucfirst>]DirtySubscribers]
+  dirty-subscribers-name = !$[[<id>]DirtySubscribers]
+  
+  user-value = id
+  cache-value = !$[[<id>]_cache]
+  
+rules // constant expressions
+  exp-call-dirty-subscriber = !js-exp |[callDirtySubscriber]|
+  

@@ -66,11 +66,11 @@ rules
   /**
     get-variable :: (Env,String) -> String
   */
-  get-variable = ?(<id>, var) ; ?Env(<debug ; fetch-elem(get-variable-from-scope(|var)) ; debug>, _) ; offset-to-variable
+  get-variable = ?(<id>, var) ; ?Env(<fetch-elem(get-variable-from-scope(|var))>, _) ; offset-to-variable
   get-variable(|var) = !(<id>, var) ; get-variable
     
   //get-variable-from-scope :: Scope -> Int
-  get-variable-from-scope(|var) = ?Scope(<fetch-elem(debug(!var) ; where(binding-equals(|var)) ; ?Binding(_, <id>))>)
+  get-variable-from-scope(|var) = ?Scope(<fetch-elem(where(binding-equals(|var)) ; ?Binding(_, <id>))>)
   
   binding-equals(|x) = ?Binding(x', offset) ; <(rm-annotations, rm-annotations) ; eq> (x, x')
   

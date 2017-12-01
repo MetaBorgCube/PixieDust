@@ -4,6 +4,7 @@ imports
   api/model-names-api
   
   generating/pixiedust/names
+  generating/pixiedust/expression
   
   lib/scopes
 
@@ -20,17 +21,64 @@ rules
     with
       (env', methods_attributes) := <env-fold-mapconcat(attributename-to-js-methods)> (env, <entityname-get-arrinames-defined> x_entityname)
   
+rules // Dirty flagging
+
+  flag-dirty-method : (env, x_attributename) -> (env', method)
+    with
+      x_methodName := <flag-dirty-name> x_attributename
+    ; x_dirtySubscribers := <dirty-subscribers-name> x_attributename
+    ; exp_callDirtySubscriber := <exp-call-dirty-subscriber>
+    ; (env', [
+      stmts_clearCache,
+      stmts_flowsto
+    ]) := <thread-environment(
+      env-thread-param(flag-dirty-clear-cached-value|x_attributename),
+      env-thread-param(env-fold-mapconcat(dataflow-path-to-dirty-flag-stmts)|<name-get-flowsto-paths> x_attributename)
+    )> env
+    ; method := js-method |[
+        x_methodName(){
+          stmts_clearCache
+          if(this.x_dirtySubscribers !== undefined) {
+            this.x_dirtySubscribers.forEach(exp_callDirtySubscriber);
+          }
+          stmts_flowsto
+        }
+      ]|
+      
+  
+  flag-dirty-clear-cached-value: (env, x_attributename) -> (env, stmts_clear)
+    where
+      <name-is-default-derived> x_attributename
+    ; x_cache := <cache-value> x_attributename
+    ; stmts_clear := js-stmts |[
+      this.x_cache = null;
+    ]|
+  
+  flag-dirty-clear-cached-value = (id, ![])
+  
+    
+  dataflow-path-to-dirty-flag-stmts : (env, DataflowPath(origin, pathexpr)) -> (env', stmts)
+    with
+      x_attributeName           := <pathexpr-last>pathexpr
+    ; x_flagDirty               := <flag-dirty-name>x_attributeName
+    ; e                         := <pathexpr-shorten-safe> pathexpr
+    ; (env', (exp_e, stmts_e))  := <exp-to-js-stmts> (env, e)
+    ; stmts := js-stmts |[
+      stmts_e
+      exp_e.x_flagDirty();
+    ]|
   
 rules // Normal attribute
   
   attributename-to-js-methods : (env, x_attributename) -> 
     <thread-environment(
-        env-thread-param(normal-getter-function|x_attributename)
+        env-thread-param(normal-getter-method|x_attributename),
+        env-thread-param(flag-dirty-method| x_attributename)
     )> env
     where
       <attributename-is-normal> x_attributename
   
-  normal-getter-function: (env, x_attributename) -> <!(env, <id>)> js-method |[
+  normal-getter-method: (env, x_attributename) -> <!(env, <id>)> js-method |[
     x_methodName(){
       return this.x_attributename;
     }
@@ -40,13 +88,13 @@ rules // Normal attribute
   
 rules // TODO  
   
-  attributename-to-js-method : (env, x_attributename) -> <!(env, <id>)> js-method* |[
+  attributename-to-js-methods : (env, x_attributename) -> <!(env, <id>)> js-method* |[
     x_attributename(){
       todo();
     }
   ]|
   
-  
+
       
   
   

@@ -12,6 +12,7 @@ imports
   api/types-names-api
   api/types-api
   
+  generating/pixiedust/names
 rules
   
   exp-to-js-stmts(|e) = !(<id>, e) ; exp-to-js-stmts  
@@ -27,6 +28,8 @@ rules
   literal-to-js-stmts = ?Datetime(<js-string ; ?exp_date>) ; !js-exp |[new Date(exp_date)]|
   literal-to-js-stmts = ?NoValue() ; js-null
   literal-to-js-stmts = ?LitString(<id>) ; js-string
+  
+  exp-to-js-stmts = (id, ?This(); !(<js-this>, []))
   
   // Binary expressions
   
@@ -399,6 +402,45 @@ rules
     ; result := (env', (exp_result, stmts_result))
     
   //References
+  
+  
+  exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
+  
+  exp-to-js-stmts: (env, m@MemberAccess(e, field)) -> result
+    with
+      (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
+    ; m_inner := <get-multiplicity> e
+    ; m_outer := <get-multiplicity> m    
+    ; x_getter := <getter-name> field
+    ; switch !(m_inner, m_outer)
+      case (upper-many, upper-many):
+        (env'', [x_result, x_inner, x_innerElem, x_loop1, x_loop2]) := <thread-environment(fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable)> env'
+      ; stmts_result := js-stmts |[
+        stmts_e
+        var x_result = [];
+        var x_inner = exp_e;
+        for(var x_loop1 = 0 ; x_loop1 < x_inner.length ; x_loop1++){
+          var x_innerElem = x_inner[x_loop1].x_getter();
+          for(var x_loop2 = 0 ; x_loop2 < x_innerElem.length ; x_loop2++){
+            x_result.push(x_innerElem[x_loop2]);
+          }
+        }
+      ]|
+      ; result := (env'', (<js-var> x_result, stmts_result))
+      otherwise:
+        result := (env', (js-exp |[
+          exp_e.x_getter()
+        ]|, []))
+    end
+    
+  
+    
+  exp-to-js-stmts: (env, Ref(field)) -> (env, (exp_result, [])) 
+    with
+      x_getter := <getter-name> field
+    ; exp_result := js-exp |[this.x_getter()]|
+    
+   
   exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
 
   //Helpers

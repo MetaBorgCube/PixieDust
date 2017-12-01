@@ -288,7 +288,7 @@ strategies
     with t1__' := <pp-one-Z(prettyprint-javascript-ID) <+ pp-one-Z(prettyprint-completion-aux)> t1__
     with t2__' := <pp-H-list(prettyprint-javascript-LeftHandSideExpression|",")
                    <+ pp-one-Z(prettyprint-completion-aux)> t2__
-    with t3__' := <pp-indent(|"2")> [ <pp-H-list(prettyprint-javascript-Statement) <+ pp-one-Z(prettyprint-completion-aux)> t3__
+    with t3__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-javascript-Statement) <+ pp-one-Z(prettyprint-completion-aux)> t3__
                                     ]
 
   is-javascript-ClassElement =
@@ -323,7 +323,7 @@ strategies
            case ?2 :
              separator := ","
            case ?3 :
-             separator := ""
+             separator := "\n"
            otherwise :
              separator := ""
          end

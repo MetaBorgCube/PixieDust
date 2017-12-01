@@ -12,7 +12,7 @@ rules
 
   generate-pixiedust-code: x_moduleName -> stmts_pixiedust
     with
-      (env, stmts_pixiedust) := <thread-environment( debug;
+      (env, stmts_pixiedust) := <thread-environment(
         env-thread-param(env-fold-mapconcat(entityname-to-js-stmts) | <modulename-get-entitynames> x_moduleName),
-        env-thread-param(modulename-to-execute-stmts | x_moduleName) ; debug
-      ) ; debug ; (id, concat) ; debug> <new-environment> 
+        env-thread-param(modulename-to-execute-stmts | x_moduleName)
+      ) ; (id, concat)> <new-environment> 
