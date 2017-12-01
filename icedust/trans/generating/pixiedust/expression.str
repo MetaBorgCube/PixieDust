@@ -323,7 +323,6 @@ rules
       )> env
     ; stmts_result := js-stmt* |[
       stmts_source
-      stmts_body
       var x_result = [];
       for(var x_loop = 0 ; x_loop < exp_source.length ; x_loop++){
         var x_var = exp_source[x_loop];
