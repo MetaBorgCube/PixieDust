@@ -8,6 +8,7 @@ imports
   pp/js/Expression-pp
   lib/scopes
   
+  api/model-names-api
   api/expressions-api
   api/types-names-api
   api/types-api
@@ -409,7 +410,7 @@ rules
     with
       (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
     ; m_inner := <get-multiplicity> e
-    ; m_outer := <get-multiplicity> m    
+    ; m_outer := <get-decl(|"Member") ; name-get-multiplicity> field
     ; x_getter := <getter-name> field
     ; switch !(m_inner, m_outer)
       case (upper-many, upper-many):
@@ -426,7 +427,21 @@ rules
         }
       ]|
       ; result := (env'', (<js-var> x_result, stmts_result))
-      otherwise:
+      case (upper-many, upper-one):
+        (env'', [x_result, x_inner, x_elem, x_loop]) := <thread-environment(fresh-variable, fresh-variable, fresh-variable, fresh-variable)> env'
+      ; stmts_result := js-stmts |[
+        stmts_e
+        var x_result = [];
+        var x_inner = exp_e;
+        for(var x_loop = 0 ; x_loop < x_inner.length ; x_loop++){
+          var x_elem = x_inner[x_loop].x_getter();
+          if(x_elem !== null) {
+            x_result.push(x_elem);
+          }
+        }
+      ]|
+      ; result := (env'', (<js-var> x_result, stmts_result))
+      case (upper-one, id):
         result := (env', (js-exp |[
           exp_e.x_getter()
         ]|, []))
