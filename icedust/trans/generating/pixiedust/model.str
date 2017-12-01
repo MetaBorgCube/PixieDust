@@ -112,18 +112,36 @@ rules // Getter
   ]|
     with
       x_methodName := <getter-name> x_attributename
+    
+  derived-getter-method: (env, x_attributename) -> result
+    where
+      <is-relationname; relationname-is-right> x_attributename
+    with
+      x_methodName := <getter-name> x_attributename
+    ; x_cacheValue := <cache-value> x_attributename
+    ; method := js-method |[
+      x_methodName() {
+        return this.x_cacheValue;
+      }
+    ]|
+    ; result := (env, method)
+    
       
   derived-getter-method: (env, x_attributename) -> result
     with
       e_derived := <attributename-get-expr> x_attributename
     ; x_methodName := <getter-name> x_attributename
     ; x_cacheValue := <cache-value> x_attributename
-    ; (env', (exp_derived, stmts_derived)) := <exp-to-js-stmts> (env, e_derived)
+    ; (env', [
+      (exp_derived, stmts_derived)
+    ]) := <thread-environment(
+      exp-to-js-stmts(|e_derived)
+    )> env
     ; method := js-method |[
       x_methodName(){
         if(this.x_cacheValue === undefined) {
           stmts_derived
-          this.x_cacheValue = exp_derived;      
+          this.x_cacheValue = exp_derived;
         }
         return this.x_cacheValue;
       }
