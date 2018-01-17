@@ -73,17 +73,25 @@ rules // Dirty flagging
     ; x_flagDirty               := <flag-dirty-name>x_attributeName
     ; e                         := <pathexpr-shorten-safe> pathexpr
     ; (env', (exp_e, stmts_e))  := <exp-to-js-stmts> (env, e)
-    ; stmts_flagDirty := <switch <?This() ; !One() <+ get-multiplicity> e 
-      case upper-one:
+    ; stmts_flagDirty := <switch !e
+      case This():
         env'' := env'
       ; !js-stmts |[
+        stmts_e
+        exp_e.x_flagDirty();
+      ]|
+      case get-multiplicity ; upper-one:
+        env'' := env'
+      ; !js-stmts |[
+          stmts_e
           if(exp_e !== null) {
             exp_e.x_flagDirty();
           }
         ]|
-      case upper-many:
+      case get-multiplicity ; upper-many:
         (env'', x_loop) := <fresh-variable> env'
       ; !js-stmts |[
+          stmts_e
           for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++) {
             exp_e[x_loop].x_flagDirty();
           }
@@ -142,9 +150,10 @@ rules // Getter
     with
       x_methodName := <getter-name> x_attributename
     ; x_cacheValue := <cache-value> x_attributename
+    ; exp_empty := <exp-empty-attribute> x_attributename
     ; method := js-method |[
       x_methodName() {
-        return this.x_cacheValue;
+        return this.x_cacheValue !== undefined ? this.x_cacheValue : exp_empty;
       }
     ]|
     ; result := (env, method)
