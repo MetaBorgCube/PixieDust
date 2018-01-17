@@ -1,0 +1,74 @@
+module generating/pixiedust/data
+
+imports
+  api/data-names-api
+  
+  generating/pixiedust/names
+  generating/pixiedust/expression
+  
+  lib/scopes
+
+rules
+  modulename-to-data-stmts: (env, x_moduleName) -> result
+    with
+      entityNames := <modulename-get-entityinstancenames> x_moduleName
+    ; result := <thread-environment(
+        env-thread-param(generate-instances | entityNames),
+        env-thread-param(generate-instances-set-member-values | entityNames)
+      ) ; (id, concat)> env  
+      
+  generate-instances = env-fold-mapconcat(generate-instance)
+
+  generate-instance: (env, x_entityName) -> (env', stmts)
+    with
+      (env', x_var) := <store-variable> (env, x_entityName)
+    ; x_model := <entityinstancename-get-type> x_entityName
+    ; stmts := js-stmts |[
+      var x_var = new x_model();
+    ]|
+    
+  generate-instances-set-member-values = env-fold-mapconcat(generate-instance-set-member-values)  
+    
+  generate-instance-set-member-values: (env, x_entityName) -> result
+    with
+      memberValues := <entityinstancename-get-membervaluenames> x_entityName
+    ; x_instance := <get-variable> (env, x_entityName)
+    ; result := <env-fold-mapconcat(generate-instance-set-member-value(|x_instance))> (env, memberValues)
+    
+  generate-instance-set-member-value(|x_instance): (env, x_memberValue) -> result
+    where
+      <membervaluename-is-attribute> x_memberValue
+    with
+      x_setter := <setter-name> x_memberValue
+    ; e_memberValue := <membervaluename-get-expr> x_memberValue
+    ; (env', (exp_memberValue, stmts_memberValue)) := <exp-to-js-stmts> (env, e_memberValue)
+    ; result := (env',
+      js-stmts |[
+        stmts_memberValue
+        x_instance.x_setter(exp_memberValue);
+      ]|
+    )
+    
+  generate-instance-set-member-value(|x_instance): (env, x_memberValue) -> result
+    where
+      <membervaluename-is-relation ; membervaluename-is-left> x_memberValue
+    with
+      values := <membervaluename-get-values ; map(!(env ,<id>) ;  get-variable)> x_memberValue
+    ; stmts_setValues := <map(generate-relation-setter(|x_instance, x_memberValue))> values
+    ; result := (env, stmts_setValues)
+    
+  generate-relation-setter(|x_instance, x_memberValue): x_name -> result
+    with
+      x_origin := <membervaluename-get-origin> x_memberValue
+    ; m_origin := <name-get-multiplicity> x_origin 
+    ; x_setter := <setter-name> x_memberValue
+    with
+      switch !m_origin
+        case upper-one:
+          result := js-stmt |[x_instance.x_setter(x_name);]|
+        case upper-many:
+          x_getter := <getter-name> x_memberValue
+        ; result := js-stmt |[x_instance.x_setter(x_instance.x_getter().concat(x_name));]|    
+      end
+    
+  generate-instance-set-member-value(|x_instance) = (id, ![])

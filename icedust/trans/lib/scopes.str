@@ -50,6 +50,11 @@ rules
   */
   fresh-variable = !(<Env(id, inc)>, <environment-get-offset ; offset-to-variable>)
   
+  /**
+    fresh-variables :: Env -> (Env, [String])
+  */
+  fresh-variables(|amount): env -> <debug ; env-fold-map(?(<fresh-variable>, _))> (env, <copy> (amount, ())) 
+  
   offset-to-variable = !$[_[<id>]]
   
   /**

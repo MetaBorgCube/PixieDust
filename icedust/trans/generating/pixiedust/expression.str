@@ -20,9 +20,12 @@ rules
   
   //Literals
   
+  exp-to-js-stmts = (id, ?LitVal(<id>)) ; exp-to-js-stmts 
+  
   exp-to-js-stmts = (id, where(is-literal) ; literal-to-js-stmts ; !(<id>, []))
   
-  literal-to-js-stmts = ?Int(<id>) ; js-int
+  
+  literal-to-js-stmts = ?Int(<js-int>)
   literal-to-js-stmts = ?Float(<id>) ; js-float
   literal-to-js-stmts = ?True() ; js-true
   literal-to-js-stmts = ?False() ; js-false
@@ -31,6 +34,27 @@ rules
   literal-to-js-stmts = ?LitString(<id>) ; js-string
   
   exp-to-js-stmts = (id, ?This(); !(<js-this>, []))
+  
+  exp-to-js-stmts: (env, e*) -> result
+    where
+      <is-list> e*
+    with
+      (env', x_result) := <fresh-variable> env
+    ; (env'', stmts_concat) := <env-fold-mapconcat(exp-push-result(|x_result))> (env, e*)
+    ; stmts := js-stmts |[
+        var x_result = [];
+        stmts_concat
+      ]|
+    ; result := (env'', (<js-var> x_result, stmts))
+      
+  exp-push-result(|x_result): (env, e) -> (env', stmts)
+    with
+      (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
+    ; stmts := js-stmts |[
+      stmts_e
+      x_result.push(exp_e);
+    ]|
+  
   
   // Binary expressions
   

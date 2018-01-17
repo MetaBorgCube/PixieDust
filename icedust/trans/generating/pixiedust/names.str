@@ -11,7 +11,7 @@ imports
 rules // method names  
   getter-name = !$[get[<ucfirst>]]
   setter-name = !$[set[<ucfirst>]]
-  unisetter-name = !$[unidirectionalSet[<ucfirst>]]
+  unidirectional-setter-name = !$[unidirectionalSet[<ucfirst>]]
   flag-dirty-name = !$[flagDirty[<ucfirst>]]
   sub-dirty-name = !$[subscribeDirty[<ucfirst>]]
   unsub-dirty-name = !$[unsubcribeDirty[<ucfirst>]]

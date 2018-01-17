@@ -14,6 +14,8 @@ imports
   generating/js/names
   generating/js/common
   
+  lib/scopes
+  
 rules
 
 
@@ -36,7 +38,6 @@ rules
     ; stmt_merge := js-stmt* |[var x_merge = exp_merge; ]|
     ; stmts := <conc> (stmts_l, stmts_r, stmt_merge)
     ; result := (<js-var> x_merge, stmts, <inc> i'')
-  
   
   exp-to-js-stmts = exp-to-js-stmts(|1)
   exp-to-js-stmts(|i) = ?Addition(e1, e2) ; binexp-to-js-stmts-with-nullcheck(!(e1,e2), js-add|i) 

@@ -6,6 +6,8 @@ imports
   generating/pixiedust/names
   generating/pixiedust/expression
   
+  api/types-names-api
+  
   lib/scopes
   lib/lists-tuples
 
@@ -65,23 +67,41 @@ rules // Dirty flagging
   flag-dirty-clear-cached-value = (id, ![])
   
     
-  dataflow-path-to-dirty-flag-stmts : (env, DataflowPath(origin, pathexpr)) -> (env', stmts)
+  dataflow-path-to-dirty-flag-stmts : (env, DataflowPath(origin, pathexpr)) -> (env'', stmts)
     with
       x_attributeName           := <pathexpr-last>pathexpr
     ; x_flagDirty               := <flag-dirty-name>x_attributeName
     ; e                         := <pathexpr-shorten-safe> pathexpr
     ; (env', (exp_e, stmts_e))  := <exp-to-js-stmts> (env, e)
+    ; stmts_flagDirty := <switch <?This() ; !One() <+ get-multiplicity> e 
+      case upper-one:
+        env'' := env'
+      ; !js-stmts |[
+          if(exp_e !== null) {
+            exp_e.x_flagDirty();
+          }
+        ]|
+      case upper-many:
+        (env'', x_loop) := <fresh-variable> env'
+      ; !js-stmts |[
+          for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++) {
+            exp_e[x_loop].x_flagDirty();
+          }
+        ]|
+    end> e
     ; stmts := js-stmts |[
       stmts_e
-      exp_e.x_flagDirty();
+      stmts_flagDirty
     ]|
   
 rules // Normal attribute
   
   attributename-to-js-methods : (env, x_attributename) -> 
     <thread-environment(
-        env-thread-param(normal-getter-method|x_attributename),
-        env-thread-param(flag-dirty-method| x_attributename)
+        env-thread-param(normal-getter-method| x_attributename),
+        env-thread-param(flag-dirty-method| x_attributename),
+        env-thread-param(unidirectional-setter-method | x_attributename),
+        env-thread-param(setter-method | x_attributename)
     )> env
     where
       <attributename-is-normal> x_attributename
@@ -99,10 +119,13 @@ rules // Normal attribute
   attributename-to-js-methods : (env, x_attributename) ->
     <thread-environment(
 //        env-thread-param(normal-getter-method|x_attributename),
-        env-thread-param(flag-dirty-method| x_attributename)
+        env-thread-param(flag-dirty-method| x_attributename),
+        env-thread-param(default-getter-method| x_attributename),
+        env-thread-param(setter-method | x_attributename)
     )> env
     where
       <attributename-is-default> x_attributename
+    
   
 rules // Getter  
   normal-getter-method: (env, x_attributename) -> <!(env, <id>)> js-method |[
@@ -170,6 +193,99 @@ rules // Getter
     ]|
     ; result := (env', method)
     
+rules // Setter
+
+//  normal-setter-method (env, x_attributename) ->
+    unidirectional-setter-method: (env, x_attributename) -> result
+      where
+        <is-relationname> x_attributename
+      with
+        x_methodName := <unidirectional-setter-name> x_attributename
+      ; x_flagDirty := <flag-dirty-name> x_attributename
+      ; method := js-method |[
+          x_methodName(x_attributename) {
+            this.x_attributename = x_attributename;
+            this.x_flagDirty();
+          }
+        ]|
+      ; result := (env, method)
+    
+    //fallback if field does not need a unidirectional setter
+    unidirectional-setter-method = Fst
+    
+    setter-method: (env, x_attributename) -> result
+      with
+        x_setter := <setter-name> x_attributename
+      ; x_flagDirty := <flag-dirty-name> x_attributename
+      ; (env', stmts_setterInverse) := <setter-relation-inverse> (env, x_attributename)
+      ; method := js-method |[
+          x_setter(x_attributename) {
+            stmts_setterInverse
+            this.x_attributename = x_attributename;
+            this.x_flagDirty();
+          }
+        ]|
+      ; result := (env, method)
+      
+    setter-relation-inverse: (env, x_attributename) -> result
+      where
+        <is-relationname ; name-get-multiplicity ; upper-one> x_attributename
+      with
+        x_inverse := <relationname-get-inversename> x_attributename
+      ; x_getter := <getter-name> x_attributename
+      ; x_unidirectionalSetterInverse := <unidirectional-setter-name> x_inverse
+      ; (env', [
+        x_previous
+      ]) := <fresh-variables(|1)> env
+      ; stmts := js-stmts |[
+        var x_previous = this.x_getter();
+        if(x_previous !== null) {
+          x_previous.x_unidirectionalSetterInverse(null);
+        }
+        x_attributename.x_unidirectionalSetterInverse(this);
+      ]|
+      ; result := (env', stmts)
+    
+    setter-relation-inverse: (env, x_attributename) -> result
+      where
+        <is-relationname ; name-get-multiplicity ; upper-many> x_attributename
+      with
+        x_getter := <getter-name> x_attributename
+      ; x_inverse := <relationname-get-inversename> x_attributename
+      ; x_unidirectionalSetterInverse := <unidirectional-setter-name> x_inverse
+      ; (env', [
+        x_this,
+        x_previous,
+        x_added,
+        x_loopAdd,
+        x_removed,
+        x_loopRemove,
+        x_removedElement,
+        x_addedElement
+      ]) := <fresh-variables(|8)> env
+      ; stmts := js-stmts |[
+        var x_this = this;
+        var x_previous = this.x_getter();
+        var x_removed = new Set(x_previous);
+        for(var x_loopAdd = 0 ; x_loopAdd < x_previous.length ; x_loopAdd++) {
+          x_removed["delete"](x_previous[x_loopAdd]);
+        }
+        var x_added = new Set(x_attributename);
+        for(var x_loopRemove = 0 ; x_loopRemove < x_attributename.length ; x_loopRemove++){
+          x_added["delete"](x_previous[x_loopRemove]);
+        }
+        x_added.forEach(function(x_addedElement){
+          x_addedElement.x_unidirectionalSetterInverse(x_this);
+        });
+        x_removed.forEach(function(x_removedElement){
+          x_unidirectionalSetterInverse(null);
+        });
+      ]|
+      ; result := (env', stmts)
+    
+    setter-relation-inverse = (id, ![])
+    
+    
 rules // Constructor
 
   init-attribute = where((id, attributename-is-default)) ; init-default-attribute
@@ -182,17 +298,6 @@ rules // Constructor
       
   assign-empty-user-value = !(<user-value>, <exp-empty-attribute>) ; ?(x_userValue, exp_empty) ; !js-stmt |[this.x_userValue = exp_empty;]|
   assign-empty-cache-value = cache-value ; ?x_cacheValue ; !js-stmt |[this.x_cacheValue = undefined;]|
-      
-rules // TODO  
-  
-  attributename-to-js-methods : (env, x_attributename) -> <!(env, <id>)> js-method* |[
-    x_attributename(){
-      todo();
-    }
-  ]|
-  
-
-      
   
   
   

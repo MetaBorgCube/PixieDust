@@ -48,3 +48,9 @@ rules
     js-this = !This()
     
     js-var: x_var -> js-exp |[x_var]|
+    
+    
+    js-lexical-scope-exp: stmts_body -> js-exp |[(function(){
+      stmts_body
+    })()]|
+    js-lexical-scope-stmt = js-lexical-scope-exp ; ?exp_lexical ; !js-stmt |[exp_lexical;]| 
