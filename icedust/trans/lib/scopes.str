@@ -53,7 +53,7 @@ rules
   /**
     fresh-variables :: Env -> (Env, [String])
   */
-  fresh-variables(|amount): env -> <debug ; env-fold-map(?(<fresh-variable>, _))> (env, <copy> (amount, ())) 
+  fresh-variables(|amount): env -> <env-fold-map(?(<fresh-variable>, _))> (env, <copy> (amount, ())) 
   
   offset-to-variable = !$[_[<id>]]
   

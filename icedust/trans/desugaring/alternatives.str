@@ -33,7 +33,7 @@ rules
   desugar-alternative: InterpolateString(e1, e2, e3) ->
     Addition(
       e1,
-      <custom-origin(|e2)>Function("concat",[
+      <custom-origin(|e2)>Function(<custom-origin(|e2)> "concat",[
         <custom-origin(|e2)>Merge(
           <custom-origin(|e2)>Cast(
             e2,

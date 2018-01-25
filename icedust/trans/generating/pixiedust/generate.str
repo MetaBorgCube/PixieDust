@@ -14,7 +14,8 @@ rules
 
   generate-pixiedust-code: x_moduleName -> stmts_pixiedust
     with
-      (env, [
+      stmts_imports := <generate-imports>  
+    ; (env, [
         stmts_model,
         stmts_data,
         stmts_execute
@@ -27,6 +28,12 @@ rules
       )> <new-environment>
     ; stmt_execution := <conc ; js-lexical-scope-stmt> (stmts_data, stmts_execute)
     ; stmts_pixiedust := js-stmts |[
+      stmts_imports  
       stmts_model
       stmt_execution
     ]| 
+  
+  generate-imports = !js-stmts |[
+    var functions = require("./expressions");
+    var _ = require("lodash");
+  ]|

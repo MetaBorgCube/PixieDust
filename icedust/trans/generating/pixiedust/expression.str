@@ -192,9 +192,9 @@ rules
   
   exp-to-js-stmts = ?(_, Difference(e1,e2)) ; binexp-merge(!(e1,e2), merge-difference)
   
-  merge-difference: (env, (e1, e2, exp_lhs, exp_rhs)) -> result
+  merge-difference: (env, (e_lhs, e_rhs, exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) -> result
     with
-      exp_result := <switch <(get-multiplicity, get-multiplicity)> (e1, e2)
+      exp_result := <switch <(get-multiplicity, get-multiplicity)> (e_lhs, e_rhs)
         case (upper-one, upper-one):
           !js-exp |[exp_lhs == exp_rhs ? null : exp_lhs]|
         case (upper-one, upper-many):
@@ -204,7 +204,7 @@ rules
         case (upper-many, upper-many):
           !js-exp |[_.difference(exp_lhs, exp_rhs)]|
       end>
-    ; result := (env, (exp_result, []))
+    ; result := (env, (exp_result, <conc> (stmts_lhs, stmts_rhs)))
   
   
   exp-to-js-stmts = ?(_, ChoiceLeft(e1, e2)) ; binexp-merge(!(e1,e2), merge-choiceleft)
@@ -224,24 +224,24 @@ rules
     ]|
     ; result := (env', (<js-var> x_result, stmts))
   
-  exp-to-js-stmts = ?(env, Merge(e1, e2)) ; binexp-to-js-stmts(!(e1, e2), merge-merge)
+  exp-to-js-stmts = ?(_, Merge(e1, e2)) ; binexp-merge(!(e1, e2), merge-merge)
   
-  merge-merge : (e1, e2, exp_lhs, exp_rhs) -> js-exp |[
-    exp_lhs2.concat(exp_rhs2)
-  ]|
+  merge-merge : (env, (e_lhs, e_rhs, exp_lhs, exp_rhs, stmts_lhs, stmts_rhs)) -> result 
     with
-      exp_lhs2 := <exp-to-list> (e1, exp_lhs) 
-    ; exp_rhs2 := <exp-to-list> (e2, exp_rhs)
+      exp_lhs2 := <exp-to-list> (e_lhs, exp_lhs)
+    ; exp_rhs2 := <exp-to-list> (e_rhs, exp_rhs)
+    ; exp_result := js-exp |[
+      exp_lhs2.concat(exp_rhs2)
+    ]| 
+    ; result := (env, (exp_result, <conc> (stmts_lhs, stmts_rhs)))
   
   exp-to-list: (e, exp_e) -> exp_result
     with
-      exp_empty := <exp-empty> ZeroOrMore()
-    ; switch <get-multiplicity> e
-        case lower-one; upper-one:
-          exp_result := js-exp |[[exp_e]]|
-        case lower-zero ; upper-one:
-          exp_result := js-exp |[exp_e == null ? exp_empty : [exp_e]]|
-        otherwise:
+      switch <get-multiplicity> e
+        case upper-one:
+          exp_empty := <exp-empty-array>
+        ; exp_result := js-exp |[exp_e == null ? exp_empty : [exp_e]]|
+        case upper-many:
           exp_result := exp_e
       end
   
@@ -427,59 +427,82 @@ rules
     
   //References
   
-  
-  exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
-  
   exp-to-js-stmts: (env, m@MemberAccess(e, field)) -> result
     with
-      (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
-    ; m_inner := <get-multiplicity> e
+      m_inner := <get-multiplicity> e
     ; m_outer := <get-decl(|"Member") ; name-get-multiplicity> field
     ; x_getter := <getter-name> field
-    ; switch !(m_inner, m_outer)
-      case (upper-many, upper-many):
-        (env'', [x_result, x_inner, x_innerElem, x_loop1, x_loop2]) := <thread-environment(fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable)> env'
-      ; stmts_result := js-stmts |[
-        stmts_e
-        var x_result = [];
-        var x_inner = exp_e;
-        for(var x_loop1 = 0 ; x_loop1 < x_inner.length ; x_loop1++){
-          var x_innerElem = x_inner[x_loop1].x_getter();
-          for(var x_loop2 = 0 ; x_loop2 < x_innerElem.length ; x_loop2++){
-            x_result.push(x_innerElem[x_loop2]);
+    ; (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
+    ; (env'', (exp_access, stmts_access)) := <member-access-to-js-stmts> (env', (exp_e, x_getter, m_inner, m_outer))
+    ; result := (env'', (exp_access, <conc> (stmts_e, stmts_access)))
+  
+  member-access-to-js-stmts : (env, (This(), x_getter, _, _)) -> (env, (exp_result, []))
+    with
+      exp_result := js-exp |[this.x_getter()]|
+  
+  member-access-to-js-stmts : (env, (exp_inner, x_getter, m_inner, m_outer)) -> result
+    where
+      <(upper-many, upper-many)> (m_inner, m_outer)
+    with
+      (env', 
+          [ x_result
+          , x_innerElem
+          , x_loop1
+          , x_loop2
+          ]) := <fresh-variables(|4)> env
+        ; stmts_result := js-stmts |[
+          var x_result = [];
+          for(var x_loop1 = 0 ; x_loop1 < exp_inner.length ; x_loop1++){
+            var x_innerElem = exp_inner[x_loop1].x_getter();
+            for(var x_loop2 = 0 ; x_loop2 < x_innerElem.length ; x_loop2++){
+              x_result.push(x_innerElem[x_loop2]);
+            }
           }
-        }
-      ]|
-      ; result := (env'', (<js-var> x_result, stmts_result))
-      case (upper-many, upper-one):
-        (env'', [x_result, x_inner, x_elem, x_loop]) := <thread-environment(fresh-variable, fresh-variable, fresh-variable, fresh-variable)> env'
+        ]|
+    ; result := (env', (<js-var> x_result, stmts_result))
+  
+  member-access-to-js-stmts : (env, (exp_inner, x_getter, m_inner, m_outer)) -> result
+    where
+      <(upper-many, upper-one)> := (m_inner, m_outer)
+    with
+      (env', 
+        [ x_result
+        , x_elem
+        , x_loop
+        ]) := <fresh-variables(|3)> env
       ; stmts_result := js-stmts |[
-        stmts_e
         var x_result = [];
-        var x_inner = exp_e;
-        for(var x_loop = 0 ; x_loop < x_inner.length ; x_loop++){
-          var x_elem = x_inner[x_loop].x_getter();
+        for(var x_loop = 0 ; x_loop < exp_inner.length ; x_loop++){
+          var x_elem = exp_inner[x_loop].x_getter();
           if(x_elem !== null) {
             x_result.push(x_elem);
           }
         }
       ]|
-      ; result := (env'', (<js-var> x_result, stmts_result))
-      case (upper-one, id):
-        result := (env', (js-exp |[
-          exp_e.x_getter()
-        ]|, []))
-    end
-    
+      ; result := (env', (<js-var> x_result, stmts_result))
+      
+      
+  member-access-to-js-stmts : (env, (exp_inner, x_getter, m_inner, m_outer)) -> result
+    where
+      <(upper-one, ?m_access)> := (m_inner, m_outer)
+    with 
+      (env', x_result) := <fresh-variable> env
+      ; exp_empty := <exp-empty-multiplicity> m_access 
+      ; stmts_result := js-stmts |[
+          var x_result = exp_inner === null ? exp_empty : exp_inner.x_getter();
+        ]|
+      ; result := (env', (<js-var> x_result, stmts_result))
   
-    
-  exp-to-js-stmts: (env, Ref(field)) -> (env, (exp_result, [])) 
+  exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
+  exp-to-js-stmts: (env, Ref(field)) -> result 
     with
       x_getter := <getter-name> field
-    ; exp_result := js-exp |[this.x_getter()]|
-    
-   
-  exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
+    ; (env', x_result) := <fresh-variable> env
+    ; stmts_result := js-stmts |[
+      var x_result = this.x_getter();
+    ]|
+    ; result := (env', (<js-var> x_result, stmts_result))
+
 
   //Helpers
   
@@ -499,9 +522,5 @@ rules
       (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
     ; result := (env', ([exp_e | exps], [stmts_e | stmts]))
   
-  exp-empty = upper-one ; exp-empty-one
-  exp-empty = upper-many ; exp-empty-many
-  exp-empty-one  = !js-exp |[null]|
-  exp-empty-many = !js-exp |[EMPTY_ARRAY]|
   
   

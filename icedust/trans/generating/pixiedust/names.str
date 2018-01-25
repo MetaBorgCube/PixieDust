@@ -25,5 +25,7 @@ rules // constant expressions
 
   exp-call-dirty-subscriber = !js-exp |[callDirtySubscriber]|
   
-  exp-empty-attribute = name-get-multiplicity ; upper-many ; exp-empty-array
-  exp-empty-attribute = name-get-multiplicity ; upper-one ; js-null
+  exp-empty-multiplicity = upper-many ; exp-empty-array
+  exp-empty-multiplicity = upper-one ; js-null
+  
+  exp-empty-attribute = name-get-multiplicity ; exp-empty-multiplicity

@@ -234,7 +234,7 @@ rules // Setter
             this.x_flagDirty();
           }
         ]|
-      ; result := (env, method)
+      ; result := (env', method)
       
     setter-relation-inverse: (env, x_attributename) -> result
       where
@@ -242,16 +242,17 @@ rules // Setter
       with
         x_inverse := <relationname-get-inversename> x_attributename
       ; x_getter := <getter-name> x_attributename
-      ; x_unidirectionalSetterInverse := <unidirectional-setter-name> x_inverse
       ; (env', [
         x_previous
       ]) := <fresh-variables(|1)> env
+      ; stmts_unsetInverse := <setter-relation-inverse-unset> (x_inverse, x_previous)
+      ; stmts_setInverse := <setter-relation-inverse-set> (x_inverse, x_attributename)
       ; stmts := js-stmts |[
         var x_previous = this.x_getter();
         if(x_previous !== null) {
-          x_previous.x_unidirectionalSetterInverse(null);
+          stmts_unsetInverse
         }
-        x_attributename.x_unidirectionalSetterInverse(this);
+        stmts_setInverse
       ]|
       ; result := (env', stmts)
     
@@ -287,13 +288,58 @@ rules // Setter
           x_addedElement.x_unidirectionalSetterInverse(x_this);
         });
         x_removed.forEach(function(x_removedElement){
-          x_unidirectionalSetterInverse(null);
+          x_removedElement.x_unidirectionalSetterInverse(null);
         });
       ]|
       ; result := (env', stmts)
     
     setter-relation-inverse = (id, ![])
     
+    setter-relation-inverse-set : (x_attribute, x_ref) -> <do-setter-relation-inverse-set> (x_attribute, m_attribute, x_ref)
+      with
+        m_attribute := <name-get-multiplicity> x_attribute
+    
+    do-setter-relation-inverse-set: (x_attribute, m_attribute, x_ref) -> result
+      where
+        <upper-one> m_attribute
+      with
+        x_unidirectionalSetter := <unidirectional-setter-name> x_attribute
+      ; result := js-stmts |[
+          x_ref.x_unidirectionalSetter(this);
+        ]|
+        
+    do-setter-relation-inverse-set: (x_attribute, m_attribute, x_ref) -> result
+      where
+        <upper-many> m_attribute
+      with
+        x_unidirectionalSetter := <unidirectional-setter-name> x_attribute
+      ; x_getter := <getter-name> x_attribute
+      ; result := js-stmts |[
+          x_ref.x_unidirectionalSetter(x_ref.x_getter().concat([this]));
+        ]|
+    
+    setter-relation-inverse-unset: (x_attribute, x_ref) -> <do-setter-relation-inverse-unset> (x_attribute, m_attribute, x_ref)
+      with
+        m_attribute := <name-get-multiplicity> x_attribute 
+    
+    do-setter-relation-inverse-unset: (x_attribute, m_attribute, x_ref) -> result
+      where
+        <upper-one> m_attribute
+      with
+        x_unidirectionalSetter := <unidirectional-setter-name> x_attribute
+      ; result := js-stmts |[
+          x_ref.x_unidirectionalSetter(null);
+        ]|
+    
+    do-setter-relation-inverse-unset: (x_attribute, m_attribute, x_ref) -> result
+      where
+        <upper-many> m_attribute
+      with
+        x_unidirectionalSetter := <unidirectional-setter-name> x_attribute
+      ; x_getter := <getter-name> x_attribute
+      ; result := js-stmts |[
+          x_ref.x_unidirectionalSetter(_.without(x_ref.x_getter(), this));
+        ]|
     
 rules // Constructor
 
