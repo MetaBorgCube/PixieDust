@@ -77,13 +77,11 @@ rules // Dirty flagging
       case This():
         env'' := env'
       ; !js-stmts |[
-        stmts_e
         exp_e.x_flagDirty();
       ]|
       case get-multiplicity ; upper-one:
         env'' := env'
       ; !js-stmts |[
-          stmts_e
           if(exp_e !== null) {
             exp_e.x_flagDirty();
           }
@@ -91,7 +89,6 @@ rules // Dirty flagging
       case get-multiplicity ; upper-many:
         (env'', x_loop) := <fresh-variable> env'
       ; !js-stmts |[
-          stmts_e
           for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++) {
             exp_e[x_loop].x_flagDirty();
           }

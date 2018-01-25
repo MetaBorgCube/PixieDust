@@ -141,8 +141,8 @@ rules
   get-binexp(merge) = merge(?LessThanEqual(e1, e2)      ; !(e1, e2), merge-compare(js-lte))
   get-binexp(merge) = merge(?GreaterThan(e1, e2)        ; !(e1, e2), merge-compare(js-gt))
   get-binexp(merge) = merge(?GreaterThanEqual(e1, e2)   ; !(e1, e2), merge-compare(js-gte))
-  get-binexp(merge) = merge(?Equal(e1, e2)              ; !(e1, e2), merge-compare(js-eq))
-  get-binexp(merge) = merge(?Inequal(e1, e2)            ; !(e1, e2), merge-compare(js-neq))
+  get-binexp(merge) = merge(?Equal(e1, e2)              ; !(e1, e2), merge-compare(js-eqq))
+  get-binexp(merge) = merge(?Inequal(e1, e2)            ; !(e1, e2), merge-compare(js-neqq))
   
   merge-compare(compare) : (e1, e2, exp_lhs, exp_rhs) -> <compare> (exp_lhs', exp_rhs')
     where
@@ -215,6 +215,7 @@ rules
     ; exp_nonempty := <check-nonempty> (<get-multiplicity> e_lhs, exp_lhs)
     ; stmts := js-stmt* |[
       stmts_lhs
+      var x_result;
       if(exp_nonempty){
         x_result = exp_lhs;
       } else{
@@ -238,9 +239,11 @@ rules
   exp-to-list: (e, exp_e) -> exp_result
     with
       switch <get-multiplicity> e
+        case lower-one ; upper-one ; <is-literal> e:
+          exp_result := js-exp |[[exp_e]]|
         case upper-one:
           exp_empty := <exp-empty-array>
-        ; exp_result := js-exp |[exp_e == null ? exp_empty : [exp_e]]|
+        ; exp_result := js-exp |[exp_e === null ? exp_empty : [exp_e]]|
         case upper-many:
           exp_result := exp_e
       end
