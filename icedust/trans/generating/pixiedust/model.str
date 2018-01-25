@@ -3,10 +3,13 @@ module generating/pixiedust/model
 imports
   api/model-names-api
   
+  analysis2/path
+  
   generating/pixiedust/names
   generating/pixiedust/expression
   
   api/types-names-api
+  api/types-api
   
   lib/scopes
   lib/lists-tuples
@@ -15,6 +18,7 @@ rules
   entityname-to-js-stmts: (env, x_entityname) -> <!(env', <id>)> js-stmt* |[
     class x_entityname {
       constructor(){
+        stmts_subscription
         stmts_init
       }
       methods_attributes
@@ -23,9 +27,11 @@ rules
     with
       attributenames := <entityname-get-arrinames-defined> x_entityname
     ; (env', [
+        stmts_subscription,
         stmts_init,
         methods_attributes
       ]) := <thread-environment(
+        env-thread-param(env-fold-mapconcat(init-subscription)|attributenames),
         env-thread-param(env-fold-mapconcat(init-attribute)|attributenames),
         env-thread-param(env-fold-mapconcat(attributename-to-js-methods)|attributenames)
       )> env
@@ -338,7 +344,38 @@ rules // Setter
           x_ref.x_unidirectionalSetter(_.without(x_ref.x_getter(), this));
         ]|
     
+rules // Subscribe / Unsubscribe
+
+  subscribe-method: x_attributename -> js-method |[
+    x_subscribeDirtyName(x_dirtySubscriber) {
+      if(this.x_dirtySubscribers === undefined) {
+        this.x_dirtySubscribers = new Set();
+      }
+      this.x_dirtySubscribers.add(x_dirtySubscriber);
+    }
+  ]|
+    with
+      x_subscribeDirtyName := <subscribe-dirty-name> x_attributename
+    ; x_dirtySubscriber := <dirty-subscriber-name> x_attributename
+    ; x_dirtySubscribers := <dirty-subscribers-name> x_attributename
+    
+  unsubscribe-method: x_attributename -> js-method |[
+    x_subscribeDirtyName(x_dirtySubscriber) {
+      if(this.x_dirtySubscribers !== undefined) {
+        this.x_dirtySubscribers["delete"](x_dirtySubscriber);
+      }
+    }
+  ]|
+    with
+      x_subscribeDirtyName := <subscribe-dirty-name> x_attributename
+    ; x_dirtySubscriber := <dirty-subscriber-name> x_attributename
+    ; x_dirtySubscribers := <dirty-subscribers-name> x_attributename
+    
 rules // Constructor
+
+  init-subscription: (env, x_attributename) -> (env, js-stmts |[this.x_dirtySubscribers = undefined;]|)
+    with
+      x_dirtySubscribers := <dirty-subscribers-name> x_attributename
 
   init-attribute = where((id, attributename-is-default)) ; init-default-attribute
   init-attribute = where((id, attributename-is-derivation)) ; init-derived-attribute

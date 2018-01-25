@@ -38,4 +38,10 @@ rules
     var _ = require("lodash");
     var React = require("react");
     var ReactDOMServer = require("react-dom/server");
+    
+    var runtime = {
+      callDirtySubscriber: function callDirtySubscriber(dirtySubscriber) {
+        dirtySubscriber();
+      }
+    };
   ]|

@@ -13,8 +13,9 @@ rules // method names
   setter-name = !$[set[<ucfirst>]]
   unidirectional-setter-name = !$[unidirectionalSet[<ucfirst>]]
   flag-dirty-name = !$[flagDirty[<ucfirst>]]
-  sub-dirty-name = !$[subscribeDirty[<ucfirst>]]
-  unsub-dirty-name = !$[unsubcribeDirty[<ucfirst>]]
+  subscribe-dirty-name = !$[subscribeDirty[<ucfirst>]]
+  unsubscribe-dirty-name = !$[unsubcribeDirty[<ucfirst>]]
+  dirty-subscriber-name = !$[[<id>]DirtySubscriber]
   dirty-subscribers-name = !$[[<id>]DirtySubscribers]
   
   user-value = id
@@ -23,7 +24,7 @@ rules // method names
 rules // constant expressions
   exp-empty-array = !js-exp |[[]]|
 
-  exp-call-dirty-subscriber = !js-exp |[callDirtySubscriber]|
+  exp-call-dirty-subscriber = !js-exp |[runtime.callDirtySubscriber]|
   
   exp-empty-multiplicity = upper-many ; exp-empty-array
   exp-empty-multiplicity = upper-one ; js-null

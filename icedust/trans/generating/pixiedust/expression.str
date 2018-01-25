@@ -18,10 +18,6 @@ rules
   
   exp-to-js-stmts(|e) = !(<id>, e) ; exp-to-js-stmts  
   
-  //Literals
-  
-  exp-to-js-stmts = (id, ?LitVal(<id>)) ; exp-to-js-stmts 
-  
   exp-to-js-stmts = (id, where(is-literal) ; literal-to-js-stmts ; !(<id>, []))
   
   
@@ -547,7 +543,7 @@ rules
     with
       (env', (exp_value, stmts_value)) := <attribute-value-to-js-exp> (env, value)
     ; prop_value := js-prop |[x_key: exp_value]|
-    ; result := (env, (prop_value, stmts_value))
+    ; result := (env', (prop_value, stmts_value))
   
   attribute-value-to-js-exp = (id, ?DomElementPropertyValueExp(<id>)) ; exp-to-js-stmts 
   attribute-value-to-js-exp = (id, ?DomElementPropertyValueMap(<id>)) ; env-fold-map(attribute-to-js-prop) ; (id, (unzip ; (js-object, concat)))
