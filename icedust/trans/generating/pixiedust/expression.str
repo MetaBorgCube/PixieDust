@@ -6,7 +6,9 @@ imports
   
   js/util
   pp/js/Expression-pp
+  
   lib/scopes
+  lib/nabl2
   
   api/model-names-api
   api/expressions-api
