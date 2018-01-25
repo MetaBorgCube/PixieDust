@@ -1,0 +1,41 @@
+module expressions-view
+
+rules
+
+  [[ RenderComponent(ref, parameters, children) ^ (module_scope) : ty ]] :=
+    ty == TTuple(TView(), TOne(), TOnDemandIncremental()),
+    [[ ref ^ (module_scope) : TComponent(params)]],
+    PairwiseEqual2 [[ parameters ^ (module_scope, params) ]],
+    Map1T [[ children ^ (module_scope) : (_) ]].
+  
+  [[ ComponentRef(name) ^ (module_scope) : ty ]] :=
+    Component{name} -> module_scope,
+    Component{name} |-> name_def,
+    name_def : ty.
+  
+  PairwiseEqual2 [[ l@[x | xs] ^ (s, expected) ]] :=
+    expected == [y | ys]  | error $[invalid number of arguments] @ l,
+    [[ x ^ (s) : TTuple(x_ty, x_mult, x_strat) ]],
+    y == TTuple(y_ty, y_mult, y_strat),
+    x_ty <sub? y_ty | error $[expected type: [y_ty], got: [x_ty]],
+    x_mult <mulOrd? y_mult | error $[expected multiplicity: [y_mult], got: [x_mult] ],
+    x_strat <strat? y_strat | error $[expected strategy: [y_strat], got: [x_strat] ],
+    PairwiseEqual [[ xs ^ (s, ys) ]].
+    
+  PairwiseEqual2 [[ l@[] ^ (s, expected) ]] := 
+    expected == [] | error $[invalid number of arguments] @ l.
+    
+  [[ RenderDomElement(name, properties, children) ^ (module_scope) : ty ]] :=
+    ty == TTuple(TView(), TOne(), TOnDemandIncremental()),
+    Map1 [[ properties ^ (module_scope) ]],
+    Map1T [[ children ^ (module_scope) : (_) ]].
+  
+  [[ DomElementProperty(k, value) ^ (s) ]] := 
+    [[ value ^ (s) ]].
+  
+  [[ DomElementPropertyValueExp(e) ^ (s) ]] := 
+    [[ e ^ (s) : _ ]].
+  
+  [[ DomElementPropertyValueMap(pairs) ^ (s) ]] :=
+    Map1 [[ pairs ^ (s) ]].  
+  

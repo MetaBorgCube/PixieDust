@@ -181,3 +181,51 @@ context-free priorities
   { left:
     Exp.ChoiceLeft
   }
+  
+//Views
+
+context-free syntax
+  Exp = Render
+  
+  Render = RenderComponent
+  Render = RenderDomElement 
+  
+  RenderDomElement.RenderDomElement  = <
+    <DomID>[<{DomElementProperty ", "}*>] {
+      <{Exp "\n"}*>
+    }> 
+  RenderDomElement.RenderDomElement2 = <
+    <DomID> {
+      <{Exp "\n"}*>
+    }>
+  
+  RenderDomElement.RenderDomElement3 = <<DomID>[<{DomElementProperty ", "}*>]>
+  
+  ComponentRef.ComponentRef = ID
+  
+  RenderComponent.RenderComponent  = <
+    @<ComponentRef>(<{Exp ", "}*>) { 
+      <{Exp "\n"}*> 
+    }>
+  RenderComponent.RenderComponent2 =  <
+    @<ComponentRef> { 
+      <{Exp "\n"}*> 
+    }>
+  RenderComponent.RenderComponent3 = <@<ComponentRef>(<{Exp ", "}*>)> { prefer } //above Rendercomponent4 ( Exp )
+  
+  RenderComponent = RenderComponent4
+  RenderComponent4.RenderComponent4 = <@<ComponentRef>>
+
+  DomElementProperty.DomElementProperty = <<ID> = <DomElementPropertyValue>>
+  
+  DomElementPropertyValue.DomElementPropertyValueExp = Exp
+  DomElementPropertyValue.DomElementPropertyValueMap = <{
+    <{DomElementProperty ", "}*>
+  }>
+
+lexical syntax
+  DomID = ID
+  DomID = Keyword { reject }
+  DomID = ViewKeyword { reject }
+  
+  ViewKeyword = "children"  

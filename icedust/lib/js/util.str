@@ -49,6 +49,8 @@ rules
     
     js-var: x_var -> js-exp |[x_var]|
     
+    js-array: exps_values -> js-exp |[[exps_values]]|
+    js-object: prop_fields* -> js-exp |[{prop_fields*}]|
     
     js-lexical-scope-exp: stmts_body -> js-exp |[(function(){
       stmts_body

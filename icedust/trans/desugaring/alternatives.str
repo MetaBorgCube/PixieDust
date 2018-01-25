@@ -43,4 +43,18 @@ rules
         )]
       )
     )
+    
+rules
+
+  desugar-alternative: RenderDomElement2(domId, children) -> RenderDomElement(domId, [], children)
+  desugar-alternative: RenderDomElement3(domId, properties) -> RenderDomElement(domId, properties, [])
+  
+  desugar-alternative: RenderComponent2(name, children) -> RenderComponent(name, [], children) 
+  desugar-alternative: RenderComponent3(name, args) -> RenderComponent(name, args, [])
+  desugar-alternative: RenderComponent4(name) -> RenderComponent(name, [], [])
+  
+  desugar-alternative: TypeWithDefaultMultiplicity(type) -> TypeWithMultiplicity(type, <custom-origin(|type)> One())
+  
+  desugar-alternative: TypeParameter2(name, type) -> TypeParameter(name, type, <custom-origin(|type)>One())
+  desugar-alternative: RefTypeParameter2(name, type) -> RefTypeParameter(name, type, <custom-origin(|type)>One())
   

@@ -29,3 +29,6 @@ signature constructors
   
   Ignore : Term
   
+signature constructors
+  NormalVariableType : VariableType
+  BoxedVariableType : VariableType

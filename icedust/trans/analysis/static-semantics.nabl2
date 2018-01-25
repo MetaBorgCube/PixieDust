@@ -12,6 +12,7 @@ imports
   expressions-math
   expressions-multiplicity-operators
   expressions-references
+  expressions-view
   functions2
   map3
   model
@@ -29,6 +30,8 @@ signature
     TString   : Type
     TNoValue  : Type
     TEntity   : occurrence -> Type
+    TView     : Type
+    TComponent : list(Type) -> Type
     
     TOne               : Mult
     TZeroOrOne         : Mult
@@ -305,6 +308,7 @@ rules
     TNoValue() <sub! TBoolean(),
     TNoValue() <sub! TDatetime(),
     TNoValue() <sub! TString(),
+    TNoValue() <sub! TView(), //TODO extract
 
     // casting relation
     
@@ -318,6 +322,7 @@ rules
     TString() <cast! TDatetime(),
     TString() <cast! TNoValue(),
     TString() <cast! TString(),   // allow string to string casting for string interpolation
+    TString() <cast! TView(),
 
     new init_scope.
  

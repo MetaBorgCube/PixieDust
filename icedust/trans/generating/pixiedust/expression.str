@@ -290,6 +290,7 @@ rules
     ; exp_result := <switch !(t1,t2)
       case ?(Float(), Int())        : !js-exp |[parseInt(exp_e)]|
       case ?(Datetime(), String())  : <js-function-call> ("dateToString", [exp_e])
+      case ?(View(), String())      : !js-exp |[ReactDOMServer.renderToStaticMarkup(exp_e)]|
       otherwise                     : !exp_e
     end>
   
@@ -525,5 +526,30 @@ rules
       (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
     ; result := (env', ([exp_e | exps], [stmts_e | stmts]))
   
+rules
+  exp-to-js-stmts: (env, RenderDomElement(name, attributes, children)) -> result
+    with
+      exp_name := <js-string> name
+    ; (env', [
+      (prop_attribute*, stmts_attributes),
+      (exps_children, stmts_children)
+    ]) := <thread-environment(
+      env-thread-param(env-fold-map(attribute-to-js-prop) ; (id, unzip ; (id, concat))|attributes),
+      env-thread-param(env-fold-map(exp-to-js-stmts) ; (id, unzip ; (id, concat))|children)
+    )> env
+    ; exp_result := js-exp |[
+      React.createElement(exp_name, {prop_attribute*}, exps_children)    
+    ]|
+    ; result := (env', (exp_result, <conc> (stmts_attributes, stmts_children)))
+      
+  
+  attribute-to-js-prop: (env, DomElementProperty(x_key, value)) -> result
+    with
+      (env', (exp_value, stmts_value)) := <attribute-value-to-js-exp> (env, value)
+    ; prop_value := js-prop |[x_key: exp_value]|
+    ; result := (env, (prop_value, stmts_value))
+  
+  attribute-value-to-js-exp = (id, ?DomElementPropertyValueExp(<id>)) ; exp-to-js-stmts 
+  attribute-value-to-js-exp = (id, ?DomElementPropertyValueMap(<id>)) ; env-fold-map(attribute-to-js-prop) ; (id, (unzip ; (js-object, concat)))
   
   

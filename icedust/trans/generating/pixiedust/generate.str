@@ -36,4 +36,6 @@ rules
   generate-imports = !js-stmts |[
     var functions = require("./expressions");
     var _ = require("lodash");
+    var React = require("react");
+    var ReactDOMServer = require("react-dom/server");
   ]|
