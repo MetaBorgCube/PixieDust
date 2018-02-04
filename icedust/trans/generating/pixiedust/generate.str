@@ -6,6 +6,7 @@ imports
   generating/pixiedust/model
   generating/pixiedust/data
   generating/pixiedust/execute
+  generating/pixiedust/view
   
   lib/scopes
   lib/js/util
@@ -18,20 +19,24 @@ rules
     ; (env, [
         stmts_model,
         stmts_data,
-        stmts_execute
+        stmts_execute,
+        stmts_view
       ]) := <thread-environment(
         env-thread-param(env-fold-mapconcat(entityname-to-js-stmts) | <modulename-get-entitynames> x_moduleName),
         push-scope,
         env-thread-param(modulename-to-data-stmts | x_moduleName),
         env-thread-param(modulename-to-execute-stmts | x_moduleName),
-        pop-scope
+        pop-scope,
+        env-thread-param(modulename-to-view-stmts | x_moduleName)
       )> <new-environment>
     ; stmt_execution := <conc ; js-lexical-scope-stmt> (stmts_data, stmts_execute)
     ; stmts_pixiedust := js-stmts |[
       stmts_imports  
       stmts_model
+      stmts_view
       stmt_execution
     ]| 
+    
   
   generate-imports = !js-stmts |[
     var functions = require("./expressions");

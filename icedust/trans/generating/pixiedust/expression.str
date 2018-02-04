@@ -10,6 +10,8 @@ imports
   lib/scopes
   lib/nabl2
   
+  analysis2/path
+  
   api/model-names-api
   api/expressions-api
   api/types-names-api
@@ -31,7 +33,7 @@ rules
   literal-to-js-stmts = ?NoValue() ; js-null
   literal-to-js-stmts = ?LitString(<id>) ; js-string
   
-  exp-to-js-stmts = (id, ?This(); !(<js-this>, []))
+  exp-to-js-stmts: (env, This()) -> (env, (<env-to-this-expr> env, [])) 
   
   exp-to-js-stmts: (env, e*) -> result
     where
@@ -440,7 +442,8 @@ rules
   
   member-access-to-js-stmts : (env, (This(), x_getter, _, _)) -> (env, (exp_result, []))
     with
-      exp_result := js-exp |[this.x_getter()]|
+      exp_this := <env-to-this-expr> env
+    ; exp_result := js-exp |[exp_this.x_getter()]|
   
   member-access-to-js-stmts : (env, (exp_inner, x_getter, m_inner, m_outer)) -> result
     where
@@ -494,6 +497,8 @@ rules
           var x_result = exp_inner === null ? exp_empty : exp_inner.x_getter();
         ]|
       ; result := (env', (<js-var> x_result, stmts_result))
+  
+  env-to-this-expr = (get-variable(|This()) ; js-var) <+ js-this 
   
   exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
   exp-to-js-stmts: (env, Ref(field)) -> result 
@@ -549,5 +554,13 @@ rules
   
   attribute-value-to-js-exp = (id, ?DomElementPropertyValueExp(<id>)) ; exp-to-js-stmts 
   attribute-value-to-js-exp = (id, ?DomElementPropertyValueMap(<id>)) ; env-fold-map(attribute-to-js-prop) ; (id, (unzip ; (js-object, concat)))
+  
+rules
+  pathexpr-to-js-stmts: (env, pathexpr) -> result
+    with
+      x_attributeName           := <pathexpr-last>pathexpr
+    ; e                         := <pathexpr-shorten-safe> pathexpr
+    ; (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
+    ; result := (env', (x_attributeName, exp_e, stmts_e))
   
   

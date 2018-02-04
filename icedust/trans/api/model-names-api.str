@@ -76,6 +76,8 @@ rules // entity
   entityname-get-parentname    = entityname-get-parentnames;Hd
   entityname-has-parentname    = where(entityname-get-parentname)
   
+  attributename-has-type(|type) = where((name-get-type <+ get-type2) ; ?type)
+  
 rules // attributes
 
   is-attributename = where(is-string;                             get-property(|"Member","ns");?Attribute())

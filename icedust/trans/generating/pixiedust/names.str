@@ -17,6 +17,9 @@ rules // method names
   unsubscribe-dirty-name = !$[unsubcribeDirty[<ucfirst>]]
   dirty-subscriber-name = !$[[<id>]DirtySubscriber]
   dirty-subscribers-name = !$[[<id>]DirtySubscribers]
+  component-name =  !$[[<(ucfirst, ucfirst) ; conc-strings>]Component]
+  subscribe-dirty-method = !$[subscribeDirtyDependsOn]
+  unsubscribe-dirty-method = !$[unsubscribDirtyDependsOn]
   
   user-value = id
   cache-value = !$[[<id>]_cache]

@@ -157,7 +157,9 @@ rules
   pathexpr-shorten-remove-filtertype: MemberAccess(expr, _)               -> expr
   
   pathexpr-shorten-safe =  pathexpr-shorten
-  pathexpr-shorten-safe: Ref(_) -> This()
+  pathexpr-shorten-safe: Ref(_) -> <set-annotations> (This(), [
+    (Mult(), One())
+  ])
   
   pathexpr-shorten-refl-trans = reflexive-transitive-closure(pathexpr-shorten-remove-filtertype)
   
