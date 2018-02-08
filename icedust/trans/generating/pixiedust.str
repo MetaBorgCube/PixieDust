@@ -4,6 +4,9 @@ imports
   signatures/Config-sig
   
   generating/pixiedust/generate
+  generating/pixiedust/webpack
+  
+  
   generating/_ir/paths
   js/util
   js/desugaring/desugaring

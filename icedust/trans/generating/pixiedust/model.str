@@ -65,7 +65,7 @@ rules // Dirty flagging
   flag-dirty-clear-cached-value: (env, x_attributename) -> (env, stmts_clear)
     where
       <name-is-default-derived> x_attributename
-    ; x_cache := <cache-value> x_attributename
+    ; x_cache := <cache-value-name> x_attributename
     ; stmts_clear := js-stmts |[
       this.x_cache = undefined;
     ]|
@@ -112,7 +112,9 @@ rules // Normal attribute
         env-thread-param(normal-getter-method| x_attributename),
         env-thread-param(flag-dirty-method| x_attributename),
         env-thread-param(unidirectional-setter-method | x_attributename),
-        env-thread-param(setter-method | x_attributename)
+        env-thread-param(setter-method | x_attributename),
+        env-thread-param(subscribe-dirty-method | x_attributename),
+        env-thread-param(unsubscribe-dirty-method | x_attributename)
     )> env
     where
       <attributename-is-normal> x_attributename
@@ -122,7 +124,9 @@ rules // Normal attribute
     <thread-environment(
 //        env-thread-param(normal-getter-method|x_attributename),
         env-thread-param(flag-dirty-method| x_attributename),
-        env-thread-param(derived-getter-method| x_attributename)
+        env-thread-param(derived-getter-method| x_attributename),
+        env-thread-param(subscribe-dirty-method | x_attributename),
+        env-thread-param(unsubscribe-dirty-method | x_attributename)
     )> env
     where
       <attributename-is-derivation> x_attributename
@@ -132,7 +136,9 @@ rules // Normal attribute
 //        env-thread-param(normal-getter-method|x_attributename),
         env-thread-param(flag-dirty-method| x_attributename),
         env-thread-param(default-getter-method| x_attributename),
-        env-thread-param(setter-method | x_attributename)
+        env-thread-param(setter-method | x_attributename),
+        env-thread-param(subscribe-dirty-method | x_attributename),
+        env-thread-param(unsubscribe-dirty-method | x_attributename)
     )> env
     where
       <attributename-is-default> x_attributename
@@ -152,7 +158,7 @@ rules // Getter
       <is-relationname; relationname-is-right> x_attributename
     with
       x_methodName := <getter-name> x_attributename
-    ; x_cacheValue := <cache-value> x_attributename
+    ; x_cacheValue := <cache-value-name> x_attributename
     ; exp_empty := <exp-empty-attribute> x_attributename
     ; method := js-method |[
       x_methodName() {
@@ -166,7 +172,7 @@ rules // Getter
     with
       e_derived := <attributename-get-expr> x_attributename
     ; x_methodName := <getter-name> x_attributename
-    ; x_cacheValue := <cache-value> x_attributename
+    ; x_cacheValue := <cache-value-name> x_attributename
     ; (env', [
       (exp_derived, stmts_derived)
     ]) := <thread-environment(
@@ -187,8 +193,8 @@ rules // Getter
     with
       e_default := <attributename-get-expr> x_attributename
     ; x_methodName := <getter-name> x_attributename
-    ; x_cacheValue := <cache-value> x_attributename
-    ; x_userValue := <user-value> x_attributename
+    ; x_cacheValue := <cache-value-name> x_attributename
+    ; x_userValue := <user-value-name> x_attributename
     ; (env', (exp_default, stmts_default)) := <exp-to-js-stmts> (env, e_default)
     ; method := js-method |[
       x_methodName(){
@@ -371,6 +377,36 @@ rules // Subscribe / Unsubscribe
     ; x_dirtySubscriber := <dirty-subscriber-name> x_attributename
     ; x_dirtySubscribers := <dirty-subscribers-name> x_attributename
     
+rules // Subscription management
+    
+  subscribe-dirty-method: (env, x_attributeName) -> (env, result)
+    with
+      x_methodName := <subscribe-dirty-name> x_attributeName
+    ; x_dirtySubscriberVariable := <dirty-subscriber-variable-name> x_attributeName
+    ; x_dirtySubscriberField := <dirty-subscriber-field-name> x_attributeName
+    ; result := js-method |[
+        x_methodName(x_dirtySubscriberVariable){
+          if(this.x_dirtySubscriberField === undefined) {
+            this.x_dirtySubscriberField = new Set();
+          }
+          this.x_dirtySubscriberField.add(x_dirtySubscriberVariable);
+        }
+      ]|
+  
+  unsubscribe-dirty-method: (env, x_attributeName) -> (env, result)
+    with
+      x_methodName := <unsubscribe-dirty-name> x_attributeName
+    ; x_dirtySubscriberVariable := <dirty-subscriber-variable-name> x_attributeName
+    ; x_dirtySubscriberField := <dirty-subscriber-field-name> x_attributeName
+    ; result := js-method |[
+        x_methodName(x_dirtySubscriberVariable){
+          if(this.x_dirtySubscriberField !== undefined) {
+            this.x_dirtySubscriberField["delete"](x_dirtySubscriberVariable);
+          }
+        }
+      ]|
+    
+    
 rules // Constructor
 
   init-subscription: (env, x_attributename) -> (env, js-stmts |[this.x_dirtySubscribers = undefined;]|)
@@ -385,8 +421,8 @@ rules // Constructor
   init-derived-attribute = (id, ![<assign-empty-cache-value>])
   init-default-attribute = (id, ![<assign-empty-user-value>, <assign-empty-cache-value>])
       
-  assign-empty-user-value = !(<user-value>, <exp-empty-attribute>) ; ?(x_userValue, exp_empty) ; !js-stmt |[this.x_userValue = exp_empty;]|
-  assign-empty-cache-value = cache-value ; ?x_cacheValue ; !js-stmt |[this.x_cacheValue = undefined;]|
+  assign-empty-user-value = !(<user-value-name>, <exp-empty-attribute>) ; ?(x_userValue, exp_empty) ; !js-stmt |[this.x_userValue = exp_empty;]|
+  assign-empty-cache-value = cache-value-name ; ?x_cacheValue ; !js-stmt |[this.x_cacheValue = undefined;]|
   
   
   

@@ -1,0 +1,47 @@
+module test
+
+imports
+  libstratego-lib
+  lib/scopes
+  js/util
+
+  
+  
+  signatures/Expressions-sig
+  
+//  generating/pixiedust/expression
+  
+rules
+
+//  main = new-environment ; thread-environment(push-scope, store-variable(|"x")) ; Fst ; get-variable(|"x"{32})
+  main = new-environment ; fresh-variables(|10)
+   
+  scope-test = 
+    test-scopes
+  ; test-fresh-variables
+  ; test-store-variable
+  ; test-get-local-variable
+  ; test-get-lexical-variable
+  ; test-thread-env
+  
+  assert-equals(|to) = !(<id>, to) ; ?(fst, snd) ; (eq <+ print(|"Not equal: ") ; print(|fst) ; print(|snd) ; fail)
+  
+  print(|value) = !value ; write-to-string ; debug
+  
+  test-scopes = new-environment ; push-scope ; pop-scope ; assert-equals(|<new-environment>)
+  test-fresh-variables = new-environment ; fresh-variable ; assert-equals(|(Env([Scope([])], 1), "_0"))
+  test-store-variable = new-environment ; <store-variable> (<id>, "foo") ; assert-equals(|(Env([Scope([Binding("foo", 0)])], 1), "_0"))
+  test-get-local-variable = new-environment ; <store-variable> (<id>, "foo") ; <get-variable> (<Fst>, "foo") ; assert-equals(|"_0")
+  test-get-lexical-variable = new-environment ; <store-variable> (<id>, "foo") ; Fst ; push-scope ; <get-variable> (<id>, "foo") ; assert-equals(|"_0")
+  test-thread-env =
+    new-environment 
+    ; thread-environment(fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, fresh-variable, store-variable(|"foo"))
+    ; assert-equals(|(Env([Scope([Binding("foo", 7)])], 8), ["_0", "_1", "_2", "_3", "_4", "_5", "_6", "_7"]))
+
+
+
+  test-fold-map = <env-fold-map(store-variable)> (<new-environment>, ["a", "b", "c"]) ; assert-equals(|(Env([Scope([Binding("c", 2), Binding("b", 1), Binding("a", 0)])], 3), ["_0", "_1", "_2"]))
+  
+  test-fold-mapconcat = <env-fold-mapconcat(env-fold-map(store-variable))> (<new-environment>, [["a", "b"], ["c", "d"]]) ; assert-equals(|(Env([Scope([Binding("d", 3), Binding("c", 2), Binding("b", 1), Binding("a", 0)])], 4), ["_0", "_1", "_2", "_3"]))
+    
+    

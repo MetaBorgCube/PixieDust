@@ -26,11 +26,11 @@ rules
   view-attribute-to-component : (env, x_attributeName) -> result
     with
       x_entityName := <attributename-get-entityname> x_attributeName
-    ; x_entityNameCamel := <lcfirst> x_entityName
+    ; x_entityNameCamel := <component-entity-prop-name> x_entityName
     ; x_componentName := <component-name> (x_entityName, x_attributeName)
     ; x_getter := <getter-name> x_attributeName
-    ; x_subscribeDirtyDependsOn := <subscribe-dirty-method>
-    ; x_unsubscribeDirtyDependsOn := <unsubscribe-dirty-method>
+    ; x_subscribeDirtyDependsOn := <subscribe-dirty-dependson-method-name>
+    ; x_unsubscribeDirtyDependsOn := <unsubscribe-dirty-dependson-method-name>
     ; (env', [
       x_this,
       stmts_subscribeDirtyDependsOn,
@@ -45,6 +45,7 @@ rules
     ; stmts_component := js-stmts |[
         class x_componentName extends PixieDustComponent {
           constructor(props) {
+            super(props);
             this.x_subscribeDirtyDependsOn(props);
           }
           
@@ -80,8 +81,8 @@ rules
       
   attributename-to-subscribe-dependson-stmts(subscribe-dirty-method-name): (env, x_attributeName) -> result
     with
-      dependencies := <attributename-get-dependencies ; debug> x_attributeName
-    ; result := <env-fold-mapconcat(pathexpr-to-subscribe-stmts(subscribe-dirty-method-name) ; debug)> (env, dependencies) 
+      dependencies := <attributename-get-dependencies> x_attributeName
+    ; result := <env-fold-mapconcat(pathexpr-to-subscribe-stmts(subscribe-dirty-method-name))> (env, dependencies) 
  
   /**
     subscribe-dirty-method-name :: String -> String
@@ -91,7 +92,7 @@ rules
       (env', (x_attributeName, exp_e, stmts_e)) := <pathexpr-to-js-stmts> (env, pathexpr)
     ; x_getter := <getter-name> x_attributeName
     ; x_subscribeDirtyMethodName := <subscribe-dirty-method-name> x_attributeName
-    ; switch <pathexpr-shorten-safe ; debug ; get-multiplicity> pathexpr
+    ; switch <pathexpr-shorten-safe ; get-multiplicity> pathexpr
         case upper-one:
           env'' := env'
         ; stmts_invalidate := js-stmts |[
@@ -114,17 +115,5 @@ rules
   
   attributename-get-dependencies = name-get-dependson-paths ; filter(path-pathexpr ; not(dependencypath-is-view))
   dependencypath-is-view = where(pathexpr-last ; name-get-type ; ?View())
-  
-  
-  
-  unsubscribe-dirty-dependson-method: (env, x_attributeName) -> result
-    with
-      x_methodName := <unsubscribe-dirty-method>
-    ; method := js-method |[
-        x_methodName() {
-        
-        }
-      ]|
-    ; result := (env, method)
   
   

@@ -1,0 +1,29 @@
+module generating/pixiedust/webpack
+
+imports
+  lib/files
+  
+  
+rules
+
+  copy-webpack-files: (selected, position, ast, path, project-path) -> None()
+    with
+      dir := <dirname> path
+    ; app_name := <base-filename ; remove-extension> path
+    ; <copy-directory-entries> (<webpack-path>, dir)
+    ; <copy-directory-entries> (<runtime-path>, $[[dir]/src/runtime])
+    ; <replace-in-file> ($[[dir]/package.json], [
+      ("project_name", app_name)
+    ])
+    ; <replace-in-file> ($[[dir]/main.js], [
+      ("project_name", app_name)
+    ])
+    ; <replace-in-file> ($[[dir]/index.html], [
+      ("project_name", app_name)
+    ])
+    ; <replace-in-file> ($[[dir]/.gitignore], [
+      ("project_name", app_name)
+    ])
+  
+  webpack-path = !$[[<component-path>]/lib-js/webpack-files]
+  runtime-path = !$[[<component-path>]/lib-js/src/runtime]

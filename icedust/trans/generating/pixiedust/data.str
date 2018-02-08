@@ -6,6 +6,8 @@ imports
   generating/pixiedust/names
   generating/pixiedust/expression
   
+  api/module-names-api
+  
   lib/scopes
 
 rules

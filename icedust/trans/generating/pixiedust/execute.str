@@ -5,13 +5,43 @@ imports
 
   lib/scopes
   
+  generating/pixiedust/names
+  generating/pixiedust/data
   generating/pixiedust/expression
 
 rules
 
-  modulename-to-execute-stmts = (id, modulename-get-exprs) ; env-fold-mapconcat(exp-to-js-stmts ; (id, output-exp-stmts))
+  modulename-to-execute-stmts : (env, x_moduleName) -> result
+    with
+      expressions := <modulename-get-exprs> x_moduleName
+    ; (env', x_result) := <fresh-variable> env
+    ; (env'', [
+        stmts_data,
+        stmts_execute
+      ]) := <thread-environment(
+        push-scope,
+        env-thread-param(modulename-to-data-stmts | x_moduleName),
+        env-thread-param(env-fold-mapconcat(execute-exp-stmts(|x_result)) | expressions),
+        pop-scope
+      )> env'
+    ; x_executeFunctionName := <execute-function-name>
     
-  output-exp-stmts : (exp_e, stmts_e) -> js-stmt* |[
-    stmts_e
-    console.log(exp_e);
-  ]|
+    ; stmts  := js-stmts |[
+      function x_executeFunctionName() {
+        stmts_data
+        var x_result = [];
+        stmts_execute
+        return x_result;
+      }
+      module.exports.x_executeFunctionName = x_executeFunctionName;
+    ]| 
+    ; result := (env'', stmts)
+      
+  execute-exp-stmts(|x_result) : (env, e) -> result
+    with
+      (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
+    ; stmts := js-stmts |[
+        stmts_e
+        x_result.push(exp_e);
+      ]|
+    ; result := (env', stmts)

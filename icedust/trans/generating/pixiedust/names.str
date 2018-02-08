@@ -18,11 +18,17 @@ rules // method names
   dirty-subscriber-name = !$[[<id>]DirtySubscriber]
   dirty-subscribers-name = !$[[<id>]DirtySubscribers]
   component-name =  !$[[<(ucfirst, ucfirst) ; conc-strings>]Component]
-  subscribe-dirty-method = !$[subscribeDirtyDependsOn]
-  unsubscribe-dirty-method = !$[unsubscribDirtyDependsOn]
+  component-entity-prop-name = lcfirst
   
-  user-value = id
-  cache-value = !$[[<id>]_cache]
+  dirty-subscriber-variable-name = !$[dirtySubscriber]
+  dirty-subscriber-field-name = !$[[<id>]DirtySubscribers]
+  subscribe-dirty-dependson-method-name = !$[subscribeDirtyDependsOn]
+  unsubscribe-dirty-dependson-method-name = !$[unsubscribeDirtyDependsOn]
+  
+  user-value-name = id
+  cache-value-name = !$[[<id>]_cache]
+  
+  execute-function-name = !"main"
   
 rules // constant expressions
   exp-empty-array = !js-exp |[[]]|

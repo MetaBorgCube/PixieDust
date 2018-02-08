@@ -1,7 +1,0 @@
-var EMPTY_ARRAY = [];
-var EMPTY_OBJECT = {};
-
-module.exports = {
-  EMPTY_ARRAY: EMPTY_ARRAY,
-  EMPTY_OBEJCT: EMPTY_OBJECT
-};

@@ -44,6 +44,8 @@ menus
   menu: "Generation"
     
     action: "Build" = build (openeditor)
+    
+    action: "Copy webpack files" = copy-webpack-files (openeditor)
 
     action: "Cleanup Generated Code" = cleanup-generated-files
 

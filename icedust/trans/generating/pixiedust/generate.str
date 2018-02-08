@@ -18,35 +18,26 @@ rules
       stmts_imports := <generate-imports>  
     ; (env, [
         stmts_model,
-        stmts_data,
         stmts_execute,
         stmts_view
       ]) := <thread-environment(
         env-thread-param(env-fold-mapconcat(entityname-to-js-stmts) | <modulename-get-entitynames> x_moduleName),
-        push-scope,
-        env-thread-param(modulename-to-data-stmts | x_moduleName),
         env-thread-param(modulename-to-execute-stmts | x_moduleName),
-        pop-scope,
         env-thread-param(modulename-to-view-stmts | x_moduleName)
       )> <new-environment>
-    ; stmt_execution := <conc ; js-lexical-scope-stmt> (stmts_data, stmts_execute)
     ; stmts_pixiedust := js-stmts |[
       stmts_imports  
       stmts_model
       stmts_view
-      stmt_execution
+      stmts_execute
     ]| 
     
   
   generate-imports = !js-stmts |[
-    var functions = require("./expressions");
+    var runtime = require("./src/runtime/runtime");
+    var functions = require("./src/runtime/expression");
+    var PixieDustComponent = require("./src/runtime/components/PixieDustComponent");
     var _ = require("lodash");
     var React = require("react");
     var ReactDOMServer = require("react-dom/server");
-    
-    var runtime = {
-      callDirtySubscriber: function callDirtySubscriber(dirtySubscriber) {
-        dirtySubscriber();
-      }
-    };
   ]|

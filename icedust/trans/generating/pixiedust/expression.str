@@ -290,7 +290,7 @@ rules
     ; exp_result := <switch !(t1,t2)
       case ?(Float(), Int())        : !js-exp |[parseInt(exp_e)]|
       case ?(Datetime(), String())  : <js-function-call> ("dateToString", [exp_e])
-      case ?(View(), String())      : !js-exp |[ReactDOMServer.renderToStaticMarkup(exp_e)]|
+      case ?(View(), String())      : !js-exp |[runtime.renderViewToString(exp_e)]|
       otherwise                     : !exp_e
     end>
   
@@ -437,8 +437,8 @@ rules
     ; m_outer := <get-decl(|"Member") ; name-get-multiplicity> field
     ; x_getter := <getter-name> field
     ; (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
-    ; (env'', (exp_access, stmts_access)) := <member-access-to-js-stmts> (env', (exp_e, x_getter, m_inner, m_outer))
-    ; result := (env'', (exp_access, <conc> (stmts_e, stmts_access)))
+    ; (env'', (exp_access, stmts_access)) := <debug ; member-access-to-js-stmts> (env', (exp_e, x_getter, m_inner, m_outer))
+    ; result := <debug> (env'', (exp_access, <conc> (stmts_e, stmts_access)))
   
   member-access-to-js-stmts : (env, (This(), x_getter, _, _)) -> (env, (exp_result, []))
     with
@@ -501,6 +501,21 @@ rules
   env-to-this-expr = (get-variable(|This()) ; js-var) <+ js-this 
   
   exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
+  
+//  exp-to-js-stmts: (env, Ref(x_attributeName)) -> result 
+//    where
+//      View() := <name-get-type> x_attributeName
+//    with
+//      x_entityName := <attributename-get-entityname> x_attributeName
+//    ; x_componentName := <component-name> (x_entityName, x_attributeName)
+//    ; x_entityProp := <component-entity-prop-name> x_entityName
+//    ; (env', x_result) := <fresh-variable> env
+//    ; stmts_result := js-stmts |[
+//      var x_result = React.createElement(x_componentName, {
+//        x_entityProp: 
+//      });
+//    ]| 
+  
   exp-to-js-stmts: (env, Ref(field)) -> result 
     with
       x_getter := <getter-name> field
