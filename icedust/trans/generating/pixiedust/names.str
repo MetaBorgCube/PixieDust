@@ -20,6 +20,8 @@ rules // method names
   component-name =  !$[[<(ucfirst, ucfirst) ; conc-strings>]Component]
   component-entity-prop-name = lcfirst
   
+  identity-name = !"$id"
+  
   dirty-subscriber-variable-name = !$[dirtySubscriber]
   dirty-subscriber-field-name = !$[[<id>]DirtySubscribers]
   subscribe-dirty-dependson-method-name = !$[subscribeDirtyDependsOn]

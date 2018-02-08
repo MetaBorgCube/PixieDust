@@ -72,7 +72,7 @@ rules
           }
           
           render() {
-            return this.x_entityNameCamel.x_getter();
+            return this.props.x_entityNameCamel.x_getter();
           }
         }
       ]|
@@ -96,7 +96,7 @@ rules
         case upper-one:
           env'' := env'
         ; stmts_invalidate := js-stmts |[
-            exp_e.x_getter().x_subscribeDirtyMethodName(this.scheduleRender);
+            exp_e.x_subscribeDirtyMethodName(this.scheduleRender);
           ]|
         case upper-many:
           (env'', [x_loop]) := <fresh-variables(|1)> env'  

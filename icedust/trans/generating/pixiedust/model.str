@@ -18,14 +18,22 @@ rules
   entityname-to-js-stmts: (env, x_entityname) -> <!(env', <id>)> js-stmt* |[
     class x_entityname {
       constructor(){
+        this.x_id = runtime.generateUniqueIdentifier();
         stmts_subscription
         stmts_init
       }
+      
+      x_getIdentity() {
+        return this.x_id;
+      }
+      
       methods_attributes
     }
   ]|
     with
       attributenames := <entityname-get-arrinames-defined> x_entityname
+    ; x_id := <identity-name>
+    ; x_getIdentity := <getter-name> x_id
     ; (env', [
         stmts_subscription,
         stmts_init,

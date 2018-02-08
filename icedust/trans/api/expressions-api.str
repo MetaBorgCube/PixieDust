@@ -3,6 +3,7 @@ module api/expressions-api
 imports // signatures
 
   signatures/Expressions-sig
+  signatures/Types-sig  
 
 imports // functions
 
@@ -19,4 +20,9 @@ rules
   is-literal = ?Datetime(_)
   is-literal = ?NoValue()
   is-literal = ?LitString(_)
+  
+  literal-multiplicity = ?This() ; !One()
+  literal-multiplicity = ?NoValue() ; !ZeroOrOne()
+  literal-multiplicity = is-literal ; !One()
+  
   

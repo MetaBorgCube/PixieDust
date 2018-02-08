@@ -5,14 +5,20 @@ imports // signatures
   analysis2/constructors
   nabl2/static-semantics
   signatures/Types-sig
+  signatures/Expressions-sig
   
 imports // functions
 
   lib/annotations
 
+imports
+  api/expressions-api
+
 rules
 
   get-type2        = get-annotation(|Type()) <+ nabl2-get-ast-type;normalize-type
+  
+  get-multiplicity = literal-multiplicity
   get-multiplicity = get-annotation(|Mult()) <+ nabl2-get-ast-type;normalize-multiplicity
   get-strategy     =                            nabl2-get-ast-type;normalize-strategy
   

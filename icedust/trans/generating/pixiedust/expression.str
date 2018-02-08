@@ -434,87 +434,53 @@ rules
   exp-to-js-stmts: (env, m@MemberAccess(e, field)) -> result
     with
       m_inner := <get-multiplicity> e
-    ; m_outer := <get-decl(|"Member") ; name-get-multiplicity> field
-    ; x_getter := <getter-name> field
+    ; x_attributeName := <get-decl(|"Member")> field
+    ; m_outer := <name-get-multiplicity> x_attributeName
+    ; x_getter := <getter-name> x_attributeName
     ; (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
-    ; (env'', (exp_access, stmts_access)) := <debug ; member-access-to-js-stmts> (env', (exp_e, x_getter, m_inner, m_outer))
-    ; result := <debug> (env'', (exp_access, <conc> (stmts_e, stmts_access)))
+    ; (env'', (exp_access, stmts_access)) := <member-access-to-js-stmts> (env', (x_attributeName, exp_e, x_getter, m_inner, m_outer))
+    ; result := (env'', (exp_access, <conc> (stmts_e, stmts_access)))
   
-  member-access-to-js-stmts : (env, (This(), x_getter, _, _)) -> (env, (exp_result, []))
-    with
-      exp_this := <env-to-this-expr> env
-    ; exp_result := js-exp |[exp_this.x_getter()]|
-  
-  member-access-to-js-stmts : (env, (exp_inner, x_getter, m_inner, m_outer)) -> result
+  member-access-to-js-stmts : (env, (x_attributeName, exp_inner, x_getter, m_inner, m_outer)) -> result
     where
-      <(upper-many, upper-many)> (m_inner, m_outer)
+      <upper-many> m_inner
     with
-      (env', 
-          [ x_result
-          , x_innerElem
-          , x_loop1
-          , x_loop2
-          ]) := <fresh-variables(|4)> env
-        ; stmts_result := js-stmts |[
-          var x_result = [];
-          for(var x_loop1 = 0 ; x_loop1 < exp_inner.length ; x_loop1++){
-            var x_innerElem = exp_inner[x_loop1].x_getter();
-            for(var x_loop2 = 0 ; x_loop2 < x_innerElem.length ; x_loop2++){
-              x_result.push(x_innerElem[x_loop2]);
-            }
-          }
-        ]|
-    ; result := (env', (<js-var> x_result, stmts_result))
-  
-  member-access-to-js-stmts : (env, (exp_inner, x_getter, m_inner, m_outer)) -> result
-    where
-      <(upper-many, upper-one)> := (m_inner, m_outer)
-    with
-      (env', 
-        [ x_result
-        , x_elem
-        , x_loop
-        ]) := <fresh-variables(|3)> env
-      ; stmts_result := js-stmts |[
+      (env' , [ 
+        x_result,
+        x_innerElem,
+        x_loop
+      ]) := <fresh-variables(|3)> env
+    ; exp_instance := js-exp |[x_innerElem]|
+    ; (env'', (exp_ref, stmts_ref)) := <generate-reference-exp> (env', (exp_instance, m_outer, x_attributeName))
+    ; stmts_result := js-stmts |[
         var x_result = [];
         for(var x_loop = 0 ; x_loop < exp_inner.length ; x_loop++){
-          var x_elem = exp_inner[x_loop].x_getter();
-          if(x_elem !== null) {
-            x_result.push(x_elem);
-          }
+          var x_innerElem = exp_inner[x_loop];
+          stmts_ref
+          x_result = x_result.concat(exp_ref);
         }
       ]|
-      ; result := (env', (<js-var> x_result, stmts_result))
-      
-      
-  member-access-to-js-stmts : (env, (exp_inner, x_getter, m_inner, m_outer)) -> result
+    ; result := (env'', (<js-var> x_result, stmts_result))
+
+  
+  member-access-to-js-stmts : (env, (x_attributeName, exp_inner, x_getter, m_inner, m_outer)) -> result
     where
-      <(upper-one, ?m_access)> := (m_inner, m_outer)
+      <upper-one> m_inner
     with 
       (env', x_result) := <fresh-variable> env
-      ; exp_empty := <exp-empty-multiplicity> m_access 
+      ; exp_empty := <exp-empty-multiplicity> m_outer
+      ; exp_instance := js-exp |[exp_inner]|
+      ; (env'', (exp_ref, stmts_ref)) := <generate-reference-exp> (env', (exp_instance, m_outer, x_attributeName))             
       ; stmts_result := js-stmts |[
-          var x_result = exp_inner === null ? exp_empty : exp_inner.x_getter();
+          stmts_ref
+          var x_result = exp_inner === null ? exp_empty : exp_ref;
         ]|
-      ; result := (env', (<js-var> x_result, stmts_result))
+      ; result := (env'', (<js-var> x_result, stmts_result))
   
+
   env-to-this-expr = (get-variable(|This()) ; js-var) <+ js-this 
   
   exp-to-js-stmts = ?(env, Ref(x)) ; !(env, (<get-variable ; js-var> (env, x), []))
-  
-//  exp-to-js-stmts: (env, Ref(x_attributeName)) -> result 
-//    where
-//      View() := <name-get-type> x_attributeName
-//    with
-//      x_entityName := <attributename-get-entityname> x_attributeName
-//    ; x_componentName := <component-name> (x_entityName, x_attributeName)
-//    ; x_entityProp := <component-entity-prop-name> x_entityName
-//    ; (env', x_result) := <fresh-variable> env
-//    ; stmts_result := js-stmts |[
-//      var x_result = React.createElement(x_componentName, {
-//        x_entityProp: 
-//      });
-//    ]| 
   
   exp-to-js-stmts: (env, Ref(field)) -> result 
     with
@@ -525,7 +491,49 @@ rules
     ]|
     ; result := (env', (<js-var> x_result, stmts_result))
 
+  generate-reference-exp: (env, (exp_entity, m_entity, x_attributeName)) -> result
+    where
+      View() := <name-get-type> x_attributeName
+    with
+      x_entityName := <attributename-get-entityname> x_attributeName
+      ; x_componentName := <component-name> (x_entityName, x_attributeName)
+      ; x_entityProp := <component-entity-prop-name> x_entityName
+      ; (env', x_result) := <fresh-variable> env
+      ; x_getIdentity := <identity-name ; getter-name>
+      ; switch !m_entity 
+        case upper-one:
+          env'' := env'
+        ; stmts_result := js-stmts |[
+          var x_result = React.createElement(x_componentName, {
+            x_entityProp: exp_entity,
+            key: exp_entity.x_getIdentity()
+          });
+          ]|
+        case upper-many:
+          (env'', [x_loop, x_instance]) := <fresh-variables(|2)> env'
+        ; stmts_result := js-stmts |[
+          var x_result = [];
+          for(var x_loop = 0 ; x_loop < exp_entity.length ; i++) {
+            var x_instance = exp_entity[x_loop];
+            x_result.push(React.createElement(x_componentName, {
+              x_entityProp: x_instance,
+              key: x_instance.getId()
+            }));
+          }
+        ]|
+      end
+      ; result := (env'', (<js-var> x_result, stmts_result))
 
+  generate-reference-exp : (env, (exp_entity, m_entity, x_attributeName)) -> result
+    with
+      x_getter := <getter-name> x_attributeName
+    ; (env', x_result) := <fresh-variable> env
+    ; stmts_result := js-stmts |[
+        var x_result = exp_entity.x_getter();
+      ]|
+    ; result := (env', (<js-var> x_result, stmts_result))
+    
+     
   //Helpers
   
   check-nonempty = where((upper-one, ?exp_e)) ; !js-exp |[exp_e !== null]|
