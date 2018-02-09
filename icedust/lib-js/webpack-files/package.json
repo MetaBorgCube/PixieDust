@@ -1,0 +1,28 @@
+{
+  "name": "${project_name}",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "webpack --progress --colors",
+    "start": "webpack-dev-server"
+  },
+  "author": "author_name",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.5",
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "css-loader": "^0.28.9",
+    "file-loader": "^1.1.6",
+    "node-sass": "^4.7.2",
+    "sass-loader": "^6.0.6",
+    "style-loader": "^0.20.1",
+    "url-loader": "^0.6.2",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.11.1"
+  }
+}
