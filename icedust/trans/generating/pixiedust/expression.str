@@ -451,7 +451,7 @@ rules
         x_loop
       ]) := <fresh-variables(|3)> env
     ; exp_instance := js-exp |[x_innerElem]|
-    ; (env'', (exp_ref, stmts_ref)) := <generate-reference-exp> (env', (exp_instance, m_outer, x_attributeName))
+    ; (env'', (exp_ref, stmts_ref)) := <generate-reference-exp> (env', (exp_instance, m_inner, m_outer, x_attributeName))
     ; stmts_result := js-stmts |[
         var x_result = [];
         for(var x_loop = 0 ; x_loop < exp_inner.length ; x_loop++){
@@ -470,7 +470,7 @@ rules
       (env', x_result) := <fresh-variable> env
       ; exp_empty := <exp-empty-multiplicity> m_outer
       ; exp_instance := js-exp |[exp_inner]|
-      ; (env'', (exp_ref, stmts_ref)) := <generate-reference-exp> (env', (exp_instance, m_outer, x_attributeName))             
+      ; (env'', (exp_ref, stmts_ref)) := <generate-reference-exp> (env', (exp_instance, m_inner, m_outer, x_attributeName))             
       ; stmts_result := js-stmts |[
           stmts_ref
           var x_result = exp_inner === null ? exp_empty : exp_ref;
@@ -484,14 +484,11 @@ rules
   
   exp-to-js-stmts: (env, Ref(field)) -> result 
     with
-      x_getter := <getter-name> field
-    ; (env', x_result) := <fresh-variable> env
-    ; stmts_result := js-stmts |[
-      var x_result = this.x_getter();
-    ]|
-    ; result := (env', (<js-var> x_result, stmts_result))
+      x_attributeName := <get-decl(|"Member")> field
+    ; m_outer := <name-get-multiplicity> x_attributeName
+    ; result := <generate-reference-exp> (env, (This(), One(), m_outer, x_attributeName))
 
-  generate-reference-exp: (env, (exp_entity, m_entity, x_attributeName)) -> result
+  generate-reference-exp: (env, (exp_entity, m_inner, m_outer, x_attributeName)) -> result
     where
       View() := <name-get-type> x_attributeName
     with
@@ -500,13 +497,14 @@ rules
       ; x_entityProp := <component-entity-prop-name> x_entityName
       ; (env', x_result) := <fresh-variable> env
       ; x_getIdentity := <identity-name ; getter-name>
-      ; switch !m_entity 
+      ; prop_key* := <generate-key-prop> (exp_entity, m_inner, m_outer) 
+      ; switch !m_outer 
         case upper-one:
           env'' := env'
         ; stmts_result := js-stmts |[
           var x_result = React.createElement(x_componentName, {
             x_entityProp: exp_entity,
-            key: exp_entity.x_getIdentity()
+            prop_key*
           });
           ]|
         case upper-many:
@@ -517,14 +515,25 @@ rules
             var x_instance = exp_entity[x_loop];
             x_result.push(React.createElement(x_componentName, {
               x_entityProp: x_instance,
-              key: x_instance.getId()
+              prop_key*
             }));
           }
         ]|
       end
       ; result := (env'', (<js-var> x_result, stmts_result))
 
-  generate-reference-exp : (env, (exp_entity, m_entity, x_attributeName)) -> result
+
+  generate-key-prop: (exp_instance, m_inner, m_outer) -> []
+    where
+      <(upper-one, upper-one)> (m_inner, m_outer)
+  
+  generate-key-prop: (exp_instance, m_inner, m_outer) -> js-prop* |[
+    key: exp_instance.x_getId()
+  ]|
+    with
+      x_getId := <identity-name ; getter-name> 
+      
+  generate-reference-exp : (env, (exp_entity, m_inner, m_outer, x_attributeName)) -> result
     with
       x_getter := <getter-name> x_attributeName
     ; (env', x_result) := <fresh-variable> env

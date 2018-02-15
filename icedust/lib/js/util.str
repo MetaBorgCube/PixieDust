@@ -51,6 +51,7 @@ rules
     
     js-array: exps_values -> js-exp |[[exps_values]]|
     js-object: prop_fields* -> js-exp |[{prop_fields*}]|
+    js-prop: (x_k, exp_v) -> js-prop |[x_k: exp_v]|
     
     js-lexical-scope-exp: stmts_body -> js-exp |[(function(){
       stmts_body

@@ -44,8 +44,8 @@ rules
     )> env
     ; stmts_component := js-stmts |[
         class x_componentName extends PixieDustComponent {
-          constructor(props) {
-            super(props);
+          constructor(props, context) {
+            super(props, context);
             this.x_subscribeDirtyDependsOn(props);
           }
           

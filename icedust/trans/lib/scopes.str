@@ -45,6 +45,9 @@ rules
   */
   pop-scope = Env(Tl, id)
   
+  //peek-scope :: Env -> Scope
+  peek-scope = ?Env(<Hd>, _)
+
   /**
     fresh-variable :: Env -> (Env, String)
   */
@@ -73,11 +76,22 @@ rules
   */
   get-variable = ?(<id>, var) ; ?Env(<fetch-elem(get-variable-from-scope(|var))>, _) ; offset-to-variable
   get-variable(|var) = !(<id>, var) ; get-variable
-    
+
+  
+
   //get-variable-from-scope :: Scope -> Int
   get-variable-from-scope(|var) = ?Scope(<fetch-elem(where(binding-equals(|var)) ; ?Binding(_, <id>))>)
   
+  
+  //get-variables-in-scope :: Scope -> [Binding]
+  get-bindings-in-scope = ?Scope(<id>)
+  
+  //get-bindings-in-top-scope :: Env -> [Binding]
+  get-bindings-in-top-scope = peek-scope ; get-bindings-in-scope
+  
   binding-equals(|x) = ?Binding(x', offset) ; <(rm-annotations, rm-annotations) ; eq> (x, x')
+  
+  binding-to-tuple : Binding(name, offset) -> (name, offset)
   
   /**
     s_i: Env -> (Env, Term)
@@ -126,4 +140,10 @@ rules
     s :: (env, param) -> (env, value)
   */
   env-thread-param(s|param): env -> <s> (env, param) 
+  
+  /**
+    s :: (env) -> value
+    env-readonly :: Env -> (Env, value)
+  */
+  env-readonly(s): env -> (env, <s> env)
   

@@ -23,9 +23,16 @@ function consoleRunner(program) {
 }
 
 function browserRunner(program) {
-  var container = React.createElement('div', {}, program.main());
+  var main = program.main()
+  window.Main = expressions;
+  var expressions = main.map(e => isView(e) ? e : e === null ? 'null' : e.toString());
+  var container = React.createElement('div', {}, expressions);
   var root = React.createElement(SchedulerProvider, {}, container);
   ReactDOM.render(root, document.body.appendChild(document.createElement('div')))
+}
+
+function isView(e) {
+  return typeof(e === 'object' && e.$$typeof === Symbol.for('react.element'))
 }
 
 function renderElement(e) {

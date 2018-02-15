@@ -17,21 +17,25 @@ rules
     ; (env', x_result) := <fresh-variable> env
     ; (env'', [
         stmts_data,
-        stmts_execute
+        stmts_execute,
+        exp_data
       ]) := <thread-environment(
         push-scope,
         env-thread-param(modulename-to-data-stmts | x_moduleName),
         env-thread-param(env-fold-mapconcat(execute-exp-stmts(|x_result)) | expressions),
+        env-readonly(get-data-expressions-from-env),
         pop-scope
       )> env'
     ; x_executeFunctionName := <execute-function-name>
-    
     ; stmts  := js-stmts |[
       function x_executeFunctionName() {
         stmts_data
         var x_result = [];
         stmts_execute
-        return x_result;
+        return {
+          execute: x_result,
+          data: exp_data
+        };
       }
       module.exports.x_executeFunctionName = x_executeFunctionName;
     ]| 
