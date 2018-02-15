@@ -1,0 +1,40 @@
+module Actions
+
+imports
+  Common
+  Expressions
+  Types
+  
+
+context-free syntax
+
+  Actions.Actions = 
+    <actions {
+      <{ActionDeclaration "\n"}*>
+    }>
+
+  ActionDeclaration.ActionDeclaration = <
+    <ID>(<{TypeParameter ", "}*>) {
+      <{ActionStatement "\n"}*>
+    }
+  >
+
+  ActionStatement.AddEntity =    <<Exp> += <ExpOrNewInstance>>
+  ActionStatement.RemoveEntity = <<Exp> -= <Exp>>
+  ActionStatement.SetAttribute = <<Exp> := <ExpOrNewInstance>>
+  
+  NewInstance.NewInstance = <
+    {
+      <{InstanceValue "\n"}*>
+    }
+  >
+  
+  InstanceValue.InstanceValue = <
+    <ID> = <Exp>
+  >
+  
+  ExpOrNewInstance = Exp
+  ExpOrNewInstance = NewInstance
+  
+  
+  

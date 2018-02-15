@@ -4,6 +4,7 @@ imports // constructors
   
   signatures/Expressions-sig
   signatures/Types-sig
+  signatures/Actions-sig
   
 imports // functions
 
@@ -57,4 +58,8 @@ rules
   
   desugar-alternative: TypeParameter2(name, type) -> TypeParameter(name, type, <custom-origin(|type)>One())
   desugar-alternative: RefTypeParameter2(name, type) -> RefTypeParameter(name, type, <custom-origin(|type)>One())
+  
+rules //actions
+  desugar-alternative: x @ AddEntity(e1, e2)    -> <custom-origin(|x)>SetAttribute(e1, <custom-origin(|e2)>Merge(e1, e2))
+  desugar-alternative: x @ RemoveEntity(e1, e2) -> <custom-origin(|x)>SetAttribute(e1, <custom-origin(|e2)>Difference(e1, e2))
   

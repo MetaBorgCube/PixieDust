@@ -5,6 +5,7 @@ imports
   Common
   Expressions
   Types
+  Actions
   
 context-free syntax // entities
 
@@ -78,3 +79,6 @@ context-free syntax // entity members
   DotID             = <.<ID>>
   SpaceArrowID      = [ -> [ID]]
   SpaceMultiplicity = [ [MultiplicityOrdering]]
+  
+context-free syntax // actions
+  Member = Actions

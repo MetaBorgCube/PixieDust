@@ -1,0 +1,5 @@
+module action
+
+rules
+
+  [[Actions(_) ^ (s) ]] := true.
