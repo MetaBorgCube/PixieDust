@@ -24,7 +24,7 @@ context-free syntax
   ActionStatement.SetAttribute = <<Exp> := <ExpOrNewInstance>>
   
   NewInstance.NewInstance = <
-    <ID> {
+    <EntityType> {
       <{InstanceValue "\n"}*>
     }
   >

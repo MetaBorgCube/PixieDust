@@ -17,32 +17,29 @@ rules
     instance_scope -I-> entity_scope,
     
     Implicit{"this"} <- instance_scope,
-    Implicit{"this"} : var_tpl,
+    Implicit{"this"} : e_ty,
     
     Map1 [[ fields ^ (instance_scope) ]].
     
   [[ InstanceValue(m, value) ^ (s) ]] :=
+    
     Implicit{"this"} -> s,
     Implicit{"this"} |-> this_def,
-    this_def : this_tpl,
-    this_tpl == TTuple(this_type, this_m, this_strat),
-    this_type == TEntity(this_type_entity), 
+    this_def : TTuple(this_type, this_mult, this_strat),
+    this_type == TEntity(this_type_entity),
     this_type_entity ?=I=> entity_scope,
-    new member_key_scope,
-    member_key_scope -I-> entity_scope,
-    Member{m} -> member_key_scope,
-    Member{m} |-> member_def,
-    member_def : m_tpl,
-    m_tpl == TTuple(m_type, m_mult, m_strat),
     
-    new member_value_scope,
-    member_value_scope -P-> body,
-    member_value_scope -X-> entity_scope,
-    Implicit{"this"} <- member_value_scope,
-    Implicit{"this"} : this_tpl,
-    [[ value ^ (member_value_scope) : value_tpl ]],
-    value_tpl == TTuple(value_type, value_mult, value_strat),
-    value_type  <sub?    m_type  | error $[Type error: expected [m_type] got [value_type].]@value,
-    value_mult  <mulOrd? m_mult  | error $[Multiplicity error: expected [m_mult] got [value_mult].]@value,
-    expected_strat == TOnDemandIncremental(),
-    value_strat <strat? expected_strat | error $[Calculation strategy error: expected [expected_strat] got [value_strat].]@value.
+    new this_scope,
+    this_scope -P-> s,
+    this_scope -J-> entity_scope,
+    
+    Member{m} -> this_scope,
+    Member{m} |-> m_def,
+    m_def : m_tpl,
+    m_tpl == TTuple(m_ty, m_mult, m_strat),
+    
+    [[ value ^ (this_scope) : value_tpl ]],
+    value_tpl == TTuple(value_ty, value_mult, value_strat),
+    
+    value_ty  <sub?    m_ty  | error $[Type error: expected [m_type] got [value_type].]@value,
+    value_mult  <mulOrd? m_mult  | error $[Multiplicity error: expected [m_mult] got [value_mult].]@value.
