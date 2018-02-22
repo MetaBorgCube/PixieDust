@@ -31,6 +31,7 @@ rules
   is-backend = ?PixieDustBackend()
   
   is-javascript-backend = ?JavascriptBackend(_, _)
+  is-pixiedust-backend = ?PixieDustBackend()
   
   backend-get-phase = ?JavaBackend(<id>)
   backend-get-phase = ?JavascriptBackend(<id>, _)

@@ -6,6 +6,8 @@ imports
   generating/pixiedust/generate
   generating/pixiedust/webpack
   
+  api/config-api
+  
   
   generating/_ir/paths
   js/util
@@ -23,3 +25,5 @@ rules
     ; result := (filename, program-pp)
     
   generate-default-backend: c -> <custom-origin(|c)> PixieDustBackend()
+  
+  module-generate-default-strategy = where(configsection-get-backend ; is-pixiedust-backend) ; !OnDemandIncremental()

@@ -44,7 +44,20 @@ rules
 
 rules // module strategy
 
-  module-generate-strategy = is-module; try( module-has-no-strategy; ?m; module-set-strategy(!<custom-origin(|<module-get-modulename>m)>Some(<custom-origin(|<module-get-modulename>m)>Incremental())))
+  module-generate-strategy: m -> result
+    where
+      is-module ; module-has-no-strategy
+    with
+      name := <module-get-modulename> m
+    ; config := <module-get-config-section> m
+    ; strategy := <module-generate-default-strategy <+ module-generate-default-strategy-fallback> config
+    ; result := <module-set-strategy(
+        !<custom-origin(|name)> Some(<custom-origin(|name)> strategy)
+      )> m
+
+  module-generate-default-strategy = fail
+  
+  module-generate-default-strategy-fallback = !Incremental()
 
 rules // functions
 
