@@ -48,3 +48,5 @@ context-free syntax
   TypeParameter.RefTypeParameter = <ref <ID> : <AnyType><Multiplicity>>
   TypeParameter.RefTypeParameter2 = <ref <ID> : <AnyType>>
   
+  TypeParameter.RefTypeParameter = <ref <ID> : <AnyType><Multiplicity>>
+  TypeParameter.RefTypeParameter2 = <ref <ID> : <AnyType>>

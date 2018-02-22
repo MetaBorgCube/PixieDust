@@ -2,4 +2,32 @@ module action
 
 rules
 
-  [[Actions(_) ^ (s) ]] := true.
+  [[ Actions(declarations) ^ (entity_scope_local, entity_scope, module_scope) ]] := 
+    Map3 [[ declarations ^ (entity_scope_local, entity_scope, module_scope) ]].
+  
+  [[ ActionDeclaration(name, params, stmts) ^ (entity_scope_local, entity_scope, module_scope) ]] := 
+    new body_scope,
+    body_scope -P-> entity_scope,
+    
+    Map2T [[ params ^ (body_scope, module_scope) : params_ty ]],
+    Map2 [[ stmts ^ (body_scope, module_scope)]],
+    
+    a_type == TAction(params_ty),
+    a_mult == TOne(),
+    a_strat == TOnDemandIncremental(),
+
+    Member{name} <- entity_scope_local,
+    Member{name} : TTuple(a_type, a_mult, a_strat),
+    Member{name}.ns := Action(),
+    Member{name}.side := None().
+  
+  [[ SetAttribute(e_ref, e_value) ^ (s, module_scope) ]] := 
+    [[ e_ref ^ (s) : e_ref_tpl ]],
+    [[ e_value ^ (s) : e_value_tpl ]],
+    
+    e_ref_tpl == TTuple(e_ref_ty, e_ref_mult, e_ref_strat),
+    e_value_tpl == TTuple(e_value_ty, e_value_mult, e_value_strat),
+    
+    e_value_ty  <sub?    e_ref_ty      | error $[Type error: expected [a_type] got [e_type].]@e_value,
+    e_value_mult  <mulOrd? e_ref_mult  | error $[Multiplicity error: expected [a_mult] got [e_mult].]@e_value,
+    e_value_strat <strat?  e_ref_strat | error $[Calculation strategy error: expected [a_strat] got [e_strat].]@e_value.

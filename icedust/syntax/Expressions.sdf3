@@ -218,6 +218,7 @@ context-free syntax
 
   DomElementProperty.DomElementProperty = <<ID> = <DomElementPropertyValue>>
   
+  DomElementPropertyValue.DomElementPropertyActionCall = <<Exp>(<{Exp ","}*>)> { prefer }
   DomElementPropertyValue.DomElementPropertyValueExp = Exp
   DomElementPropertyValue.DomElementPropertyValueMap = <{
     <{DomElementProperty ", "}*>

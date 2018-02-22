@@ -18,6 +18,9 @@ imports
   model
   module
   types
+
+imports
+  expressions-constructor
   action
 
 signature
@@ -33,6 +36,8 @@ signature
     TEntity   : occurrence -> Type
     TView     : Type
     TComponent : list(Type) -> Type
+    TAction    : list(TTuple) -> Type
+    
     
     TOne               : Mult
     TZeroOrOne         : Mult

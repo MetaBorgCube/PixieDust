@@ -35,14 +35,24 @@ rules
 
   [[ View() ^ (s) : ty ]] := ty == TView().
   
+  [[ ActionType(args) ^ (s) : ty ]] :=
+    Map1T [[ args ^ (s) : args_ty ]],
+    TNoValue() <sub! ty,
+    ty == TAction(args_ty).
+    
+  [[ TypeWithMultiplicity(t, m) ^ (s) : ty ]] :=
+    [[ t ^ (s) : t_ty ]],
+    [[ m ^ (s) : t_m ]],
+    ty == TTuple(t_ty, t_m, TOnDemandIncremental()).
+  
   [[ TypeWithMultiplicity(t, m) ^ (s) : ty ]] :=
     [[ t ^ (s) : t_ty ]],
     [[ m ^ (s) : t_m ]],
     ty == TTuple(t_ty, t_m, TOnDemandIncremental()).
     
-  [[ TypeParameter(name, type, m) ^ (s) : member_type ]] :=
-    [[ type ^ (s) : ttype ]],
-    [[ m ^ (s) : mm ]],
+  [[ TypeParameter(name, type, m) ^ (s, module_scope) : member_type ]] :=
+    [[ type ^ (module_scope) : ttype ]],
+    [[ m ^ (module_scope) : mm ]],
     member_type == TTuple(ttype, mm, TOnDemandIncremental()),
     Member{name} <- s,
     Member{name} : member_type,
@@ -50,9 +60,9 @@ rules
     Member{name}.side := None().
      
    
-  [[ RefTypeParameter(name, type, m) ^ (s) : member_type ]] :=
-    [[ type ^ (s) : ttype ]],
-    [[ m ^ (s) : mm ]],
+  [[ RefTypeParameter(name, type, m) ^ (s, module_scope) : member_type ]] :=
+    [[ type ^ (module_scope) : ttype ]],
+    [[ m ^ (module_scope) : mm ]],
     member_type == TTuple(ttype, mm, TOnDemandIncremental()),
     Member{name} <- s,
     Member{name} : member_type,
