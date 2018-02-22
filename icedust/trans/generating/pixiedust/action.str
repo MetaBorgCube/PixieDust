@@ -1,0 +1,79 @@
+module generating/pixiedust/action
+
+imports
+  
+  generating/pixiedust/expression
+  generating/pixiedust/names
+  
+  api/model-names-api
+  api/types-api
+  
+  lib/scopes
+  analysis2/path
+
+rules // Actions
+  entityname-action-methods: (env, x_entityname) -> result
+    with
+      actions := <entityname-get-actionnames> x_entityname
+    ; (env', stmts_actions) := <env-fold-map(actionname-method)> (env, actions)
+    ; result := (env', stmts_actions)
+    
+  actionname-method : (env, x_actionname) -> result
+    with
+      statements := <actionname-get-statements> x_actionname
+    ; parameter-names := <actionname-get-parameters ; map(type-parameter-get-name)> x_actionname
+    ; (env', [
+      params_parameters,
+      stmts_statements
+    ]) := <thread-environment(
+        push-scope,
+        env-thread-param(store-variables | parameter-names),
+        env-thread-param(env-fold-mapconcat(generate-action-statement-statements) | statements),
+        pop-scope 
+      )> env
+    ; method_action := js-method |[
+        x_actionname(params_parameters) {
+          stmts_statements
+        }
+      ]|
+    ; result := (env', method_action)
+    
+  generate-action-statement-statements: (env, SetAttribute(e_attribute, e_value)) -> result
+    with
+      x_attributeName := <pathexpr-last> e_attribute
+    ; e_ref := <pathexpr-shorten-safe> e_attribute
+    ; (env', [
+        (exp_attribute, stmts_attribute),
+        (exp_value, stmts_value)
+      ]) := <thread-environment(
+        env-thread-param(exp-to-js-stmts | e_ref),
+        env-thread-param(exp-to-js-stmts | e_value)
+      )> env
+    ; x_setter := <setter-name> x_attributeName
+    
+    ; switch <get-multiplicity> e_ref
+      case upper-one:
+        env'' := env'
+      ; stmts_set := js-stmts|[
+          exp_attribute.x_setter(exp_value);
+        ]|
+      case upper-many:
+        (env'', [x_attribute, x_loop]) := <fresh-variables(|2)> env'
+      ; stmts_set := js-stmts |[
+          var x_attribute = exp_attribute;
+          for(var x_loop = 0 ; x_loop < x_attribute.length ; x_loop++) {
+            x_attribute[x_loop].x_setter(exp_value);
+          }
+        ]|
+    end
+    ; stmts_result := js-stmts |[
+      stmts_attribute
+      stmts_value
+      stmts_set
+    ]|
+    ; result := (env', stmts_result)
+    
+  
+  
+    
+    

@@ -58,6 +58,8 @@ rules
   */
   fresh-variables(|amount): env -> <env-fold-map(?(<fresh-variable>, _))> (env, <copy> (amount, ())) 
   
+  
+  
   offset-to-variable = !$[_[<id>]]
   
   /**
@@ -70,6 +72,7 @@ rules
     ; env' := Env([Scope([binding | bindings]) | ss], <inc> offset)
   store-variable(|var) = <store-variable> (<id>, var)
   
+  store-variables = env-fold-map(store-variable)
   
   /**
     get-variable :: (Env,String) -> String

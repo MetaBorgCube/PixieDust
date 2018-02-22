@@ -256,6 +256,10 @@ rules // combined
   
   name-get-flowsto-pathexprs-ondemandinc-incremental-eventual = name-get-flowsto-pathexprs;filter(where(pathexpr-last;name-is-ondemandinc-incremental-eventual))
 
-//rules // helper
-//
-//  def-to-name: d@Def(uri) -> name{d} with  name := <_nabl-uri-name>uri
+rules //actions
+  entityname-get-actionnames = get-decl-assoc(|"Entity");get-scope-visible-names2(|"Member");filter(is-actionname     );string-sort-anno
+  
+  is-actionname = where(is-string;get-property(|"Member","ns");?Action())
+  
+  actionname-get-parameters = get-property(|"Member","parameters")
+  actionname-get-statements = get-property(|"Member","statements")

@@ -488,6 +488,17 @@ rules
     ; m_outer := <name-get-multiplicity> x_attributeName
     ; result := <generate-reference-exp> (env, (This(), One(), m_outer, x_attributeName))
 
+
+  generate-reference-exp: (env, (exp_entity, m_inner, m_outer, x_attributeName)) -> result
+    where
+      ActionType(_) := <name-get-type> x_attributeName
+    with
+      exp_result := js-exp |[
+        exp_entity.x_attributeName
+      ]|
+    ; result := (env, (exp_result, []))
+      
+
   generate-reference-exp: (env, (exp_entity, m_inner, m_outer, x_attributeName)) -> result
     where
       View() := <name-get-type> x_attributeName
@@ -561,7 +572,7 @@ rules
       (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
     ; result := (env', ([exp_e | exps], [stmts_e | stmts]))
   
-rules
+rules // Views
   exp-to-js-stmts: (env, RenderDomElement(name, attributes, children)) -> result
     with
       exp_name := <js-string> name
@@ -584,6 +595,23 @@ rules
     ; prop_value := js-prop |[x_key: exp_value]|
     ; result := (env', (prop_value, stmts_value))
   
+  attribute-value-to-js-exp: (env, DomElementPropertyActionCall(e_action, parameters)) -> result
+    with
+      (env', [
+        (exp_action, stmts_action),
+        (exps_parameters, stmts_parameters)
+      ]) := <thread-environment(
+        env-thread-param(exp-to-js-stmts | e_action),
+        env-thread-param(env-fold-map(exp-to-js-stmts) ; (id, unzip ; (id, concat)) | parameters)
+      )> env
+      ; exp_result := js-exp |[
+        (function(){
+          stmts_action
+          exp_action(exps_parameters);
+        }).bind(this)
+      ]|
+    ; result := (env', (exp_result, []))
+   
   attribute-value-to-js-exp = (id, ?DomElementPropertyValueExp(<id>)) ; exp-to-js-stmts 
   attribute-value-to-js-exp = (id, ?DomElementPropertyValueMap(<id>)) ; env-fold-map(attribute-to-js-prop) ; (id, (unzip ; (js-object, concat)))
   
@@ -595,4 +623,27 @@ rules
     ; (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
     ; result := (env', (x_attributeName, exp_e, stmts_e))
   
+rules //constructor
+  exp-to-js-stmts: (env, NewInstance(EntityType(x_name), fields)) -> result
+    with
+      (env', x_instance) := <fresh-variable> env
+    ; (env'', stmts_fields) := <env-fold-mapconcat(instance-value-to-js-stmts(|x_instance))> (env', fields)
+    ; stmts_result := js-stmts |[
+        var x_instance = new x_name();
+        stmts_fields
+      ]|
+    ; result := (env'', (<js-var> x_instance, stmts_result))
+    
   
+  instance-value-to-js-stmts(|x_instance): (env, InstanceValue(name, value)) -> result
+    with
+      (env', (exp_value, stmts_value)) := <exp-to-js-stmts> (env, value)
+    ; x_setter := <setter-name> name
+    ; stmts_result := js-stmts |[
+        stmts_value
+        x_instance.x_setter(exp_value);
+      ]|
+    ; result := (env', stmts_result)
+  
+
+

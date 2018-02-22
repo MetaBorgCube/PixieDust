@@ -19,18 +19,24 @@ rules
     Member{name} <- entity_scope_local,
     Member{name} : TTuple(a_type, a_mult, a_strat),
     Member{name}.ns := Action(),
+    Member{name}.statements := stmts,
+    Member{name}.parameters := params,
     Member{name}.side := None().
   
-  [[ SetAttribute(e_ref, e_value) ^ (s, module_scope) ]] := 
+  [[ SetAttribute(e_ref @ MemberAccess(_, _), e_value) ^ (s, module_scope) ]] := 
     [[ e_ref ^ (s) : e_ref_tpl ]],
     [[ e_value ^ (s) : e_value_tpl ]],
-    
-    
-    
     e_ref_tpl == TTuple(e_ref_ty, e_ref_mult, e_ref_strat),
-    e_value_tpl == TTuple(e_value_ty, e_value_mult, e_value_strat),
-    
+    e_value_tpl == TTuple(e_value_ty, e_value_mult, e_value_strat),    
     e_value_ty  <sub?    e_ref_ty      | error $[Type error: expected [a_type] got [e_type].]@e_value.
-    //disabled for now, to be able to update entities such that multiplicity bounds are not correct anymore
-//    e_value_mult  <mulOrd? e_ref_mult  | error $[Multiplicity error: expected [a_mult] got [e_mult].]@e_value, 
-//    e_value_strat <strat?  e_ref_strat | error $[Calculation strategy error: expected [a_strat] got [e_strat].]@e_value.
+
+  [[ SetAttribute(e_ref @ Ref(_), e_value) ^ (s, module_scope) ]] := 
+    [[ e_ref ^ (s) : e_ref_tpl ]],
+    [[ e_value ^ (s) : e_value_tpl ]],
+    e_ref_tpl == TTuple(e_ref_ty, e_ref_mult, e_ref_strat),
+    e_value_tpl == TTuple(e_value_ty, e_value_mult, e_value_strat),    
+    e_value_ty  <sub?    e_ref_ty      | error $[Type error: expected [a_type] got [e_type].]@e_value.
+  
+  [[ SetAttribute(e_ref, e_value) ^ (s, module_scope) ]] := 
+    false | error $[Can only set values on references] @ e_ref. 
+    

@@ -77,3 +77,7 @@ rules
   mult-inbounds(|multiplicity) = where(!multiplicity;lower-zero;upper-one ) ;?i ;where(!(i,1);leq)
   mult-inbounds(|multiplicity) = where(!multiplicity;lower-one ;upper-one ) ;?i ;where(!(i,1);eq)
   
+rules // Type parameters
+  type-parameter-get-name = ?TypeParameter(<id>, _, _)
+  type-parameter-get-name = ?RefTypeParameter(<id>, _, _)
+  
