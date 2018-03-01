@@ -72,6 +72,7 @@ rules
     ; env' := Env([Scope([binding | bindings]) | ss], <inc> offset)
   store-variable(|var) = <store-variable> (<id>, var)
   
+  store-variables(|variables) = env-thread-param(store-variables | variables)
   store-variables = env-fold-map(store-variable)
   
   /**

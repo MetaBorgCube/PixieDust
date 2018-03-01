@@ -384,15 +384,9 @@ rules
     where
       <is-normal-parameter> param
       
-    
-  js-function-call: (x_fn, exps_args) -> js-exp |[imports[exp_importPath].x_importName(exps_args)]|
-    where
-      <functionname-is-imported> x_fn
+  js-function-call: (x_fn, exps_args) -> js-exp |[exp_fn(exps_args)]|
     with
-      exp_importPath := <import-function-get-importpath ; js-string> x_fn
-    ; x_importName := <import-function-get-importname> x_fn
-      
-  js-function-call: (x_fn, exps_args) -> js-exp |[functions.x_fn(exps_args)]|    
+      exp_fn := <functionname-get-reference-exp> x_fn
 
   exp-to-js-stmts: (env, Filter(e_source, var, e_body)) -> result
     with

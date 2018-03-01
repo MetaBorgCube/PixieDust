@@ -1,0 +1,46 @@
+module generating/pixiedust/function
+
+imports
+  api/module-names-api
+  api/types-api
+  
+  generating/pixiedust/expression
+  generating/pixiedust/names
+
+  lib/scopes
+
+rules
+  modulename-to-function-stmts: (env, x_moduleName) -> result
+    with
+      functionnames := <modulename-get-functionnames ; filter(functionname-is-userdefined)> x_moduleName
+    ; (env', prop_function*) := <env-fold-map(functionname-to-function-prop)> (env, functionnames)
+    ; x_userDefinedFunctionScope := <user-defined-function-scope-name>
+    ; stmts_result := js-stmts |[
+      var x_userDefinedFunctionScope = {
+        prop_function*
+      };
+    ]|
+    ; result := (env', stmts_result)
+      
+  functionname-to-function-prop: (env, x_functionname) -> result
+    with
+      params := <functionname-get-params> x_functionname
+    ; paramNames := <map(param-get-name)> params
+    ; e := <functionname-get-expr> x_functionname
+    ; (env', [
+      params_f,
+      (exp_e, stmts_e)
+    ]) := <thread-environment(
+      push-scope,
+      store-variables(|paramNames),
+      env-thread-param(exp-to-js-stmts | e),
+      pop-scope
+    )> env
+    ; exp_function := js-prop|[
+      x_functionname: function x_functionname(params_f) {
+        stmts_e
+        return exp_e;
+      }
+    ]|
+    ; result := (env, exp_function)
+    

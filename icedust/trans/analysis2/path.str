@@ -98,7 +98,7 @@ rules // Expr -> ([Expr], [Expr]) // path-based-abstract-interpretation of expre
 //      <debug(|"eps*")>eps*;
       eq*        := <fmap(Snd)>ets*;                             // (path*)*         [e1q1, e1q2, ...] // don't need extending
 //      <debug(|"eq* ")>eq*;
-      f_expr     := <functionname-get-expr>f_def;                // expr
+      f_expr     := <functionname-get-expr-safe>f_def;                // expr
 //      <debug(|"f_ex")>f_expr;
       (fp*, fq*) := <expr-pathexprs>f_expr;                      // (path* ,path*)   function paths
 //      <debug(|"fp* ")>fp*;

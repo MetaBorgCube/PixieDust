@@ -6,6 +6,8 @@ imports
 
   api/model-names-api
   api/types-names-api
+  api/functions-names-api
+  api/import-names-api
   api/types-api
 
 rules // method names  
@@ -19,6 +21,32 @@ rules // method names
   dirty-subscribers-name = !$[[<id>]DirtySubscribers]
   component-name =  !$[[<(ucfirst, ucfirst) ; conc-strings>]Component]
   component-entity-prop-name = lcfirst
+  
+  user-defined-function-scope-name = !"userDefinedFunctions"
+  builtin-function-scope-name = !"expressions"
+  imports-function-scope-name = !"imports"
+  
+  
+  functionname-get-reference-exp: x_functionname -> js-exp |[x_userDefinedScope.x_functionname]|
+    where
+      <functionname-is-userdefined> x_functionname
+    with 
+      x_userDefinedScope := <user-defined-function-scope-name>
+      
+  functionname-get-reference-exp: x_functionname -> js-exp |[x_builtinScope.x_functionname]|
+    where
+      <functionname-is-builtin> x_functionname
+    with 
+      x_builtinScope := <builtin-function-scope-name>
+      
+  functionname-get-reference-exp: x_functionname -> js-exp |[x_importScope[exp_importPath].x_importName]|
+    where
+      <functionname-is-imported> x_functionname
+    with
+      x_importScope := <imports-function-scope-name>
+    ; exp_importPath := <functionname-get-importpath ; js-string> x_functionname
+    ; x_importName := <functionname-get-importname> x_functionname 
+       
   
   identity-name = !"$id"
   
