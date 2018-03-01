@@ -326,12 +326,21 @@ rules
   //Functions
   
   exp-to-js-stmts: (env, Function(name, args)) -> result
-    with
+    where
       params := <functionname-get-params> name
-    ; zippedParams := <zip> (params, args)
-    ; (env', (exps_exp_args, stmts_args)) := <env-fold-map(parameter-to-js-stmts) ; (id, unzip ; (id, concat))> (env, zippedParams)
-    ; exp_result := <js-function-call> (name, exps_exp_args)
+    with
+      zippedParams := <zip> (params, args)
+    ; (env', (exps_args, stmts_args)) := <env-fold-map(parameter-to-js-stmts) ; (id, unzip ; (id, concat))> (env, zippedParams)
+    ; exp_result := <js-function-call> (name, exps_args)
     ; result := (env', (exp_result, stmts_args))
+  
+  //primitive functions have no real parameters
+  exp-to-js-stmts: (env, Function(name, args)) -> result
+    with
+      (env', (exps_args, stmts_args)) := <env-fold-map(exp-to-js-stmts) ; (id, unzip ; (id, concat))> (env, args)
+    ; exp_result := <js-function-call> (name, exps_args)
+    ; result := (env', (exp_result, stmts_args))
+    
     
   parameter-to-js-stmts: (env, (param, e)) -> result
     where
