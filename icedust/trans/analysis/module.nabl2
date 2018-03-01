@@ -36,3 +36,5 @@ rules
   [[ ExecuteSection(es) ^ (module_scope, module_data_scope, module_name) ]] :=
     Map1T [[ es ^ (module_data_scope) : es_types ]].
     
+  [[ ImportSection(es) ^ (module_scope, module_data_scope, module_name) ]] :=
+    Map1 [[ es ^ (module_scope) ]].

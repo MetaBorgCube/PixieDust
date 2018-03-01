@@ -50,22 +50,25 @@ rules
     [[ m ^ (s) : t_m ]],
     ty == TTuple(t_ty, t_m, TOnDemandIncremental()).
     
-  [[ TypeParameter(name, type, m) ^ (s, module_scope) : member_type ]] :=
-    [[ type ^ (module_scope) : ttype ]],
-    [[ m ^ (module_scope) : mm ]],
+  [[ TypeParameter(name, type, m) ^ (s) : member_type ]] :=
+    [[ type ^ (s) : ttype ]],
+    [[ m ^ (s) : mm ]],
     member_type == TTuple(ttype, mm, TOnDemandIncremental()),
     Member{name} <- s,
     Member{name} : member_type,
     Member{name}.variableType := NormalVariableType(),
+    Member{name}.ns := Parameter(),
+    Member{name}.reltype := None(),
     Member{name}.side := None().
-     
    
-  [[ RefTypeParameter(name, type, m) ^ (s, module_scope) : member_type ]] :=
-    [[ type ^ (module_scope) : ttype ]],
-    [[ m ^ (module_scope) : mm ]],
+  [[ RefTypeParameter(name, type, m) ^ (s) : member_type ]] :=
+    [[ type ^ (s) : ttype ]],
+    [[ m ^ (s) : mm ]],
     member_type == TTuple(ttype, mm, TOnDemandIncremental()),
     Member{name} <- s,
     Member{name} : member_type,
     Member{name}.variableType := BoxedVariableType(),
+    Member{name}.ns := Parameter(),
+    Member{name}.reltype := None(),
     Member{name}.side := None().
   

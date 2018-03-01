@@ -59,6 +59,10 @@ lexical syntax // Keywords
   
 lexical syntax
   Keyword = "View"
+  
+  PathChar = [a-zA-Z0-9\-\.\_]
+  PathPart = PathChar+
+  Path = {PathPart "/"}+
 
 lexical restrictions
 

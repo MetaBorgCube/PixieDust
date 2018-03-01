@@ -9,8 +9,6 @@ imports
 context-free syntax
 
   Function.Function = <
-    <ID>(<{Parameter ", "}*>) : <AnyType><Multiplicity?> = <Exp>
+    <ID>(<{TypeParameter ", "}*>) : <AnyType><Multiplicity?> = <Exp>
   >
-  
-  Parameter.Parameter = <<ID> : <AnyType><Multiplicity?>>
   

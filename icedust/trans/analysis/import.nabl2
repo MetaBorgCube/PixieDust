@@ -1,0 +1,21 @@
+module import
+
+rules
+
+  [[ ImportJsModule(path, defs) ^ (s) ]] :=  
+    new import_scope,
+    s -I-> import_scope,
+    Map2 [[ defs ^ (import_scope, path) ]].
+    
+  [[ ImportFunction(importName, params, r, ImportAlias(name)) ^ (s, path) ]] := 
+    [[ r ^ (s) : rty ]],
+    new f_scope,
+    f_scope -P-> s,
+    Map1T [[params ^ (f_scope) : ps_tuples]],
+    Function{name} <- s,
+    Function{name} : rty,
+    Function{name} : TTuple(f_type, f_mult, TOnDemandIncremental()),
+    Function{name}.paramtuples := ps_tuples,
+    Function{name}.params := params,
+    Function{name}.importedFrom := path,
+    Function{name}.importName := importName.

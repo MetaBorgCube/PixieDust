@@ -1,0 +1,22 @@
+module Import
+
+imports
+  Common
+  Types
+  Functions
+  Common
+
+context-free syntax
+
+  Import.ImportJsModule = <<ImportPath> { 
+    <{ImportDefinition "\n"}*>
+  }>
+  
+  ImportPath.ImportPath = Path
+  
+  ImportDefinition.ImportFunction = <
+    <ID>(<{TypeParameter ", "}*>): <TypeWithMultiplicity> <ImportAlias>
+  >
+  
+  ImportAlias.ImportAlias = <as <ID>>
+  ImportAlias.NoImportAlias = <>

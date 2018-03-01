@@ -1,7 +1,7 @@
 module Modules
 
 imports
-
+  
   Common
   Config
   Model
@@ -9,7 +9,8 @@ imports
   Execute
   Functions
   Types
-
+  Import  
+  
 context-free syntax // modules
 
   Start.Module = <
@@ -23,6 +24,13 @@ context-free syntax // modules
     config
     
       <{Config "\n\n"}*>
+  >
+  
+  ModuleSection.ImportSection = <
+    imports
+    
+      <{Import "\n\n"}*>
+  
   >
 
   ModuleSection.ModelSection = <

@@ -5,6 +5,7 @@ imports // constructors
   signatures/Expressions-sig
   signatures/Types-sig
   signatures/Actions-sig
+  signatures/Import-sig
   
 imports // functions
 
@@ -62,4 +63,7 @@ rules
 rules //actions
   desugar-alternative: x @ AddEntity(e1, e2)    -> <custom-origin(|x)>SetAttribute(e1, <custom-origin(|e2)>Merge(e1, e2))
   desugar-alternative: x @ RemoveEntity(e1, e2) -> <custom-origin(|x)>SetAttribute(e1, <custom-origin(|e2)>Difference(e1, e2))
+  
+rules //imports
+  desugar-alternative = ImportFunction(?name, id, id, ?x @ NoImportAlias() ; <custom-origin(|x)>ImportAlias(name)) 
   

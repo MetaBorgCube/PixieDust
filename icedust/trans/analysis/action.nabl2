@@ -9,7 +9,7 @@ rules
     new body_scope,
     body_scope -P-> entity_scope,
     
-    Map2T [[ params ^ (body_scope, module_scope) : params_ty ]],
+    Map1T [[ params ^ (body_scope) : params_ty ]],
     Map2 [[ stmts ^ (body_scope, module_scope)]],
     
     a_type == TAction(params_ty),
