@@ -33,8 +33,8 @@ function avg(collection){
   return sum(collection) / collection.length;
 }
 
-function concat(c1, c2){
-  return c1.concat(c2);
+function concat(c1){
+  return c1 === null ? "" : c1.join("")
 }
 
 function count(collection){
@@ -61,18 +61,18 @@ function disj(collection){
 
 
 function dateToString(d) {
-	var year = d.getFullYear();
-	var month = d.getMonth() + 1;
-	var dayOfMonth = d.getDate();
-	var hours = d.getHours();
-	var minutes = d.getMinutes();
-	var seconds = d.getSeconds();
-	var result = year + '-' + padZero(month) + '-' + padZero(dayOfMonth) + ' ' + padZero(hours) + ':' + padZero(minutes) + ':' + padZero(seconds);
-	return result
+  var year = d.getFullYear();
+  var month = d.getMonth() + 1;
+  var dayOfMonth = d.getDate();
+  var hours = d.getHours();
+  var minutes = d.getMinutes();
+  var seconds = d.getSeconds();
+  var result = year + '-' + padZero(month) + '-' + padZero(dayOfMonth) + ' ' + padZero(hours) + ':' + padZero(minutes) + ':' + padZero(seconds);
+  return result
 }
 
 function padZero(n) {
-	return (n < 10 ? '0' : '') + n
+  return (n < 10 ? '0' : '') + n
 }
 
 module.exports = {

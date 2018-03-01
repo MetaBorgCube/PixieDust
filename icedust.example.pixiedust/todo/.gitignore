@@ -1,0 +1,13 @@
+node_modules/
+src/runtime/
+target/
+todo.js
+todo.flowsto.dot
+todo.flowsto.txt
+todo.dependson.dot
+todo.dependson.txt
+todo.scope-graph
+todo.scope-graph
+todo.aterm
+todo.desugared.aterm
+

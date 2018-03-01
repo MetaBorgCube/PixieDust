@@ -2,3 +2,12 @@ node_modules/
 src/runtime/
 target/
 ${project_name}.js
+${project_name}.flowsto.dot
+${project_name}.flowsto.txt
+${project_name}.dependson.dot
+${project_name}.dependson.txt
+${project_name}.scope-graph
+${project_name}.scope-graph
+${project_name}.aterm
+${project_name}.desugared.aterm
+
