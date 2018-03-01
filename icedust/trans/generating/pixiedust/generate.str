@@ -41,9 +41,10 @@ rules
   generate-imports: x_moduleName -> result
     with 
       prop_import* := <modulename-get-importpaths ; map(generate-import-prop)> x_moduleName
+    ; x_builtInFunctionScope := <builtin-function-scope-name>
     ; result := js-stmts |[
         var runtime = require("./src/runtime/runtime");
-        var functions = require("./src/runtime/expression");
+        var x_builtInFunctionScope = require("./src/runtime/expression");
         var PixieDustComponent = require("./src/runtime/components/PixieDustComponent");
         var _ = require("lodash");
         var React = require("react");
