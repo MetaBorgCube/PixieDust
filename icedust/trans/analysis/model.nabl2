@@ -138,7 +138,7 @@ rules
     Entity{parent} |-> parent_def,
     parent_def : TEntity(parent_entity),
 //    parent_def.constructor := Trait() | error "Only traits can be extended",
-    Implicit{"this"} -> entity_scope,ß
+    Implicit{"this"} -> entity_scope,
     Implicit{"this"} |-> this_def,
     this_def : TTuple(TEntity(entity), this_mu, this_st),
     TEntity(entity) <sub! TEntity(parent_entity).
