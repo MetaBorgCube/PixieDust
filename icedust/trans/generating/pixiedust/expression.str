@@ -360,6 +360,16 @@ rules
       };
     ]|
     ; result := (env', (<js-var> x_result, stmts_result))
+  
+  parameter-to-js-stmts: (env, (param, e)) -> result
+    where
+      ActionType(_) := <param-get-type> param
+    with
+      e_ref := <pathexpr-shorten-safe> e
+    ; (env', (exp_ref, stmts_ref)) := <exp-to-js-stmts> (env, e_ref)
+    ; x_attributeName := <pathexpr-last> e
+    ; exp_result := js-exp |[exp_ref.x_attributeName.bind(exp_ref)]|
+    ; result := (env', (exp_result, stmts_ref))
     
   parameter-to-js-stmts: (env, (param, e)) -> <exp-to-js-stmts> (env, e)
     where
