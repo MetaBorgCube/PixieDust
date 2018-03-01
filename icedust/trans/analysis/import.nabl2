@@ -2,10 +2,12 @@ module import
 
 rules
 
-  [[ ImportJsModule(path, defs) ^ (s) ]] :=  
+  [[ ImportJsModule(path, imports) ^ (s) ]] :=  
     new import_scope,
     s -I-> import_scope,
-    Map2 [[ defs ^ (import_scope, path) ]].
+    Import{path} <- s,
+    Import{path}.imports := defs,
+    Map2 [[ imports ^ (import_scope, path) ]].
     
   [[ ImportFunction(importName, params, r, ImportAlias(name)) ^ (s, path) ]] := 
     [[ r ^ (s) : rty ]],

@@ -1,0 +1,14 @@
+module api/import-api
+
+imports
+  signatures/Import-sig
+
+rules
+  import-get-functions = ?ImportJsModule(_, <filter(is-import-function)>)
+
+  is-import-function = ?ImportFunction(_, _, _, _)
+  import-function-get-name = ?ImportFunction(<id>, _, _, _)
+  import-function-get-parameters = ?ImportFunction(_, <id>, _, _)
+  import-function-get-return-type = ?ImportFunction(_, _, <id>, _)
+  import-function-get-alias = ?ImportFunction(_, _, _, <id>)
+  

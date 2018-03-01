@@ -21,7 +21,7 @@ rules // Actions
   actionname-method : (env, x_actionname) -> result
     with
       statements := <actionname-get-statements> x_actionname
-    ; parameter-names := <actionname-get-parameters ; map(type-parameter-get-name)> x_actionname
+    ; parameter-names := <actionname-get-parameters ; map(parameter-get-name)> x_actionname
     ; (env', [
       params_parameters,
       stmts_statements

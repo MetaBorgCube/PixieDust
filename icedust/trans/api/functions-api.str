@@ -22,22 +22,6 @@ rules // functions
   
 rules // params
 
-  is-param = ?TypeParameter(_, _, _)
-  is-param = ?RefTypeParameter(_, _, _)
-
-  param-get-name = ?TypeParameter(<id>, _, _)
-  param-get-name = ?RefTypeParameter(<id>, _, _)
-  
-  
-  param-get-type = ?TypeParameter(_, <id>, _)
-  param-get-type = ?RefTypeParameter(_, <id>, _)
-  
-  param-get-mult = ?TypeParameter(_, _, <id>)
-  param-get-mult = ?RefTypeParameter(_, _, <id>)
-  
-  param-set-mult(s) = TypeParameter(id, id, s)
-  param-set-mult(s) = RefTypeParameter(id, id, s)
-  
   param-has-no-mult = fail //no multiplicity => desugared to default multiplicity
   
   

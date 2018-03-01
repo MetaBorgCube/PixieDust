@@ -12,7 +12,7 @@ context-free syntax
     <{ImportDefinition "\n"}*>
   }>
   
-  ImportPath.ImportPath = Path
+  ImportPath = Path
   
   ImportDefinition.ImportFunction = <
     <ID>(<{TypeParameter ", "}*>): <TypeWithMultiplicity> <ImportAlias>

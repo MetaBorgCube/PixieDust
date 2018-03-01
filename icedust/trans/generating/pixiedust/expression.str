@@ -15,6 +15,8 @@ imports
   api/model-names-api
   api/expressions-api
   api/types-names-api
+  api/functions-names-api
+  api/import-names-api
   api/types-api
   
   generating/pixiedust/names
@@ -325,13 +327,53 @@ rules
   
   exp-to-js-stmts: (env, Function(name, args)) -> result
     with
-      (env', (exps_exp_args, stmts_stmts_args)) := <exp-fold2> (env, args)
+      params := <functionname-get-params> name
+    ; zippedParams := <zip> (params, args)
+    ; (env', (exps_exp_args, stmts_args)) := <env-fold-map(parameter-to-js-stmts) ; (id, unzip ; (id, concat))> (env, zippedParams)
     ; exp_result := <js-function-call> (name, exps_exp_args)
-    ; stmts_args := <concat> stmts_stmts_args
     ; result := (env', (exp_result, stmts_args))
     
+  parameter-to-js-stmts: (env, (param, e)) -> result
+    where
+      <is-reference-parameter> param
+    with
+      e_ref := <pathexpr-shorten-safe> e
+    ; (env', [
+      (exp_ref, stmts_ref)
+    , x_result
+    ]) := <thread-environment(
+      env-thread-param(exp-to-js-stmts | e_ref),
+      fresh-variable
+    )> env 
+    ; x_attributeName := <pathexpr-last> e
+    ; x_getter := <getter-name> x_attributeName
+    ; x_setter := <setter-name> x_attributeName
+    ; x_subscribeDirty := <subscribe-dirty-name> x_attributeName
+    ; x_unsubscribeDirty := <unsubscribe-dirty-name> x_attributeName
+    ; stmts_result := js-stmts |[
+      stmts_ref
+      var x_result = {
+        getter: exp_ref.x_getter.bind(exp_ref),
+        setter: exp_ref.x_setter.bind(exp_ref),
+        subscribeDirty: exp_ref.x_subscribeDirty.bind(exp_ref),
+        unsubcribeDirty: exp_ref.x_unsubscribeDirty.bind(exp_ref)
+      };
+    ]|
+    ; result := (env', (<js-var> x_result, stmts_result))
     
-  js-function-call: (x_fn, exp_args*) -> js-exp |[functions.x_fn(exp_args*)]|
+  parameter-to-js-stmts: (env, (param, e)) -> <exp-to-js-stmts> (env, e)
+    where
+      <is-normal-parameter> param
+      
+    
+  js-function-call: (x_fn, exps_args) -> js-exp |[imports[exp_importPath].x_importName(exps_args)]|
+    where
+      <functionname-is-imported> x_fn
+    with
+      exp_importPath := <import-function-get-importpath ; js-string> x_fn
+    ; x_importName := <import-function-get-importname> x_fn
+      
+  js-function-call: (x_fn, exps_args) -> js-exp |[functions.x_fn(exps_args)]|    
 
   exp-to-js-stmts: (env, Filter(e_source, var, e_body)) -> result
     with
@@ -565,12 +607,6 @@ rules
     with
       (env', exp_e, stmts_e) := <exp-to-js-stmts> (env, e)
     ; result := (env', [(exp_e, stmts_e) | acc])
-  
-  exp-fold2 = env-fold(do-exp-fold2| ([], []))  
-  do-exp-fold2 : ((env, (exps, stmts)), e) -> result
-    with
-      (env', (exp_e, stmts_e)) := <exp-to-js-stmts> (env, e)
-    ; result := (env', ([exp_e | exps], [stmts_e | stmts]))
   
 rules // Views
   exp-to-js-stmts: (env, RenderDomElement(name, attributes, children)) -> result

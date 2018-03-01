@@ -78,6 +78,25 @@ rules
   mult-inbounds(|multiplicity) = where(!multiplicity;lower-one ;upper-one ) ;?i ;where(!(i,1);eq)
   
 rules // Type parameters
-  type-parameter-get-name = ?TypeParameter(<id>, _, _)
-  type-parameter-get-name = ?RefTypeParameter(<id>, _, _)
+  parameter-get-name = ?TypeParameter(<id>, _, _)
+  parameter-get-name = ?RefTypeParameter(<id>, _, _)
+  
+  is-normal-parameter = ?TypeParameter(_, _, _)
+  is-reference-parameter = ?RefTypeParameter(_, _, _)
+  
+  is-param = ?TypeParameter(_, _, _)
+  is-param = ?RefTypeParameter(_, _, _)
+
+  param-get-name = ?TypeParameter(<id>, _, _)
+  param-get-name = ?RefTypeParameter(<id>, _, _)
+  
+  param-get-type = ?TypeParameter(_, <id>, _)
+  param-get-type = ?RefTypeParameter(_, <id>, _)
+  
+  param-get-mult = ?TypeParameter(_, _, <id>)
+  param-get-mult = ?RefTypeParameter(_, _, <id>)
+  
+  param-set-mult(s) = TypeParameter(id, id, s)
+  param-set-mult(s) = RefTypeParameter(id, id, s)
+  
   

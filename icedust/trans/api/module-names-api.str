@@ -110,3 +110,6 @@ rules // module
       <index-set(|einame-decl, "Parent")>modulename;
       <index-set(|einame-decl, "type"  )>type
   
+// imports
+
+  modulename-get-importpaths = get-decl-assoc(|"Module");get-scope-decl-names(|"Import")

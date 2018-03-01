@@ -1,0 +1,13 @@
+module api/import-names-api
+
+imports
+  lib/nabl2
+
+rules
+  importpath-get-imports = get-property(|"imports")
+  
+rules //function imports
+  functionname-is-imported = where(import-function-get-importpath)
+  
+  import-function-get-importpath = debug ; get-decl(|"Function") ; debug ; get-property(|"Function", "importedFrom") ; debug
+  import-function-get-importname = get-decl(|"Function") ; get-property(|"Function", "importName")

@@ -16,7 +16,8 @@ rules // function
 
   is-functionname = where(is-string;get-property(|"Function","ns");?Function())
 
-  functionname-get-paramnames = get-property(|"Function","params");map(param-get-name)
+  functionname-get-params     = get-property(|"Function","params")
+  functionname-get-paramnames = functionname-get-params ; map(param-get-name)
   functionname-get-expr       = get-property(|"Function","expr") <+ !NoValue()
   
   functionname-get-type         = get-type-property(|"Function");normalize-type
@@ -27,6 +28,6 @@ rules // function
 rules // param
 
   is-paramname = where(is-string;get-property(|"Member","ns");?Parameter())
-  
+
   paramname-get-type         = get-type-property(|"Member");normalize-type
   paramname-get-multiplicity = get-type-property(|"Member");normalize-multiplicity

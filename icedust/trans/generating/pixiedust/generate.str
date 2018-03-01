@@ -1,6 +1,7 @@
 module generating/pixiedust/generate
 
 imports
+  api/module-names-api
   api/model-names-api
 
   generating/pixiedust/model
@@ -15,7 +16,7 @@ rules
 
   generate-pixiedust-code: x_moduleName -> stmts_pixiedust
     with
-      stmts_imports := <generate-imports>  
+      stmts_imports := <generate-imports>  x_moduleName
     ; (env, [
         stmts_model,
         stmts_execute,
@@ -33,11 +34,24 @@ rules
     ]| 
     
   
-  generate-imports = !js-stmts |[
-    var runtime = require("./src/runtime/runtime");
-    var functions = require("./src/runtime/expression");
-    var PixieDustComponent = require("./src/runtime/components/PixieDustComponent");
-    var _ = require("lodash");
-    var React = require("react");
-    var ReactDOMServer = require("react-dom/server");
+  generate-imports: x_moduleName -> result
+    with 
+      prop_import* := <modulename-get-importpaths ; map(generate-import-prop)> x_moduleName
+    ; result := js-stmts |[
+        var runtime = require("./src/runtime/runtime");
+        var functions = require("./src/runtime/expression");
+        var PixieDustComponent = require("./src/runtime/components/PixieDustComponent");
+        var _ = require("lodash");
+        var React = require("react");
+        var ReactDOMServer = require("react-dom/server");
+        var imports = {
+          prop_import*
+        };
+      ]|
+  
+  generate-import-prop: x_importPath -> js-prop |[
+    exp_importPath: require(exp_importPath)
   ]|
+    with
+      exp_importPath := <js-string> x_importPath
+      
