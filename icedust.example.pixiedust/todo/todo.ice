@@ -1,7 +1,5 @@
 module todo
 
-
-
 imports
   ./inputs {
     StringInput(ref value: String, className: String, placeHolder: String, onSubmit: Action[]?) : View
@@ -44,7 +42,9 @@ model
           visibleTodos.view 
         }
       }
-      children.view
+      ul {
+        (li(children.view))
+      }
       footer
     }
     
@@ -108,13 +108,19 @@ data
       t1 { task = "T1 task" finished = true },
       t2 { task = "T2 task" },
       t3 { task = "T3 task" }
-//    children = 
-//      list2 {
-//        todos = 
-//          t4 { task = "T4 task" finished = true },
-//          t5 { task = "T5 task" },
-//          t6 { task = "T6 task" }  
-//      }
+    children = 
+      list2 {
+        todos = 
+          t4 { task = "T4 task" finished = true },
+          t5 { task = "T5 task" },
+          t6 { task = "T6 task" }  
+      },
+      list3 {
+        todos = 
+            t7 { task = "T7 task" finished = true },
+            t8 { task = "T8 task" },
+            t9 { task = "T9 task" }
+      }
   }
   
 execute

@@ -80,8 +80,12 @@ rules
   */
   get-variable = ?(<id>, var) ; ?Env(<fetch-elem(get-variable-from-scope(|var))>, _) ; offset-to-variable
   get-variable(|var) = !(<id>, var) ; get-variable
-
   
+  get-variables(|vars) = env-thread-param(get-variables2 | vars) ; Snd
+  get-variables = get-variables2 ; Snd
+  get-variables2 = env-fold-map(get-variables3)
+  get-variables3 : (env, v) -> (env, <get-variable> (env, v))
+
 
   //get-variable-from-scope :: Scope -> Int
   get-variable-from-scope(|var) = ?Scope(<fetch-elem(where(binding-equals(|var)) ; ?Binding(_, <id>))>)

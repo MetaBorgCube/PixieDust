@@ -330,9 +330,25 @@ rules
       params := <functionname-get-params> name
     with
       zippedParams := <zip> (params, args)
-    ; (env', (exps_args, stmts_args)) := <env-fold-map(parameter-to-js-stmts) ; (id, unzip ; (id, concat))> (env, zippedParams)
-    ; exp_result := <js-function-call> (name, exps_args)
-    ; result := (env', (exp_result, stmts_args))
+    ; (env', [
+      (exps_args, stmts_args),
+      x_result
+    ]) := <thread-environment(
+      env-thread-param(env-fold-map(parameter-to-js-stmts) ; (id, unzip ; (id, concat)) | zippedParams),
+      fresh-variable,
+      push-scope
+    )> env
+    ; liftZip := <zip3> (<functionname-get-paramnames> name, <map(get-multiplicity)> args, exps_args)
+    ; (env'', [stmts_lift]) := <thread-environment(
+      env-thread-param(lift-function-parameters(|x_result, name) | liftZip),
+      pop-scope
+    )> env'
+    ; stmts_result := js-stmts |[
+      stmts_args
+      var x_result = [];
+      stmts_lift
+    ]|
+    ; result := (env'', (<js-var> x_result, stmts_result))
   
   //primitive functions have no real parameters
   exp-to-js-stmts: (env, Function(name, args)) -> result
@@ -340,7 +356,70 @@ rules
       (env', (exps_args, stmts_args)) := <env-fold-map(exp-to-js-stmts) ; (id, unzip ; (id, concat))> (env, args)
     ; exp_result := <js-function-call> (name, exps_args)
     ; result := (env', (exp_result, stmts_args))
-    
+  
+  
+  lift-function-parameters(|x_result, fname): (env, [x | xs]) -> <lift-function-parameter(!(<id>, xs) ; lift-function-parameters(|x_result, fname))> (env, x)
+  lift-function-parameters(|x_result, fname): (env, []) -> result
+    with
+      paramnames := <debug ; functionname-get-paramnames ; debug> fname
+    ; exps_params := <debug ; get-variables ; debug ; map(js-var) ; debug> (env, paramnames)
+    ; exp_call := <debug ; js-function-call ; debug> (fname, exps_params) 
+    ; stmts_result := js-stmts|[
+      x_result.push(exp_call);
+    ]|
+    ; result := (env, stmts_result)
+  
+  // continuation :: Env -> (Env, Stmts)
+  lift-function-parameter(continuation): (env, (x_paramname, m_e, exp_e)) -> result
+    where
+      <(paramname-get-multiplicity, id) ; (upper-one, upper-many)> (x_paramname, m_e)
+    with
+      (env', [
+        x_loop,
+        x_param,
+        stmts_continuation
+      ]) := <thread-environment(
+        fresh-variable,
+        store-variable(|x_paramname),
+        continuation
+      )> env
+    ; stmts_result := js-stmts|[
+        for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++) {
+          var x_param = exp_e[x_loop];
+          stmts_continuation
+        }
+      ]|
+    ; result := (env', stmts_result)
+      
+  
+  // continuation :: Env -> (Env, Stmts)
+  lift-function-parameter(continuation): (env, (x_paramname, m_e, exp_e)) -> result
+    where
+      <(paramname-get-multiplicity, id) ; (upper-many, upper-one)> (x_paramname, m_e)
+    with
+      (env', [x_param, stmts_continuation]) := 
+        <thread-environment(
+          store-variable(|x_paramname),
+          continuation
+        )> env
+    ; stmts_result := js-stmts |[
+        var x_param = exp_e === null ? [] : [ exp_e ];
+        stmts_continuation
+      ]|
+    ; result := (env', stmts_result)
+  
+  lift-function-parameter(continuation): (env, (x_paramname, m_e, exp_e)) -> result
+    with
+      (env', [x_param, stmts_continuation]) := 
+        <thread-environment(
+          store-variable(|x_paramname),
+          continuation
+        )> env
+    ; stmts_result := js-stmts |[
+        var x_param = exp_e;
+        stmts_continuation
+      ]|
+    ; result := (env', stmts_result)
     
   parameter-to-js-stmts: (env, (param, e)) -> result
     where
