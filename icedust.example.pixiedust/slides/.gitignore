@@ -1,0 +1,12 @@
+node_modules/
+target/
+slides.js
+slides.flowsto.dot
+slides.flowsto.txt
+slides.dependson.dot
+slides.dependson.txt
+slides.scope-graph
+slides.scope-graph
+slides.aterm
+slides.desugared.aterm
+

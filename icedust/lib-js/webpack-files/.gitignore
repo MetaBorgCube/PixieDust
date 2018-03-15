@@ -1,5 +1,4 @@
 node_modules/
-src/runtime/
 target/
 ${project_name}.js
 ${project_name}.flowsto.dot
