@@ -369,9 +369,9 @@ rules
   lift-function-parameters(|x_result, fname): (env, [x | xs]) -> <lift-function-parameter(!(<id>, xs) ; lift-function-parameters(|x_result, fname))> (env, x)
   lift-function-parameters(|x_result, fname): (env, []) -> result
     with
-      paramnames := <debug ; functionname-get-paramnames ; debug> fname
-    ; exps_params := <debug ; get-variables ; debug ; map(js-var) ; debug> (env, paramnames)
-    ; exp_call := <debug ; js-function-call ; debug> (fname, exps_params)
+      paramnames := <functionname-get-paramnames> fname
+    ; exps_params := <get-variables ; map(js-var)> (env, paramnames)
+    ; exp_call := <js-function-call> (fname, exps_params)
     ; switch <functionname-get-multiplicity> fname
       case upper-one:
         stmts_result := js-stmts|[
