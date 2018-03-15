@@ -325,7 +325,7 @@ rules
   
   //Functions
   
-  exp-to-js-stmts: (env, Function(name, args)) -> result
+  exp-to-js-stmts: (env, e @ Function(name, args)) -> result
     where
       params := <functionname-get-params> name
     with
@@ -348,7 +348,15 @@ rules
       var x_result = [];
       stmts_lift
     ]|
-    ; result := (env'', (<js-var> x_result, stmts_result))
+    ; switch <get-multiplicity> e
+      case upper-one:
+        exp_result := js-exp |[
+          x_result.length === 0 ? null : x_result[0]
+        ]|
+      case upper-many:
+        exp_result := <js-var> x_result
+    end
+    ; result := (env'', (exp_result, stmts_result))
   
   //primitive functions have no real parameters
   exp-to-js-stmts: (env, Function(name, args)) -> result
@@ -363,10 +371,20 @@ rules
     with
       paramnames := <debug ; functionname-get-paramnames ; debug> fname
     ; exps_params := <debug ; get-variables ; debug ; map(js-var) ; debug> (env, paramnames)
-    ; exp_call := <debug ; js-function-call ; debug> (fname, exps_params) 
-    ; stmts_result := js-stmts|[
-      x_result.push(exp_call);
-    ]|
+    ; exp_call := <debug ; js-function-call ; debug> (fname, exps_params)
+    ; switch <functionname-get-multiplicity> fname
+      case upper-one:
+        stmts_result := js-stmts|[
+          if(exp_call !== null){
+            x_result.push(exp_call);
+          }
+        ]|
+      case upper-many:
+        stmts_result := js-stmts|[
+          x_result = x_result.concat(exp_call);
+        ]|
+    end
+    
     ; result := (env, stmts_result)
   
   // continuation :: Env -> (Env, Stmts)
@@ -417,8 +435,10 @@ rules
         )> env
     ; stmts_result := js-stmts |[
         var x_param = exp_e;
-        stmts_continuation
-      ]|
+        if(x_param !== null) {
+          stmts_continuation
+        }
+      ]| 
     ; result := (env', stmts_result)
     
   parameter-to-js-stmts: (env, (param, e)) -> result
