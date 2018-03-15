@@ -394,16 +394,19 @@ rules
     with
       (env', [
         x_loop,
+        x_exp,
         x_param,
         stmts_continuation
       ]) := <thread-environment(
+        fresh-variable,
         fresh-variable,
         store-variable(|x_paramname),
         continuation
       )> env
     ; stmts_result := js-stmts|[
-        for(var x_loop = 0 ; x_loop < exp_e.length ; x_loop++) {
-          var x_param = exp_e[x_loop];
+        var x_exp = exp_e;
+        for(var x_loop = 0 ; x_loop < x_exp.length ; x_loop++) {
+          var x_param = x_exp[x_loop];
           stmts_continuation
         }
       ]|
