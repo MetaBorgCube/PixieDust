@@ -22,17 +22,20 @@ imports
   generating/pixiedust/names
 rules
   
-  exp-to-js-stmts(|e) = !(<id>, e) ; exp-to-js-stmts  
+  //overload for expressions that have a contextual multiplicity
+  exp-to-js-stmts = ?(env, (NoValue(), m)) ; !(env, (<exp-empty-multiplicity> m, []))
+  exp-to-js-stmts = (id, ?(<id>, _)) ; exp-to-js-stmts
+  
+  exp-to-js-stmts(|e) = !(<id>, e) ; exp-to-js-stmts
   
   exp-to-js-stmts = (id, where(is-literal) ; literal-to-js-stmts ; !(<id>, []))
-  
   
   literal-to-js-stmts = ?Int(<js-int>)
   literal-to-js-stmts = ?Float(<id>) ; js-float
   literal-to-js-stmts = ?True() ; js-true
   literal-to-js-stmts = ?False() ; js-false
   literal-to-js-stmts = ?Datetime(<js-string ; ?exp_date>) ; !js-exp |[new Date(exp_date)]|
-  literal-to-js-stmts = ?NoValue() ; js-null
+  literal-to-js-stmts = ?NoValue() ; get-multiplicity ; exp-empty-multiplicity
   literal-to-js-stmts = ?LitString(<id>) ; js-string
   
   exp-to-js-stmts: (env, This()) -> (env, (<env-to-this-expr> env, [])) 
@@ -472,15 +475,15 @@ rules
     ]|
     ; result := (env', (<js-var> x_result, stmts_result))
   
-  parameter-to-js-stmts: (env, (param, e)) -> result
-    where
-      ActionType(_) := <param-get-type> param
-    with
-      e_ref := <pathexpr-shorten-safe> e
-    ; (env', (exp_ref, stmts_ref)) := <exp-to-js-stmts> (env, e_ref)
-    ; x_attributeName := <pathexpr-last> e
-    ; exp_result := js-exp |[exp_ref.x_attributeName.bind(exp_ref)]|
-    ; result := (env', (exp_result, stmts_ref))
+//  parameter-to-js-stmts: (env, (param, e)) -> result
+//    where
+//      ActionType(_) := <param-get-type> param
+//    with
+//      e_ref := <pathexpr-shorten-safe> e
+//    ; (env', (exp_ref, stmts_ref)) := <exp-to-js-stmts> (env, e_ref)
+//    ; x_attributeName := <pathexpr-last> e
+//    ; exp_result := js-exp |[exp_ref.x_attributeName.bind(exp_ref)]|
+//    ; result := (env', (exp_result, stmts_ref))
     
   parameter-to-js-stmts: (env, (param, e)) -> <exp-to-js-stmts> (env, e)
     where
@@ -643,7 +646,8 @@ rules
     with
       x_attributeName := <get-decl(|"Member")> field
     ; m_outer := <name-get-multiplicity> x_attributeName
-    ; result := <generate-reference-exp> (env, (This(), One(), m_outer, x_attributeName))
+    ; e_this := <env-to-this-expr> env
+    ; result := <generate-reference-exp> (env, (e_this, One(), m_outer, x_attributeName))
 
 
   generate-reference-exp: (env, (exp_entity, m_inner, m_outer, x_attributeName)) -> result
@@ -706,7 +710,7 @@ rules
       x_getter := <getter-name> x_attributeName
     ; (env', x_result) := <fresh-variable> env
     ; stmts_result := js-stmts |[
-        var x_result = exp_entity.x_getter();
+        var x_result = exp_entity !== null ? exp_entity.x_getter() : null;
       ]|
     ; result := (env', (<js-var> x_result, stmts_result))
     

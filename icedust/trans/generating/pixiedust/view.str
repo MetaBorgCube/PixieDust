@@ -96,7 +96,9 @@ rules
         case upper-one:
           env'' := env'
         ; stmts_invalidate := js-stmts |[
-            exp_e.x_subscribeDirtyMethodName(this.scheduleRender);
+            if(exp_e !== null) {
+              exp_e.x_subscribeDirtyMethodName(this.scheduleRender);
+            }
           ]|
         case upper-many:
           (env'', [x_loop]) := <fresh-variables(|1)> env'  

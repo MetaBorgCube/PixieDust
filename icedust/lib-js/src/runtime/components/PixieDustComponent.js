@@ -20,12 +20,13 @@ class PixieDustComponent extends React.Component{
 
   rerender() {
     if(this.componentIsMounted){
+      console.log('rendering' + this.constructor.name);
       this.forceUpdate();
     }
   };
 
   scheduleRender() {
-    console.log('scheduling ' + this.constructor.name);
+
     this.context.scheduler.schedule(this.rerender);
   };
 }

@@ -22,6 +22,7 @@ rules
         this.x_id = runtime.generateUniqueIdentifier();
         stmts_subscription
         stmts_init
+        stmts_bindActions
       }
       
       x_getIdentity() {
@@ -40,11 +41,13 @@ rules
     ; (env', [
         stmts_subscription,
         stmts_init,
+        stmts_bindActions,
         methods_attributes,
         methods_actions
       ]) := <thread-environment(
         env-thread-param(env-fold-mapconcat(init-subscription)|attributenames),
         env-thread-param(env-fold-mapconcat(init-attribute)|attributenames),
+        env-thread-param(bind-actions|x_entityname),
         env-thread-param(env-fold-mapconcat(attributename-to-js-methods)|attributenames),
         env-thread-param(entityname-action-methods | x_entityname)
       )> env
@@ -327,7 +330,9 @@ rules // Setter
       with
         x_unidirectionalSetter := <unidirectional-setter-name> x_attribute
       ; result := js-stmts |[
-          x_ref.x_unidirectionalSetter(this);
+          if(x_ref !== null){
+            x_ref.x_unidirectionalSetter(this);
+          }
         ]|
         
     do-setter-relation-inverse-set: (x_attribute, m_attribute, x_ref) -> result
@@ -337,7 +342,9 @@ rules // Setter
         x_unidirectionalSetter := <unidirectional-setter-name> x_attribute
       ; x_getter := <getter-name> x_attribute
       ; result := js-stmts |[
-          x_ref.x_unidirectionalSetter(x_ref.x_getter().concat([this]));
+          if(x_ref !== null) {
+            x_ref.x_unidirectionalSetter(x_ref.x_getter().concat([this]));
+          }
         ]|
     
     setter-relation-inverse-unset: (x_attribute, x_ref) -> <do-setter-relation-inverse-unset> (x_attribute, m_attribute, x_ref)
@@ -437,8 +444,9 @@ rules // Constructor
   assign-empty-user-value = !(<user-value-name>, <exp-empty-attribute>) ; ?(x_userValue, exp_empty) ; !js-stmt |[this.x_userValue = exp_empty;]|
   assign-empty-cache-value = cache-value-name ; ?x_cacheValue ; !js-stmt |[this.x_cacheValue = undefined;]|
   
+  bind-actions = (id, entityname-get-actionnames ; map(bind-action))
   
-  
-  
-  
+  bind-action: x_actionname -> js-stmt |[
+    this.x_actionname = this.x_actionname.bind(this);
+  ]|
   

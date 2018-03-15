@@ -47,10 +47,9 @@ rules // Actions
         (exp_value, stmts_value)
       ]) := <thread-environment(
         env-thread-param(exp-to-js-stmts | e_ref),
-        env-thread-param(exp-to-js-stmts | e_value)
+        env-thread-param(exp-to-js-stmts | (e_value, <get-multiplicity> e_attribute))
       )> env
     ; x_setter := <setter-name> x_attributeName
-    
     ; switch <get-multiplicity> e_ref
       case upper-one:
         env'' := env'

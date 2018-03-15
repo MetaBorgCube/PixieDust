@@ -27,7 +27,7 @@ function max(collection){
 }
 
 function avg(collection){
-  if(collection.length == 0){
+  if(collection.length === 0){
     return null;
   }
   return sum(collection) / collection.length;
@@ -38,12 +38,17 @@ function concat(c1){
 }
 
 function count(collection){
-  return collection.length;
+  console.log(isArray(collection) ?
+    collection.length :
+    collection === null ? 0 : 1)
+  return isArray(collection) ?
+    collection.length :
+    collection === null ? 0 : 1;
 }
 
 function conj(collection){
   for(var i = 0 ; i < collection.length ; i++){
-    if(collection[i] == false){
+    if(collection[i] === false){
       return false;
     }
   }
@@ -52,13 +57,29 @@ function conj(collection){
 
 function disj(collection){
   for(var i = 0 ; i < collection.length ; i++){
-    if(collection[i] == true){
+    if(collection[i] === true){
       return true;
     }
   }
   return collection.isEmpty();
 }
 
+function indexOf(collection, elem){
+  var index = collection.indexOf(elem);
+  console.log(`indexOf(${collection.length}, ${elem}) = ${index === -1 ? null : index}`)
+  return index === -1 ? null : index;
+}
+
+function elemAt(collection, index) {
+  console.log(`elemAt(${collection.length}, ${index})`)
+  return index < 0 || index >= collection.length ? null : collection[index];
+}
+
+function first(collection, n) {
+  return arguments.length === 1 ?
+    collection.length > 0 ? collection[0] : null
+    : collection.slice(0, n);
+}
 
 function dateToString(d) {
   var year = d.getFullYear();
@@ -75,6 +96,10 @@ function padZero(n) {
   return (n < 10 ? '0' : '') + n
 }
 
+function isArray(x) {
+  return x !== null & x !== undefined && x.constructor === Array;
+}
+
 module.exports = {
   sum: sum,
   min: min,
@@ -84,5 +109,8 @@ module.exports = {
   count: count,
   conj: conj,
   disj: disj,
+  indexOf: indexOf,
+  elemAt: elemAt,
+  first: first,
   dateToString: dateToString
 };
