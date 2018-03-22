@@ -43,8 +43,7 @@ module.exports = {
   ],
   
   devServer: {
-  	publicPath: '/target',
-  	port: 8080
+  	publicPath: '/target'
   }
   
 };

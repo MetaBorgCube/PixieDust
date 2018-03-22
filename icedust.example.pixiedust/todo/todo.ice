@@ -16,7 +16,6 @@ model
     //view state
     
     input: String = "" (default)
-    canCreate: Boolean = input != ""
     show: String = "All" (default)
     
     actions {
@@ -31,26 +30,32 @@ model
       setVisibility(to: String){ 
         show := to
       }
+      addChild() {
+        children += TodoList {
+          parent = this
+        }
+      }
     }
     
     //views
-    view: View = section[className="todolist"]{
+    view: View = section[className="todoapp"]{
       header
-      if(todos.count() > 0)  section[className="main"]{
-        input[type="checkbox", className="toggle-all", checked=allFinished, onChange=toggleAll()]
+      section[className="main"]{
         ul[className="todo-list"]{ 
           visibleTodos.view 
         }
-      }
-      ul {
-        (li(children.view))
+        ul[className="todo-children"] {
+          (li(children.view))
+        }
       }
       footer
     }
     
     header : View = header[className="header"] {
+      button[className="add-child", onClick=addChild()] { "Add child" }
       h1 { "Todos" }
       (StringInput(input, "new-todo", "What needs to be done?", addTodo))
+      input[type="checkbox", className="toggle-all", checked=allFinished, onChange=toggleAll()]
     }
     
     footer : View = footer[className="footer"] {
@@ -64,7 +69,7 @@ model
         li { a[className=if(show == "Not Completed") "selected", onClick=setVisibility("Not Completed")] { "Not Completed" } }
       }
       if(count(finishedTodos) > 0)
-        a[className="clear-completed", onClick=clearFinished()]{ "Clear completed" }
+        a[className="clear-completed", onClick=clearFinished()]{ "Clear finished todos" }
     }
   }
   entity Todo {
@@ -76,7 +81,6 @@ model
           input[type="checkbox", className="toggle", checked=finished, onChange=toggleTodo()]
           label { task }
           button[className="destroy", onClick=deleteTodo()]
-          
         }
       }
       

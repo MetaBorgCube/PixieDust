@@ -9,5 +9,5 @@ rules
 rules //function imports
   functionname-is-imported = where(functionname-get-importpath)
   
-  functionname-get-importpath = debug ; get-decl(|"Function") ; debug ; get-property(|"Function", "importedFrom") ; debug
+  functionname-get-importpath = get-decl(|"Function") ; get-property(|"Function", "importedFrom")
   functionname-get-importname = get-decl(|"Function") ; get-property(|"Function", "importName")

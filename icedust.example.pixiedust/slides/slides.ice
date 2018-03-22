@@ -9,7 +9,7 @@ functions
   slideButton(slide: Slide): View = 
     button[onClick=slide.setCurrent()]{ 
       if(slide.isCurrent) 
-        b { slide.slideNumber} 
+        b { slide.slideNumber } 
       else 
         span { slide.slideNumber } 
     }

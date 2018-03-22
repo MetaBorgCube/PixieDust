@@ -33,6 +33,7 @@ rules
       
       methods_actions
     }
+    module.exports.x_entityname = x_entityname;
   ]|
     with
       attributenames := <entityname-get-arrinames-defined> x_entityname

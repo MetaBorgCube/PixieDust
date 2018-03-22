@@ -75,6 +75,7 @@ rules
             return this.props.x_entityNameCamel.x_getter();
           }
         }
+        module.exports.x_componentName = x_componentName;
       ]|
     ; result := (env', stmts_component)
       
