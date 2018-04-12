@@ -284,7 +284,7 @@ rules
       x_entity := <attributename-get-entityname> x_attribute
     ; x_path := <collect-path ; concat-strings(|",")> e
 
-  collect-path = (collect-path2 ; debug ; reverse) <+ ![]
+  collect-path = (collect-path2 ; reverse) <+ ![]
   collect-path2: Ref(x_attribute) -> [x_attribute]
   collect-path2: MemberAccess(e, x_attribute) -> [x_attribute | <collect-path2> e]
   
