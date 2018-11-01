@@ -330,6 +330,7 @@ rules
     TString() <cast! TNoValue(),
     TString() <cast! TString(),   // allow string to string casting for string interpolation
     TString() <cast! TView(),
+    TView()   <cast! TString(),
 
     new init_scope.
  

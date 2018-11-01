@@ -90,6 +90,8 @@ rules // Expr -> ([Expr], [Expr]) // path-based-abstract-interpretation of expre
   expr-pathexprs: Function(f, e*) -> (fp'*, [fq'*, eq*])
     where
       f_def := <get-resolved-name(|"Function")>f
+    ; f_expr     := <functionname-get-expr>f_def                // expr
+//      <debug(|"f_ex")>f_expr;
     with
 //      <debug(|"Func")>Function(f, e*);
       ets*       := <map(expr-pathexprs)>e*;                     // (path* ,path*)*  [(e1p*,e2q*), (e2p*,e2q*), ...]
@@ -98,8 +100,7 @@ rules // Expr -> ([Expr], [Expr]) // path-based-abstract-interpretation of expre
 //      <debug(|"eps*")>eps*;
       eq*        := <fmap(Snd)>ets*;                             // (path*)*         [e1q1, e1q2, ...] // don't need extending
 //      <debug(|"eq* ")>eq*;
-      f_expr     := <functionname-get-expr-safe>f_def;                // expr
-//      <debug(|"f_ex")>f_expr;
+      
       (fp*, fq*) := <expr-pathexprs>f_expr;                      // (path* ,path*)   function paths
 //      <debug(|"fp* ")>fp*;
 //      <debug(|"fq* ")>fq*;
@@ -111,6 +112,20 @@ rules // Expr -> ([Expr], [Expr]) // path-based-abstract-interpretation of expre
 //      <debug(|"fp'*")>fp'*;
       fq'*       := <fmap(pathexpr-replace-all(|toReplace))>fq*  // path*
 //      ;<debug(|"fq'*")>fq'*
+
+  //builtin function -- parameters are considered 
+  expr-pathexprs: Function(f, e*) -> (eps*, eq*)
+    where
+      f_def := <get-resolved-name(|"Function")>f
+//      ; <debug(|"f_ex")>f_def
+    with
+//      <debug(|"Func")>Function(f, e*);
+      ets*       := <map(expr-pathexprs)>e*;                     // (path* ,path*)*  [(e1p*,e2q*), (e2p*,e2q*), ...]
+//      <debug(|"ets*")>ets*;
+      eps*       := <fmap(Fst)>ets*;                              // (path*)*         [e1p*, e2p*, ...] // required for replacing
+//      <debug(|"eps*")>eps*;
+      eq*        := <fmap(Snd)>ets*                             // (path*)*         [e1q1, e1q2, ...] // don't need extending
+//      ; <debug(|"eq* ")>eq*
 
   expr-pathexprs = get-arguments;map(expr-pathexprs);unzip;all(concat) // literals, unops and binops
 
