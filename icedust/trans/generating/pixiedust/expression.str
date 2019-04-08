@@ -545,6 +545,7 @@ rules
         pop-scope,
         fresh-variable
       )> env
+    ; exp_compare := <compare-exp> (exp_body, exp_body2, <get-type2> e_body)
     ; stmts_result := js-stmt* |[
       stmts_source
       var x_result = exp_source.slice().sort(function(x_arg1, x_arg2){
@@ -552,11 +553,21 @@ rules
         stmts_body
         x_var = x_arg2;
         stmts_body2
-        return exp_body - exp_body2;
+        return exp_compare;
       });
     ]|
     ; exp_result := <js-var> x_result
     ; result := (env', (exp_result, stmts_result))
+    
+   
+  compare-exp: (exp_e1, exp_e2, String()) -> js-exp |[
+    exp_e1.localeCompare(exp_e2)
+  ]|
+   
+  compare-exp: (exp_e1, exp_e2, _) -> js-exp|[
+    exp_e1 - exp_e2
+  ]|
+    
     
   exp-to-js-stmts: (env, Find(e_source, var, e_body)) -> result
     with

@@ -81,6 +81,12 @@ function first(collection, n) {
     : collection.slice(0, n);
 }
 
+function last(collection, n) {
+  return arguments.length == 1 ?
+    collection.length > 0 ? collection[collection.length - 1] : null
+    : collection.slice(collection.length - n)
+}
+
 function dateToString(d) {
   var year = d.getFullYear();
   var month = d.getMonth() + 1;
