@@ -360,7 +360,7 @@ rules
         exp_result := <js-var> x_result
     end
     ; result := (env'', (exp_result, stmts_result))
-  
+    
   //primitive functions have no real parameters
   exp-to-js-stmts: (env, Function(name, args)) -> result
     with
@@ -532,6 +532,7 @@ rules
         x_arg2,
         x_var,
         (exp_body, stmts_body),
+        (exp_body2, stmts_body2),
         x_result
       ]) := <thread-environment(
         exp-to-js-stmts(|e_source),
@@ -539,6 +540,7 @@ rules
         fresh-variable,
         push-scope,
         store-variable(|var),
+        exp-to-js-stmts(|e_body),
         exp-to-js-stmts(|e_body),
         pop-scope,
         fresh-variable
@@ -548,11 +550,9 @@ rules
       var x_result = exp_source.slice().sort(function(x_arg1, x_arg2){
         var x_var = x_arg1;
         stmts_body
-        x_arg1 = exp_body;
         x_var = x_arg2;
-        stmts_body
-        x_arg2 = exp_body;
-        return x_arg1 - x_arg2;
+        stmts_body2
+        return exp_body - exp_body2;
       });
     ]|
     ; exp_result := <js-var> x_result
@@ -728,7 +728,15 @@ rules
     ; result := (env', [(exp_e, stmts_e) | acc])
   
 rules // Views
-  exp-to-js-stmts: (env, RenderDomElement(name, attributes, children)) -> result
+  exp-to-js-stmts: (env, e @ RenderDomElement(name, attributes, children)) -> result
+    with
+      (env', (exp_name, prop_attribute*, exps_children, stmts)) := <render-element-exp> (env, e)
+    ; exp_result := js-exp |[
+        React.createElement(exp_name, {prop_attribute*}, exps_children) 
+      ]|    
+    ; result := (env', (exp_result, stmts))
+  
+  render-element-exp: (env, RenderDomElement(name, attributes, children)) -> result
     with
       exp_name := <js-string> name
     ; (env', [
@@ -738,10 +746,8 @@ rules // Views
       env-thread-param(env-fold-map(attribute-to-js-prop) ; (id, unzip ; (id, concat))|attributes),
       env-thread-param(env-fold-map(exp-to-js-stmts) ; (id, unzip ; (id, concat))|children)
     )> env
-    ; exp_result := js-exp |[
-      React.createElement(exp_name, {prop_attribute*}, exps_children)    
-    ]|
-    ; result := (env', (exp_result, <conc> (stmts_attributes, stmts_children)))
+    ; result := (env', (exp_name, prop_attribute*, exps_children, <conc> (stmts_attributes, stmts_children)))
+    
       
   
   attribute-to-js-prop: (env, DomElementProperty(x_key, value)) -> result

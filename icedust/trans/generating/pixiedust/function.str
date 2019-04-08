@@ -6,6 +6,8 @@ imports
   
   generating/pixiedust/expression
   generating/pixiedust/names
+  
+  js/util
 
   lib/scopes
 
@@ -33,7 +35,7 @@ rules
     ]) := <thread-environment(
       push-scope,
       store-variables(|paramNames),
-      env-thread-param(exp-to-js-stmts | e),
+      env-thread-params(generate-function-expression | x_functionname, e),
       pop-scope
     )> env
     ; exp_function := js-prop|[
@@ -43,4 +45,82 @@ rules
       }
     ]|
     ; result := (env, exp_function)
+
+
+  generate-function-expression: (env, functionName, e @ RenderDomElement(_, _, _)) -> result
+    with
+      debug(|"env");
+      (env', [
+        (exp_name, prop_attribute*, exps_children, stmts),
+        (exp_identity, stmts_identity)
+      ]) := <thread-environment(
+        env-thread-param(render-element-exp|e),
+        env-thread-param(identity-for-params|functionName)
+      )> env
+      ; exp_props := js-exp |[ { prop_attribute*, key: exp_identity }]| //for some reason cannot get it to work just by adding them individually
+      ; exps_params := [exp_name, exp_props | exps_children]
+      ; exp_result := js-exp  |[
+          React.createElement(exps_params) 
+        ]|
+      ; result := (env', (exp_result, <conc> (stmts, stmts_identity)))
     
+  generate-function-expression = !(<_1>, <_3>) ;  exp-to-js-stmts
+    
+  identity-for-params: (env, functionName) -> (env', (exp_result, stmts_result))
+    with
+      debug(|"1");
+      params := <functionname-get-params> functionName
+    ; debug(|functionName)
+    ; paramnames := <functionname-get-paramnames> functionName
+    ; types := <map(paramname-get-type)> paramnames
+    ; debug(|functionName)
+    ; entityTypes := <filter2(param-get-type ; ?EntityType(_)) ; map(param-get-name)> params
+    where
+      <not(?[])> entityTypes
+    with
+      debug(|$[[functionName] - entityTypes])
+    ; entityVars := <get-variables> (env, entityTypes) 
+    ; debug(|$[[functionName] - vars])
+    ; (env', [
+      (exps_id, stmts_id),
+      x_result
+    ]) := <thread-environment(
+      env-thread-param(env-fold-map(identity-for-param) ; debug(|"foldmapped") ;  (id, unzip ; (id, flatten-list)) ; debug(|"transformed") | entityTypes),
+      fresh-variable
+    )> env 
+    ; exp_idFlattened := 
+      Call(
+        Property(Property(ArrayLiteral([]), "concat"), "call"),
+        exps_id
+      )
+    ; stmts_result := js-stmts |[
+      stmts_id
+      var x_result = md5(String.prototype.concat.apply("", exp_idFlattened));
+    ]|
+    ; exp_result := <js-var> x_result
+
+
+  identity-for-params: (env, _) -> (env, (js-exp |[md5([])]|, []))
+  
+  identity-for-param: (env, paramName) -> <debug(|$[identity for [paramName]])> (env', (exp_result, stmts_result))
+    with
+      debug(|"1");
+      x_var := <get-variable> (env, paramName)
+    ; debug(|"2")
+    ; switch <paramname-get-multiplicity> paramName
+        case upper-one: 
+          debug(|"upper-one");
+          env' := env
+        ; exp_result := js-exp|[x_var == null ? [] : [x_var["get$id"]()]]|
+        ; stmts_result := []
+        case upper-many:
+          debug(|"upper-many");
+          (env', [x_result, x_loop]) := <fresh-variables(|2)> env
+        ; stmts_result := js-stmts |[
+            var x_result = [];
+            for(var x_loop = 0 ; x_loop <= x_var.length ; x_loop++) {
+              x_result[x_loop] = (x_result[x_loop])["get$id"]();
+            }
+          ]|
+        ; exp_result := <js-var> x_result
+      end

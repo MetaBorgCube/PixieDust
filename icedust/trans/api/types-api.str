@@ -12,6 +12,7 @@ rules
   is-type = ?Int()
   is-type = ?String()
   is-type = ?EntityType(_)
+  is-type = ?View()
 
   is-multiplicity = ?One()
   is-multiplicity = ?ZeroOrOne()
@@ -25,7 +26,7 @@ rules
   is-strategy = ?Incremental()
   is-strategy = ?Eventual()
   is-strategy = ?OnDemandEventual()
-
+  
 rules
 
   pp2-type = ?Boolean();!"Boolean"

@@ -55,6 +55,11 @@ rules // List -> List
   list-duplicates : [h|tail] -> [h|<list-duplicates>tail] where <elem>     (h,tail)
   list-duplicates : [h|tail] ->    <list-duplicates>tail  where <not(elem)>(h,tail)
 
+rules
+  _1 = Fst
+  _2 = Snd
+  _3 = ?(_, _, <id>)
+
 rules // List(a) -> a
   
   lFst:   [x | xs] -> x
@@ -90,4 +95,9 @@ rules
 rules
 
   singletonlist: a -> [a]
+
+rules
+  //proper filter implementation - does not modify input element
+  filter2(s) = filter(!(<id>, <s>) ; Fst)
+  
   

@@ -46,6 +46,7 @@ rules
         var runtime = require("./src/runtime/runtime");
         var x_builtInFunctionScope = require("./src/runtime/expression");
         var PixieDustComponent = require("./src/runtime/components/PixieDustComponent");
+        var md5 = require("md5");
         var _ = require("lodash");
         var React = require("react");
         var ReactDOMServer = require("react-dom/server");
