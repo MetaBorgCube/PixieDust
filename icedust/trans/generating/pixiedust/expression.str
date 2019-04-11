@@ -433,6 +433,8 @@ rules
     ; result := (env', stmts_result)
   
   lift-function-parameter(continuation): (env, (x_paramname, m_e, exp_e)) -> result
+    where
+      <(paramname-get-multiplicity, id) ; (mul-one, mul-optional)> (x_paramname, m_e)
     with
       (env', [x_param, stmts_continuation]) := 
         <thread-environment(
@@ -444,6 +446,19 @@ rules
         if(x_param !== null) {
           stmts_continuation
         }
+      ]| 
+    ; result := (env', stmts_result)
+  
+  lift-function-parameter(continuation): (env, (x_paramname, m_e, exp_e)) -> result
+    with
+      (env', [x_param, stmts_continuation]) := 
+        <thread-environment(
+          store-variable(|x_paramname),
+          continuation
+        )> env
+    ; stmts_result := js-stmts |[
+        var x_param = exp_e;
+        stmts_continuation
       ]| 
     ; result := (env', stmts_result)
     

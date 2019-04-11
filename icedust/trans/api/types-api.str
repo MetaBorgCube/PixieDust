@@ -68,6 +68,10 @@ rules // multiplicity and ordering predicates
   upper-many = ?OneOrMoreOrdered()
   upper-many = ?ZeroOrMoreOrdered()
   
+  mul-one = lower-one ; upper-one
+  mul-optional = lower-zero ; upper-one
+  mul-many = lower-zero ; upper-many
+  
   upper-many-ordered   = upper-many;ordered
   upper-many-unordered = upper-many;unordered
   
